@@ -2,11 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HomisPatient;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller
 {
+    public function searchHomisPatient($hospital_id)
+    {
+        try {
+            $patient = HomisPatient::where('hpatcode', 'LIKE', '%' . $hospital_id . '%')
+                ->get(['hpatcode', 'patfirst', 'patmiddle', 'patlast', 'patsuffix', 'patbdate', 'patsex'])
+                ->first();
+            return response(['code' => 200, 'result' => $patient]);
+        } catch (\Exception $exception) {
+            return response(['code' => 500, 'message' => $exception->getMessage()]);
+        }
+    }
+
     public function getPatient(Request $request)
     {
         try {

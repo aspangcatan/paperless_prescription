@@ -35,6 +35,12 @@
                 <i class="bi bi-grid"></i>
                 <span>Medicine Management</span>
             </a>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ route('nurse_admin') }}">
+                <i class="bi bi-grid"></i>
+                <span>Nurse Management</span>
+            </a>
         </li>
     </ul>
 

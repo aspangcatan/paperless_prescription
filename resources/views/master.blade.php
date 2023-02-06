@@ -8,6 +8,7 @@
     <title>Dashboard - NiceAdmin Bootstrap Template</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Favicons -->
     <link href="assets/img/favicon.png" rel="icon">
@@ -30,6 +31,8 @@
 
     <!-- Template Main CSS File -->
     <link href="assets/css/style.css?v={{ date('ymdhis') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <!-- =======================================================
     * Template Name: NiceAdmin - v2.5.0
     * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
@@ -90,6 +93,8 @@
 <script src="assets/vendor/php-email-form/validate.js"></script>
 <!-- Template Main JS File -->
 <script src="assets/js/main.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js" integrity="sha512-RtZU3AyMVArmHLiW0suEZ9McadTdegwbgtiQl5Qqo9kunkVg1ofwueXD8/8wv3Af8jkME3DDe3yLfR8HSJfT2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 @yield('js')
 </body>
 

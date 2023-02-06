@@ -2,11 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\NurseReview;
-use App\Models\PharmacyReview;
-use App\Models\Prescription;
-use App\Models\PrescriptionLog;
-use App\Models\ReturnedPrescription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -36,7 +31,7 @@ class NurseReviewController extends Controller
                 ->where($search_filters)
                 ->skip(0)
                 ->take(10)
-                ->get(['p.id', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex', 'p.station', 'p.ward', 'p.bed_no', 'p.urgency', 'p.created_at']);
+                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);

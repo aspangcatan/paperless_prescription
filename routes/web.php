@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,46 +15,68 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::get('/', function () {
-    return view('home');
-})->name('prescription');;
+    if (Auth::check()) return redirect()->route('home');
+    return view('login');
+})->name('login');
 
-Route::get('/nurse_review', function () {
-    return view('nurse_review');
-})->name('nurse_review');
+Route::get('/logout', function () {
+    Auth::logout();
+    Session::flush();
+    return redirect()->route('login');
+})->name('logout');
 
-Route::get('/pharmacy_review', function () {
-    return view('pharmacy_review');
-})->name('pharmacy_review');
+Route::post('/authenticate', [\App\Http\Controllers\UserController::class, 'authenticate'])->name('authenticate');
 
-Route::get('/rendered_prescription', function () {
-    return view('rendered_prescription');
-})->name('rendered_prescription');
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('/home', function () {
+        return view('home');
+    })->name('prescription');;
 
-Route::get('/returned_prescription', function () {
-    return view('returned_prescription');
-})->name('returned_prescription');
+    Route::get('/nurse_review', function () {
+        return view('nurse_review');
+    })->name('nurse_review');
 
+    Route::get('/pharmacy_review', function () {
+        return view('pharmacy_review');
+    })->name('pharmacy_review');
 
-Route::get('/patient/get', [\App\Http\Controllers\PatientController::class, 'getPatient']);
+    Route::get('/rendered_prescription', function () {
+        return view('rendered_prescription');
+    })->name('rendered_prescription');
 
-Route::get('/medicine/get', [\App\Http\Controllers\MedicineController::class, 'getMedicine']);
-Route::get('/medicine/get/{keyword}', [\App\Http\Controllers\MedicineController::class, 'searchMedicine']);
-Route::get('/user/get/doctors', [\App\Http\Controllers\UserController::class, 'getDoctors']);
+    Route::get('/returned_prescription', function () {
+        return view('returned_prescription');
+    })->name('returned_prescription');
 
+    Route::get('/nurse_admin', function () {
+        return view('nurse_admin');
+    })->name('nurse_admin');
+
+    #APIS
+
+    Route::get('/homis_patient/get/{keyword}', [\App\Http\Controllers\PatientController::class, 'searchHomisPatient']);
+    Route::get('/patient/get', [\App\Http\Controllers\PatientController::class, 'getPatient']);
+    Route::get('/medicine/get', [\App\Http\Controllers\MedicineController::class, 'getMedicine']);
+    Route::get('/medicine/get/{keyword}', [\App\Http\Controllers\MedicineController::class, 'searchMedicine']);
+    Route::get('/user/get/doctors', [\App\Http\Controllers\UserController::class, 'getDoctors']);
 #DOCTORS ROUTES
-Route::get('/prescription/get', [\App\Http\Controllers\PrescriptionController::class, 'getPrescription']);
-Route::get('/prescription/get/{id}', [\App\Http\Controllers\PrescriptionController::class, 'getPrescriptionDetails']);
-Route::get('/prescription/get/logs/{id}', [\App\Http\Controllers\PrescriptionController::class, 'getPrescriptionLogs']);
-
+    Route::get('/prescription/get', [\App\Http\Controllers\PrescriptionController::class, 'getPrescription']);
+    Route::get('/prescription/get/{id}', [\App\Http\Controllers\PrescriptionController::class, 'getPrescriptionDetails']);
+    Route::get('/prescription/get/logs/{id}', [\App\Http\Controllers\PrescriptionController::class, 'getPrescriptionLogs']);
 #NURSES ROUTES
-Route::get('/nurse_review/get', [\App\Http\Controllers\NurseReviewController::class, 'getPrescriptions']);
+    Route::get('/nurse_review/get', [\App\Http\Controllers\NurseReviewController::class, 'getPrescriptions']);
 #PHARMACIST ROUTES
-Route::get('/pharmacy_review/get', [\App\Http\Controllers\PharmacyReviewController::class, 'getPrescriptions']);
+    Route::get('/pharmacy_review/get', [\App\Http\Controllers\PharmacyReviewController::class, 'getPrescriptions']);
 #RENDERED PRESCRIPTIONS ROUTES
-Route::get('/rendered_prescription/get', [\App\Http\Controllers\RenderedPrescriptionController::class, 'getPrescriptions']);
+    Route::get('/rendered_prescription/get', [\App\Http\Controllers\RenderedPrescriptionController::class, 'getPrescriptions']);
 #RETURNED PRESCRIPTIONS ROUTES
-Route::get('/returned_prescription/get', [\App\Http\Controllers\ReturnedPrescriptionController::class, 'getPrescriptions']);
-Route::get('/patient/get/details/{id}', [\App\Http\Controllers\PatientController::class, 'getPatientDetails']);
-//Route::get('/prescription/insert_prescription', [\App\Http\Controllers\PrescriptionController::class, 'insertPrescription']);
+    Route::get('/returned_prescription/get', [\App\Http\Controllers\ReturnedPrescriptionController::class, 'getPrescriptions']);
+    Route::get('/patient/get/details/{id}', [\App\Http\Controllers\PatientController::class, 'getPatientDetails']);
+
+    //Route::get('/prescription/insert_prescription', [\App\Http\Controllers\PrescriptionController::class, 'insertPrescription']);
+});
+
+
 

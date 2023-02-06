@@ -52,7 +52,6 @@
                                 <div class="text-center">
                                     <select class="form-control fw-bold text-center bg-white" id="form_station">
                                         <option value="">Select station</option>
-                                        <option>INTERNAL MEDICINE</option>
                                     </select>
                                     <small>(Station)</small>
                                 </div>
@@ -104,13 +103,15 @@
                             </div>
                             <div class="col-md-4 mt-2">
                                 <div class="text-center">
-                                    <input class="form-control bg-white fw-bold text-center" id="form_serum_creatinine"/>
+                                    <input class="form-control bg-white fw-bold text-center"
+                                           id="form_serum_creatinine"/>
                                     <small>(Serum Creatinine (mg/dL)</small>
                                 </div>
                             </div>
                             <div class="col-md-4 mt-2">
                                 <div class="text-center">
-                                    <input class="form-control bg-white fw-bold text-center" id="form_creatinine_clearance"/>
+                                    <input class="form-control bg-white fw-bold text-center"
+                                           id="form_creatinine_clearance"/>
                                     <small>(Creatinine clearance (mL/min))</small>
                                 </div>
                             </div>
@@ -492,7 +493,7 @@
 
                 <div class="card">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between align-items-center">
                             <h6 class="card-title fs-2">Rx</h6>
                             <div>
                                 <button class="btn btn-sm btn-success" id="btn_view_cart">
@@ -859,40 +860,39 @@
                                     <label>Hospital ID</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <input type="text" class="form-control" id="fname" placeholder="">
+                                    <input type="text" class="form-control bg-white" id="fname" placeholder="" readonly>
                                     <label>Firstname</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <input type="text" class="form-control" id="mname" placeholder="">
+                                    <input type="text" class="form-control bg-white" id="mname" placeholder="" readonly>
                                     <label>Middlename</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <input type="text" class="form-control" id="lname" placeholder="">
+                                    <input type="text" class="form-control bg-white" id="lname" placeholder="" readonly>
                                     <label>Lastname</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <input type="text" class="form-control" id="suffix" placeholder="">
+                                    <input type="text" class="form-control bg-white" id="suffix" placeholder="" readonly>
                                     <label>Suffix</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <input type="date" class="form-control" id="birthdate" placeholder="">
+                                    <input type="date" class="form-control bg-white" id="birthdate" placeholder="" readonly>
                                     <label>Birthdate</label>
                                 </div>
                                 <div class="form-floating mt-3">
                                     <select class="form-control" id="sex">
                                         <option value="">Select sex</option>
-                                        <option>MALE</option>
-                                        <option>FEMALE</option>
+                                        <option value="M">MALE</option>
+                                        <option value="F">FEMALE</option>
                                     </select>
                                     <label>Sex</label>
                                 </div>
                                 <div class="row mt-3">
                                     <div class="col-md-6">
-                                        <button class="btn btn-lg form-control btn-secondary">CLEAR</button>
+                                        <button class="btn btn-lg form-control btn-secondary" id="btn_find">SEARCH</button>
                                     </div>
                                     <div class="col-md-6">
-                                        <button class="btn btn-lg form-control btn-success" id="btn_save_patient">SAVE
-                                        </button>
+                                        <button class="btn btn-lg form-control btn-success" id="btn_save_patient">ADD</button>
                                     </div>
                                 </div>
 

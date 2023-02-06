@@ -44,7 +44,7 @@ class PrescriptionController extends Controller
                 })
                 ->skip(0)
                 ->take(10)
-                ->get(['p.id', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex', 'p.station', 'p.ward', 'p.bed_no', 'p.urgency', 'p.created_at']);
+                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
@@ -53,10 +53,28 @@ class PrescriptionController extends Controller
 
     public function getPrescriptionDetails($id)
     {
+        $ams = (object)[];
         try {
+            $prescription = Prescription::find($id);
+            if ($prescription->type == '2') {
+                #GET AMS
+                $indication = IndicationUse::where('prescription_id', $id)->first();
+                $indication_details = IndicationUseDetails::where('indication_id', $indication->id)->get();
+                $focus_infecction = FocusInfection::where('prescription_id', $id)->get();
+                $culute_sent = CultureSent::where('prescription_id', $id)->get();
+                $immuno = Immunocompromising::where('prescription_id', $id)->get();
+                $infectious_diagnosis = InfectiousDiagnosis::where('prescription_id', $id)->first();
+                $sepsis_criteria = SepsisCriteria::where('prescription_id', $id)->get();
+                $dysnfunction_criteria = DysfunctionCriteria::where('prescription_id', $id)->get();
+
+                $ams = ['indication_use' => $indication, 'indication_details' => $indication_details,
+                    'focus_infection' => $focus_infecction, 'culture_sent' => $culute_sent, 'immuno' => $immuno,
+                    'infectious' => $infectious_diagnosis, 'sepsis_criteria' => $sepsis_criteria,
+                    'dysfunction_criteria' => $dysnfunction_criteria];
+            }
             #GET MEDICATIONS
             $medications = PrescribedMedicine::where('prescription_id', $id)->get();
-            return response(['code' => 200, 'results' => $medications]);
+            return response(['code' => 200, 'results' => $medications, 'ams' => $ams]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
         }
@@ -116,7 +134,7 @@ class PrescriptionController extends Controller
                 $indication->save();
 
                 #INSERT INDICATION DETAILS
-                $definitive_details_param = $request->definitive_details;
+                $indication_origin = IndicationUseDetails::where();
                 $indication_details_list = $indication_use_param['organisms'];
                 for ($i = 0; $i < count($indication_details_list); $i++) {
                     $indication_details_list[$i]['indication_id'] = $indication->id;
@@ -203,11 +221,6 @@ class PrescriptionController extends Controller
             self::insertErrorLogs(1116, 'insertPrescription', $request, $exception->getMessage());
             return response(['code' => 500, 'message' => "Something went wrong"]);
         }
-    }
-
-    public function updatePrescription(Request $request)
-    {
-
     }
 
     public function approvePrescription(Request $request)
