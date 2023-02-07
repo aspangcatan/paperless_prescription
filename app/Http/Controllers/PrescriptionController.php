@@ -6,6 +6,7 @@ use App\Models\CultureSent;
 use App\Models\DysfunctionCriteria;
 use App\Models\ErrorLog;
 use App\Models\FocusInfection;
+use App\Models\IccReview;
 use App\Models\Immunocompromising;
 use App\Models\IndicationUse;
 use App\Models\IndicationUseDetails;
@@ -19,6 +20,7 @@ use App\Models\PrescriptionLog;
 use App\Models\ReturnedPrescription;
 use App\Models\SepsisCriteria;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PrescriptionController extends Controller
@@ -39,8 +41,8 @@ class PrescriptionController extends Controller
                 ->join('patient_history as h', 'p.id', '=', 'h.prescription_id')
                 ->where($search_filters)
                 ->where(function ($q) {
-                    $q->where('p.physician_id', '=', 1116)
-                        ->orWhere('p.pgi_id', '=', 1116);
+                    $q->where('p.physician_id', '=', Auth::id())
+                        ->orWhere('p.pgi_id', '=', Auth::id());
                 })
                 ->skip(0)
                 ->take(10)
@@ -101,8 +103,8 @@ class PrescriptionController extends Controller
             #PATIENT REQUEST DATA OBJECT
             $patient = $request->patient;
             $prescription = new Prescription;
-            $prescription->physician_id = 1116;
-            $prescription->pgi_id = 1116;
+            $prescription->physician_id = Auth::id();
+            $prescription->pgi_id = null;
             $prescription->station = $patient['station'];
             $prescription->ward = $patient['ward'];
             $prescription->bed_no = $patient['bed_no'];
@@ -134,7 +136,6 @@ class PrescriptionController extends Controller
                 $indication->save();
 
                 #INSERT INDICATION DETAILS
-                $indication_origin = IndicationUseDetails::where();
                 $indication_details_list = $indication_use_param['organisms'];
                 for ($i = 0; $i < count($indication_details_list); $i++) {
                     $indication_details_list[$i]['indication_id'] = $indication->id;
@@ -205,20 +206,28 @@ class PrescriptionController extends Controller
             $logs = new PrescriptionLog;
             $logs->prescription_id = $prescription_id;
             $logs->origin = "DOCTOR";
-            $logs->released_by = 1116;
+            $logs->released_by = Auth::id();
             $logs->released_to = "NURSE";
             $logs->remarks = $patient['remarks'];
             $logs->save();
 
-            $nurse = new NurseReview();
-            $nurse->prescription_id = $prescription_id;
-            $nurse->save();
+            if ($patient['type'] == "2") {
+                #TODO: CHECK IF PRESCRIBED MEDICINE IS ALREADY APPROVED FOR CERTAIN DAYS
+                #IF ALREADY APPROVED, AUTOMATIC SEND TO NURSE REVIEW
+
+                $icc = new IccReview();
+                $icc->prescription_id = $prescription_id;
+                $icc->save();
+            } else {
+                $nurse = new NurseReview();
+                $nurse->prescription_id = $prescription_id;
+                $nurse->save();
+            }
 
             return response(['code' => 200, 'message' => 'Prescribe successfully']);
         } catch (\Exception $exception) {
-            #@TODO: CREATE SYSTEM ERROR LOGS
             self::delete($prescription_id);
-            self::insertErrorLogs(1116, 'insertPrescription', $request, $exception->getMessage());
+            self::insertErrorLogs(Auth::id(), 'insertPrescription', $request, $exception->getMessage());
             return response(['code' => 500, 'message' => "Something went wrong"]);
         }
     }
@@ -228,8 +237,9 @@ class PrescriptionController extends Controller
         try {
             if ($request->origin == "NURSE")
                 $prescription = NurseReview::where('prescription_id', $request->id);
-            else {
-                #@TODO: ICC REVIEW
+            else if ($request->origin == "ICC") {
+                $prescription = IccReview::where('prescription_id', $request->id);
+            } else {
                 $prescription = PharmacyReview::where('prescription_id', $request->id);
             }
 
@@ -237,24 +247,37 @@ class PrescriptionController extends Controller
                 return response(['code' => 500, 'message' => 'Prescription dont exists']);
             }
 
-            #FORWARD TO PHARMACY
-            $pharmacy = new PharmacyReview;
-            $pharmacy->prescription_id = $request->id;
-            $pharmacy->save();
+            $released_to = "PHARMACY";
+            if ($request->origin == "ICC") {
+                #UPDATE DAYS APPROVED
+                $doctor = Prescription::find($request->id);
+                $doctor->days_approved = $request->days_approved;
+                $doctor->save();
+                #FORWARD TO PHARMACY
+                $nurse = new NurseReview();
+                $nurse->prescription_id = $request->id;
+                $nurse->save();
+                $released_to = "NURSE";
+            } else {
+                #FORWARD TO PHARMACY
+                $pharmacy = new PharmacyReview;
+                $pharmacy->prescription_id = $request->id;
+                $pharmacy->save();
+            }
 
             #INSERT TO PRESCRIPTION LOGS
             $logs = new PrescriptionLog;
             $logs->prescription_id = $request->id;
-            $logs->origin = "NURSE";
-            $logs->released_by = 1116;
-            $logs->released_to = "PHARMACY";
+            $logs->origin = $request->origin;
+            $logs->released_by = Auth::id();
+            $logs->released_to = $released_to;
             $logs->remarks = $request->remarks;
             $logs->save();
 
             $prescription->forceDelete();
             return response(['code' => 200, 'message' => 'Prescription approved']);
         } catch (\Exception $exception) {
-            self::insertErrorLogs(1116, 'approvePrescription', $request, $exception->getMessage());
+            self::insertErrorLogs(Auth::id(), 'approvePrescription', $request, $exception->getMessage());
             return response(['code' => 200, 'message' => "Something went wrong"]);
         }
     }
@@ -279,16 +302,17 @@ class PrescriptionController extends Controller
             $logs = new PrescriptionLog;
             $logs->prescription_id = $request->id;
             $logs->origin = $request->origin;
-            $logs->released_by = 1116;
+            $logs->released_by = Auth::id();
             $logs->released_to = "DOCTOR";
             $logs->remarks = $request->remarks;
             $logs->save();
 
             #AFTER RETURNED DELETE RECORD
             $prescription->forceDelete();
-            return response(['code' => 200, 'message' => 'Prescription returned']);
+            $doctor = Prescription::find($request->id);
+            return response(['code' => 200, 'message' => 'Prescription returned', 'id' => $doctor->physician_id]);
         } catch (\Exception $exception) {
-            self::insertErrorLogs(1116, 'rejectPrescription', $request, $exception->getMessage());
+            self::insertErrorLogs(Auth::id(), 'rejectPrescription', $request, $exception->getMessage());
             return response(['code' => 200, 'message' => "Something went wrong"]);
         }
     }

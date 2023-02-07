@@ -1,7 +1,8 @@
 <script src="js/moment.min.js"></script>
+<script src="js/constant.js"></script>
+<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
-
     let button_clicked = "";
     let prescription_id;
     $(document).ready(function () {
@@ -9,6 +10,10 @@
         $("#quantity_render_th").text("Quantity Render");
         $("#btn_submit").addClass("d-none");
         $("#btn_reject").addClass("d-none");
+
+        STATIONS.forEach(it => {
+            $("#form_station").append("<option>" + it + "</option>");
+        });
 
         $("#filter_date").focusin(function () {
             $(this).attr('type', 'date')
@@ -32,10 +37,6 @@
         $("#btn_submit").text("APPROVE");
         $("#form_remarks").addClass("d-none");
         $("#transaction_container").removeClass("d-none");
-        $("#form_station").prop("disabled", true);
-        $("#form_ward").prop("disabled", true);
-        $("#form_bed_no").prop("disabled", true);
-        $("#checkbox_urgent").prop("disabled", true);
 
         const urgency = $("#prescription_id_" + id + " td:eq(0)").text();
         const hospital_id = $("#prescription_id_" + id + " td:eq(1)").text();
@@ -46,7 +47,17 @@
         const birthdate = $("#prescription_id_" + id + " td:eq(6)").text();
         const ward = $("#prescription_id_" + id + " td:eq(7)").text();
         const bed_no = $("#prescription_id_" + id + " td:eq(8)").text();
+        const type = $("#prescription_id_" + id + " td:eq(9)").text();
+        const drug_allergy = $("#prescription_id_" + id + " td:eq(10)").text();
+        const weight = $("#prescription_id_" + id + " td:eq(11)").text();
+        const height = $("#prescription_id_" + id + " td:eq(12)").text();
+        const serum_creatinine = $("#prescription_id_" + id + " td:eq(13)").text();
+        const creatinine_clearance = $("#prescription_id_" + id + " td:eq(14)").text();
+        const sgpt = $("#prescription_id_" + id + " td:eq(15)").text();
+        const sgot = $("#prescription_id_" + id + " td:eq(16)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
+
+        clearForms();
 
         $("#form_hospital_id").text(hospital_id);
         $("#form_patient").text(name);
@@ -57,6 +68,24 @@
         $("#form_ward").val(ward);
         $("#form_bed_no").val(bed_no);
         $("#checkbox_urgent").prop("checked", (urgency == "Urgent"));
+        $("#form_prescription_type").val(type);
+        $("#form_drug_allergy").val(drug_allergy);
+        $("#form_weight").val(weight);
+        $("#form_height").val(height);
+        $("#form_serum_creatinine").val(serum_creatinine);
+        $("#form_creatinine_clearance").val(creatinine_clearance);
+        $("#form_sgpt").val(sgpt);
+        $("#form_sgot").val(sgot);
+
+        if (type == "2") {
+            $(".ams_container").removeClass("d-none");
+        }
+
+        $("#prescription_modal input").prop("disabled", true);
+        $("#prescription_modal input[type='checkbox']").prop("disabled", true);
+        $("#prescription_modal input[type='radio']").prop("disabled", true);
+        $("#prescription_modal select").prop("disabled", true);
+
 
         getMedications(id);
         getPrescriptionLogs(id);
@@ -71,16 +100,66 @@
         })
             .then(res => res.json())
             .then(data => {
+                console.log(data);
                 if (data.code == 200) {
+                    if (!jQuery.isEmptyObject(data.ams)) {
+                        const ams = data.ams;
+                        const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
+                        $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
+
+                        const focus_infection = ams.focus_infection;
+                        for (let i = 0; i < focus_infection.length; i++) {
+                            const focus_infection_index = FOCUS_INFECTION_ARRAY.indexOf(focus_infection[i].description);
+                            $("input[name='focus_infection']:eq(" + focus_infection_index + ")").prop("checked", true);
+                        }
+
+                        const culture_sent = ams.culture_sent;
+                        for (let i = 0; i < culture_sent.length; i++) {
+                            const culture_sent_index = CULTURE_SENT_ARRAY.indexOf(culture_sent[i].description);
+                            $("input[name='culture_sent']:eq(" + culture_sent_index + ")").prop("checked", true);
+                            if (culture_sent[i].description == "Others") {
+                                $("#culture_sent").val(culture_sent[i].details);
+                            }
+                        }
+
+                        const immuno = ams.immuno;
+                        for (let i = 0; i < immuno.length; i++) {
+                            const immuno_index = IMMUNO_ARRAY.indexOf(immuno[i].description);
+                            $("input[name='immunocompromising_condition']:eq(" + immuno_index + ")").prop("checked", true);
+                            if (immuno[i].description == "Others") {
+                                $("#immunocompromising_condition").val(immuno[i].details);
+                            }
+                        }
+
+                        const infectious_index = INFECTIOUS_DIAGNOSIS_ARRAY.indexOf(ams.infectious.description);
+                        $("input[name='infectious_diagnosis']:eq(" + infectious_index + ")").prop("checked", true);
+                        if (ams.infectious.description == "Others") {
+                            $("#infectious_diagnosis").val(ams.infectious.details);
+                        }
+
+                        const sepsis_criteria = ams.sepsis_criteria;
+                        for (let i = 0; i < sepsis_criteria.length; i++) {
+                            const sepsis_criteria_index = SEPSIS_CRITERIA_ARRAY.indexOf(sepsis_criteria[i].description);
+                            $("input[name='sepsis_criteria']:eq(" + sepsis_criteria_index + ")").prop("checked", true);
+                        }
+
+                        const dysfunction_criteria = ams.dysfunction_criteria;
+                        for (let i = 0; i < dysfunction_criteria.length; i++) {
+                            const dysfunction_criteria_index = DYSFUNCTION_CRITERIA_ARRAY.indexOf(dysfunction_criteria[i].description);
+                            $("input[name='dysfunction_criteria']:eq(" + dysfunction_criteria_index + ")").prop("checked", true);
+                        }
+
+                    }
                     $("#medication_list").empty();
                     data.results.forEach(it => {
-                        const tr = `<tr>
+                        const bg = (!it.quantity_rendered || it.quantity_rendered == 0) ? "bg-danger text-white" : "";
+                        const tr = `<tr class="` + bg + `">
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
                                             <td>` + it.unit + `</td>
                                             <td>` + it.quantity_ordered + `</td>
                                             <td>` + it.frequency + `</td>
-                                            <td>` + it.quantity_returned + `</td>
+                                            <td>` + it.quantity_rendered + `</td>
                                          </tr>`;
 
                         $("#medication_list").append(tr);
@@ -126,7 +205,7 @@
             .then(data => {
                 $("#prescription_list").empty();
                 if (data.results.length < 1) {
-                    $("#prescription_list").append("<tr><td colspan='5'>No record found</td></tr>");
+                    $("#prescription_list").append("<tr><td colspan='6'>No record found</td></tr>");
                     return;
                 }
 
@@ -142,6 +221,14 @@
                                 <td class="d-none">` + it.birthdate + `</td>
                                 <td class="d-none">` + it.ward + `</td>
                                 <td class="d-none">` + it.bed_no + `</td>
+                                <td class="d-none">` + it.type + `</td>
+                                <td class="d-none">` + it.drug_allergy + `</td>
+                                <td class="d-none">` + it.weight + `</td>
+                                <td class="d-none">` + it.height + `</td>
+                                <td class="d-none">` + it.serum_creatinine + `</td>
+                                <td class="d-none">` + it.creatinine_clearance + `</td>
+                                <td class="d-none">` + it.sgpt + `</td>
+                                <td class="d-none">` + it.sgot + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
@@ -163,5 +250,18 @@
                       <td><div class="badge bg-success p-1">` + it.released_to + `</div></td>
                       <td>` + moment(it.date_forwarded).format("MM/DD/YYYY hh:mm:ss A") + `</td>
                     </tr>`
+    }
+
+    function clearForms() {
+        $(".ams_container").addClass("d-none");
+        $("#prescription_modal input").val("");
+        $("#prescription_modal input[type='checkbox']").prop("checked", false);
+        $("#prescription_modal input[type='radio']").prop("checked", false);
+        $("#prescription_modal select").val("");
+        $("#medication_list").empty();
+    }
+
+    function logout() {
+        window.location.href = '{{ route('logout') }}';
     }
 </script>

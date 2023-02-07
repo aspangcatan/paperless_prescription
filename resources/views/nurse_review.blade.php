@@ -18,8 +18,13 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title">For Reviews</h5>
-                </div>
 
+                    <button class="btn btn-sm btn-secondary" id="btn_notification">
+                        <i class="bi bi-bell"></i>
+                        <span class="badge bg-danger badge-number"></span>
+                    </button>
+
+                </div>
                 <div class="table-responsive">
                     <table class="table text-center">
                         <thead>
@@ -28,7 +33,8 @@
                             <th>Hospital ID</th>
                             <th>Patient</th>
                             <th>Station</th>
-                            <th>Date Prescribed</th>
+                            <th>Date forwarded</th>
+                            <th>Date prescribed</th>
                             <th colspan="2" style="width:4%"></th>
                         </tr>
                         </thead>

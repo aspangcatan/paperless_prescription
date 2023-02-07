@@ -23,7 +23,6 @@ class PatientController extends Controller
     public function getPatient(Request $request)
     {
         try {
-
             $search_filters = [];
             if ($request->firstname != "") {
                 $search_filters[] = ['fname', 'LIKE', "%" . $request->firstname . "%"];

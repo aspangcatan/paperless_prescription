@@ -10,7 +10,9 @@ class NurseReviewController extends Controller
     public function getPrescriptions(Request $request)
     {
         try {
-            $station = "INTERNAL MEDICINE";
+            if (session("station") == "") {
+                return response(['code' => 200, 'results' => [], 'another' => []]);
+            }
 
             $search_filters = [];
             if ($request->filter_patient != "") {
@@ -21,17 +23,28 @@ class NurseReviewController extends Controller
                 $search_filters[] = ['p.created_at', 'LIKE', "%" . $request->filter_date . "%"];
             }
 
-            if (1 == 1) {
-                $search_filters[] = ['p.station', '=', $station];
-            }
-
             $prescriptions = DB::table('paperless_prescription.nurse_reviews as n')
                 ->join('paperless_prescription.prescriptions as p', 'n.prescription_id', '=', 'p.id')
                 ->join('paperless_prescription.patient_history as h', 'n.prescription_id', '=', 'h.prescription_id')
                 ->where($search_filters)
+                ->orWhere(function ($query) {
+                    $station = session("station");
+                    $station = explode(',', $station);
+                    if (count($station) < 1) {
+                        $query->where('p.station', '=', 'asdadsad');
+                    } else {
+                        for ($i = 0; $i < count($station); $i++) {
+                            if ($i == 0) {
+                                $query->where('p.station', '=', $station[$i]);
+                                continue;
+                            }
+                            $query->orWhere('p.station', '=', $station[$i]);
+                        }
+                    }
+                })
                 ->skip(0)
                 ->take(10)
-                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
+                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex','n.created_at as date_forwarded']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);

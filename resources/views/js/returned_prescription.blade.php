@@ -1,4 +1,6 @@
 <script src="js/moment.min.js"></script>
+<script src="js/constant.js"></script>
+<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
     const medicine_modal = new bootstrap.Modal(document.getElementById('medicine_modal'));
@@ -8,19 +10,12 @@
     let button_clicked = "";
     let prescription_id;
     let prescribed_med_id;
-    const INDICATION_USE_ARRAY = ["Prophylactic", "Empiric", "Definitive", "Empiric escalation", "Empiric de-escalation", "Empiric then definitive"];
-    const FOCUS_INFECTION_ARRAY = ["HENT", "OCULAR", "Skin/Skin structure", "Bones/Joints", "Respiratory", "Cardiovascular", "GI/Intraabdominal", "Genito-urinary", "CNS"];
-    const CULTURE_SENT_ARRAY = ["Blood", "Respiratory", "Urine", "CSF", "Wound", "Others"];
-    const IMMUNO_ARRAY = ["None", "Chronic pulmonary", "Chronic liver disease", "Chronic kidney disease", "Diabetes mellitus, poorly controlled",
-        "Malignancy", "Immunocompromised state", "Connective tissue disease", "Chronic steroid use", "Others"];
-    const INFECTIOUS_DIAGNOSIS_ARRAY = ["Deep-seated infections (e.g. abscess, empyema)", "Staphylococcus aureus bacteremia", "Meningitis or encephalitis",
-        "Septic arthritis", "Osteomyelitis", "Endocarditis", "Necrotizing soft tissue infections", "Infected implants or prosthesis", "Febrile neutropenia", "Others"];
-    const SEPSIS_CRITERIA_ARRAY = ["HR >90/min", "RR >20min or pCO2 <32 MMG", "Temperature ≥38°C or ≤36°C", "WBC >12,000 or <4,000 or >10% immature bands", "N/A"];
-    const DYSFUNCTION_CRITERIA_ARRAY = ["SBP <90 or droppped >40 mmHg from baseline", "New onset jaundice", "Platelet <100,000/uL or INR >1.5 not on anticoagulation",
-        "Upper or Lower GI bleeding", "Respiratory failure requiring ventilation; hypoxemiaL saO2 <90% air", "Urine Output <0.5 mL/kg/hr for > 6hr or azotemia (creatinine 2x baseline or >1.3 mg/dL)", "N/A"];
-
     let definitive_details = {};
     $(document).ready(function () {
+
+        STATIONS.forEach(it => {
+            $("#form_station").append("<option>" + it + "</option>");
+        });
 
         $("#filter_date").focusin(function () {
             $(this).attr('type', 'date')
@@ -28,6 +23,15 @@
 
         $("#filter_date").focusout(function () {
             $(this).attr('type', 'text')
+        });
+
+        $("#btn_notification").click(function () {
+            $(this).find("span").text("");
+            $(this).addClass("btn-secondary");
+            $(this).removeClass("btn-danger");
+            $(this).removeClass("blink");
+            notification_counter = 0;
+            getPrescriptions();
         });
 
         $("#btn_search_prescription").click(function () {
@@ -232,12 +236,12 @@
                     infectious_details = $("#infectious_diagnosis").val().trim();
                 }
 
-                if(infectious_description == ""){
+                if (infectious_description == "") {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Infectious diagnosis is required</li>");
                 }
 
-                if(infectious_description == "Others" && infectious_details == ""){
+                if (infectious_description == "Others" && infectious_details == "") {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Infectious diagnosis (Others) please specify</li>");
                 }
@@ -365,8 +369,6 @@
             params.patient = patient;
             params.medications = medications;
             params.id = prescription_id;
-
-            console.log(params);
 
             updatePrescription(params);
         });
@@ -555,46 +557,80 @@
 
     function appendMedicine(id) {
         const description = $("#" + id + " td:eq(0)").text();
+        if (checkIfMedExists(description)) {
+            alert(description + " already exists in prescription");
+            return;
+        }
         const unit = $("#" + id + " td:eq(1)").text();
         const count = $("#medication_list").length;
         if (prescribed_med_id === "") {
             //APPEND NEW RECORD
-            const tr = `<tr id='medication_id_` + count + `'>
-                                        <td>` + description + `</td>
-                                        <td>
-                                            <div class="d-flex">
-                                                <input class="form-control text-center w-50" type="number"/>
-                                                <select class="form-control text-center w-50">
-                                                    <option value="">Select unit</option>
-                                                    <option>liter</option>
-                                                    <option>mG</option>
-                                                    <option>mL</option>
-                                                </select>
-                                            </div>
-                                        </td>
-                                        <td>` + unit + `</td>
-                                        <td>
-                                            <input class="form-control text-center" type="number"/>
-                                        </td>
-                                        <td>
-                                            <select class="form-control text-center">
-                                                <option value="">Select frequency</option>
-                                                <option>3X/DAY</option>
-                                                <option>1X/DAY</option>
-                                                <option>EVERYDAY</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-success" onclick="editMedicine(` + count + `)">
-                                                <i class="bi bi-pencil-fill"></i>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteMedicine(` + count + `)">
-                                                <i class="bi bi-trash-fill"></i>
-                                            </button>
-                                        </td>
-                                    </tr>`;
+            let tr = "<tr id='medication_id_"+count+"'>";
+            tr += "<td>" + description + "</td>";
+            tr += "<td>";
+            tr += "<div class='d-flex'>";
+            tr += "<input class='form-control text-center w-50' type='number'/>"
+            tr += "<select class='form-control text-center w-50'>";
+            for (let i = 0; i < STRENGTH_UNIT.length; i++) {
+                tr += "<option>" + STRENGTH_UNIT[i] + "</option>"
+            }
+            tr += "</select>";
+            tr += "</div>";
+            tr += "</td>";
+            tr += "<td>" + unit + "</td>";
+            tr += "<td><input class='form-control text-center' type='number' /></td>";
+            tr += "<td>";
+            tr += "<select class='form-control text-center'>";
+            for (let i = 0; i < FREQUENCIES.length; i++) {
+                tr += "<option>" + FREQUENCIES[i] + "</option>"
+            }
+            tr += "</select>";
+            tr += "</td>";
+            tr += "<td>";
+            tr += "<button class='btn btn-sm btn-success'><i class='bi bi-pencil-fill'></i></button>"
+            tr += "</td>";
+            tr += "<td>";
+            tr += "<button class='btn btn-sm btn-danger'><i class='bi bi-trash-fill'></i></button>"
+            tr += "</td>";
+            tr += "</tr>";
+
+            // const tr = `<tr id='medication_id_` + count + `'>
+            //                             <td>` + description + `</td>
+            //                             <td>
+            //                                 <div class="d-flex">
+            //                                     <input class="form-control text-center w-50" type="number"/>
+            //                                     <select class="form-control text-center w-50">
+            //                                         <option value="">Select unit</option>
+            //                                         <option>liter</option>
+            //                                         <option>mG</option>
+            //                                         <option>mL</option>
+            //                                     </select>
+            //                                 </div>
+            //                             </td>
+            //                             <td>` + unit + `</td>
+            //                             <td>
+            //                                 <input class="form-control text-center" type="number"/>
+            //                             </td>
+            //                             <td>
+            //                                 <select class="form-control text-center">
+            //                                     <option value="">Select frequency</option>
+            //                                     <option>3X/DAY</option>
+            //                                     <option>1X/DAY</option>
+            //                                     <option>EVERYDAY</option>
+            //                                 </select>
+            //                             </td>
+            //                             <td>
+            //                                 <button class="btn btn-sm btn-success" onclick="editMedicine(` + count + `)">
+            //                                     <i class="bi bi-pencil-fill"></i>
+            //                                 </button>
+            //                             </td>
+            //                             <td>
+            //                                 <button class="btn btn-sm btn-danger" onclick="deleteMedicine(` + count + `)">
+            //                                     <i class="bi bi-trash-fill"></i>
+            //                                 </button>
+            //                             </td>
+            //                         </tr>`;
+
             $("#medication_list").append(tr);
         } else {
             $("#medication_id_" + prescribed_med_id + " td:eq(0)").text(description);
@@ -672,7 +708,7 @@
                 $("#prescription_list").empty();
 
                 if (data.results.length < 1) {
-                    $("#prescription_list").append("<tr><td colspan='5'>No record found</td></tr>");
+                    $("#prescription_list").append("<tr><td colspan='6'>No record found</td></tr>");
                     return;
                 }
 
@@ -714,10 +750,11 @@
     function updatePrescription(params) {
         prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
-        fetch("api/update_prescription", {
+        fetch('{{ route('update_prescription') }}', {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             body: JSON.stringify(params)
         })
@@ -732,6 +769,11 @@
 
                 $("#success_message").text(data.message);
                 success_modal.toggle();
+
+                sendWebsocketServer({
+                    action: "NOTIFY STATION",
+                    body: {station: params.patient.station}
+                })
                 getPrescriptions();
             }).catch(err => {
             console.log(err);
@@ -754,5 +796,21 @@
         $("#prescription_modal input[type='radio']").prop("checked", false);
         $("#prescription_modal select").val("");
         $("#medication_list").empty();
+    }
+
+    function checkIfMedExists(_description) {
+        let is_exists = false;
+        for (let i = 0; i < $("#medication_list tr").length; i++) {
+            const description = $("#medication_list tr:eq(" + i + ") td:eq(0)").text().trim();
+            if (_description == description) {
+                is_exists = true;
+                break;
+            }
+        }
+        return is_exists;
+    }
+
+    function logout() {
+        window.location.href = '{{ route('logout') }}';
     }
 </script>

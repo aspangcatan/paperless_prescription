@@ -1317,3 +1317,13 @@ small {
     background: rgba(0, 0, 0, 0.5);
     z-index: 9999;
 }
+
+.blink {
+    animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}

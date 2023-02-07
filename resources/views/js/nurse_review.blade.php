@@ -1,5 +1,6 @@
 <script src="js/moment.min.js"></script>
-<script src="js/websocket.js"></script>
+<script src="js/constant.js"></script>
+<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
@@ -7,19 +8,13 @@
     const remarks_modal = new bootstrap.Modal(document.getElementById('remarks_modal'));
     let button_clicked = "";
     let prescription_id;
-    const INDICATION_USE_ARRAY = ["Prophylactic", "Empiric", "Definitive", "Empiric escalation", "Empiric de-escalation", "Empiric then definitive"];
-    const FOCUS_INFECTION_ARRAY = ["HENT", "OCULAR", "Skin/Skin structure", "Bones/Joints", "Respiratory", "Cardiovascular", "GI/Intraabdominal", "Genito-urinary", "CNS"];
-    const CULTURE_SENT_ARRAY = ["Blood", "Respiratory", "Urine", "CSF", "Wound", "Others"];
-    const IMMUNO_ARRAY = ["None", "Chronic pulmonary", "Chronic liver disease", "Chronic kidney disease", "Diabetes mellitus, poorly controlled",
-        "Malignancy", "Immunocompromised state", "Connective tissue disease", "Chronic steroid use", "Others"];
-    const INFECTIOUS_DIAGNOSIS_ARRAY = ["Deep-seated infections (e.g. abscess, empyema)", "Staphylococcus aureus bacteremia", "Meningitis or encephalitis",
-        "Septic arthritis", "Osteomyelitis", "Endocarditis", "Necrotizing soft tissue infections", "Infected implants or prosthesis", "Febrile neutropenia", "Others"];
-    const SEPSIS_CRITERIA_ARRAY = ["HR >90/min", "RR >20min or pCO2 <32 MMG", "Temperature ≥38°C or ≤36°C", "WBC >12,000 or <4,000 or >10% immature bands", "N/A"];
-    const DYSFUNCTION_CRITERIA_ARRAY = ["SBP <90 or droppped >40 mmHg from baseline", "New onset jaundice", "Platelet <100,000/uL or INR >1.5 not on anticoagulation",
-        "Upper or Lower GI bleeding", "Respiratory failure requiring ventilation; hypoxemiaL saO2 <90% air", "Urine Output <0.5 mL/kg/hr for > 6hr or azotemia (creatinine 2x baseline or >1.3 mg/dL)", "N/A"];
 
     let definitive_details = {};
     $(document).ready(function () {
+
+        STATIONS.forEach(it => {
+            $("#form_station").append("<option>" + it + "</option>");
+        });
 
         $("#filter_date").focusin(function () {
             $(this).attr('type', 'date')
@@ -30,6 +25,15 @@
         });
 
         $("#btn_search_prescription").click(function () {
+            getPrescriptions();
+        });
+
+        $("#btn_notification").click(function () {
+            $(this).find("span").text("");
+            $(this).addClass("btn-secondary");
+            $(this).removeClass("btn-danger");
+            $(this).removeClass("blink");
+            notification_counter = 0;
             getPrescriptions();
         });
 
@@ -79,19 +83,19 @@
         const hospital_id = $("#prescription_id_" + id + " td:eq(1)").text();
         const name = $("#prescription_id_" + id + " td:eq(2)").text();
         const station = $("#prescription_id_" + id + " td:eq(3)").text();
-        const created_at = $("#prescription_id_" + id + " td:eq(4)").text();
-        const sex = $("#prescription_id_" + id + " td:eq(5)").text();
-        const birthdate = $("#prescription_id_" + id + " td:eq(6)").text();
-        const ward = $("#prescription_id_" + id + " td:eq(7)").text();
-        const bed_no = $("#prescription_id_" + id + " td:eq(8)").text();
-        const type = $("#prescription_id_" + id + " td:eq(9)").text();
-        const drug_allergy = $("#prescription_id_" + id + " td:eq(10)").text();
-        const weight = $("#prescription_id_" + id + " td:eq(11)").text();
-        const height = $("#prescription_id_" + id + " td:eq(12)").text();
-        const serum_creatinine = $("#prescription_id_" + id + " td:eq(13)").text();
-        const creatinine_clearance = $("#prescription_id_" + id + " td:eq(14)").text();
-        const sgpt = $("#prescription_id_" + id + " td:eq(15)").text();
-        const sgot = $("#prescription_id_" + id + " td:eq(16)").text();
+        const created_at = $("#prescription_id_" + id + " td:eq(5)").text();
+        const sex = $("#prescription_id_" + id + " td:eq(6)").text();
+        const birthdate = $("#prescription_id_" + id + " td:eq(7)").text();
+        const ward = $("#prescription_id_" + id + " td:eq(8)").text();
+        const bed_no = $("#prescription_id_" + id + " td:eq(9)").text();
+        const type = $("#prescription_id_" + id + " td:eq(10)").text();
+        const drug_allergy = $("#prescription_id_" + id + " td:eq(11)").text();
+        const weight = $("#prescription_id_" + id + " td:eq(12)").text();
+        const height = $("#prescription_id_" + id + " td:eq(13)").text();
+        const serum_creatinine = $("#prescription_id_" + id + " td:eq(14)").text();
+        const creatinine_clearance = $("#prescription_id_" + id + " td:eq(15)").text();
+        const sgpt = $("#prescription_id_" + id + " td:eq(16)").text();
+        const sgot = $("#prescription_id_" + id + " td:eq(17)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -239,7 +243,7 @@
             .then(data => {
                 $("#prescription_list").empty();
                 if (data.results.length < 1) {
-                    $("#prescription_list").append("<tr><td colspan='5'>No record found</td></tr>");
+                    $("#prescription_list").append("<tr><td colspan='6'>No record found</td></tr>");
                     return;
                 }
 
@@ -250,6 +254,7 @@
                                 <td>` + it.hospital_id + `</td>
                                 <td>` + it.name + `</td>
                                 <td>` + it.station + `</td>
+                                <td>` + moment(it.date_forwarded).format("MM/DD/YYYY hh:mm:ss A") + `</td>
                                 <td>` + moment(it.created_at).format("MM/DD/YYYY hh:mm:ss A") + `</td>
                                 <td class="d-none">` + it.sex + `</td>
                                 <td class="d-none">` + it.birthdate + `</td>
@@ -280,10 +285,11 @@
     function approvePrescription(params) {
         prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
-        fetch("api/approve_prescription", {
+        fetch('{{ route('approve_prescription') }}', {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             body: JSON.stringify(params)
         })
@@ -298,6 +304,11 @@
 
                 $("#success_message").text(data.message);
                 success_modal.toggle();
+
+                sendWebsocketServer({
+                    action: "NOTIFY ROLE",
+                    body: {role: "Pharmacist"}
+                })
                 getPrescriptions();
             }).catch(err => {
             $("#error_message").text(err);
@@ -308,10 +319,11 @@
     function rejectPrescription(params) {
         prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
-        fetch("api/reject_prescription", {
+        fetch('{{ route('reject_prescription') }}', {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             body: JSON.stringify(params)
         })
@@ -326,6 +338,11 @@
 
                 $("#success_message").text(data.message);
                 success_modal.toggle();
+
+                sendWebsocketServer({
+                    action: "NOTIFY ID",
+                    body: {id: data.id}
+                })
                 getPrescriptions();
             }).catch(err => {
             $("#error_message").text(err);
@@ -349,5 +366,9 @@
         $("#prescription_modal input[type='radio']").prop("checked", false);
         $("#prescription_modal select").val("");
         $("#medication_list").empty();
+    }
+
+    function logout() {
+        window.location.href = '{{ route('logout') }}';
     }
 </script>

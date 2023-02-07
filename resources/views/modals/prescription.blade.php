@@ -270,7 +270,6 @@
                                                    name="culture_sent">
                                             <label class="form-check-label">Others</label>
                                             <input class="underline" id="culture_sent"/>
-
                                         </div>
                                     </div>
                                 </div>
@@ -854,7 +853,7 @@
                     <div class="col-md-4">
                         <div class="card">
                             <div class="card-body">
-                                <div class="mt-3 fs-5 fw-bold">Create patient</div>
+                                <div class="mt-3 fs-5 fw-bold">Search patient</div>
                                 <div class="form-floating mt-3">
                                     <input type="text" class="form-control" id="hospital_id" placeholder="">
                                     <label>Hospital ID</label>

@@ -19,6 +19,10 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title">Prescriptions</h5>
                     <div>
+                        <button class="btn btn-secondary" id="btn_notification">
+                            <i class="bi bi-bell"></i>
+                            <span class="badge bg-danger badge-number"></span>
+                        </button>
                         <button class="btn btn-success" id="btn_add_prescription">
                             Make Rx
                             <i class="bi bi-plus-lg ms-2"></i>

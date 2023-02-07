@@ -35,7 +35,7 @@ class PharmacyReviewController extends Controller
                 ->where($search_filters)
                 ->skip(0)
                 ->take(10)
-                ->get(['p.id', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex', 'p.station', 'p.ward', 'p.bed_no', 'p.urgency', 'p.created_at']);
+                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
@@ -54,7 +54,7 @@ class PharmacyReviewController extends Controller
             $medications = $request->medications;
             for ($i = 0; $i < count($medications); $i++) {
                 $medication = PrescribedMedicine::find($medications[$i]["id"]);
-                $medication->quantity_returned = $medications[$i]["quantity_rendered"];
+                $medication->quantity_rendered = $medications[$i]["quantity_rendered"];
                 $medication->save();
             }
 

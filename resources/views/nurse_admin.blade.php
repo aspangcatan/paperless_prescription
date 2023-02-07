@@ -24,12 +24,12 @@
                     <table class="table table-hover text-center">
                         <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Firstname</th>
                             <th>Middlename</th>
                             <th>Lastname</th>
+                            <th>Suffix</th>
                             <th>Station(s)</th>
-                            <th colspan="2" style="width:4%"></th>
+                            <th style="width:4%"></th>
                         </tr>
                         </thead>
                         <tbody id="nurse_list">
@@ -42,6 +42,8 @@
     </div>
 
     @include('modals/common')
+    @include('modals/nurse_admin')
+
 
 @stop
 @section('js')

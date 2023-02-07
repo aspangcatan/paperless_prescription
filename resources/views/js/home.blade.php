@@ -1,5 +1,6 @@
 <script src="js/moment.min.js"></script>
-<script src="js/websocket.js"></script>
+<script src="js/constant.js"></script>
+<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
     const definitive_modal = new bootstrap.Modal(document.getElementById('definitive_modal'));
@@ -8,23 +9,6 @@
 
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
     const error_modal = new bootstrap.Modal(document.getElementById('error_modal'));
-
-    const INDICATION_USE_ARRAY = ["Prophylactic", "Empiric", "Definitive", "Empiric escalation", "Empiric de-escalation", "Empiric then definitive"];
-    const FOCUS_INFECTION_ARRAY = ["HENT", "OCULAR", "Skin/Skin structure", "Bones/Joints", "Respiratory", "Cardiovascular", "GI/Intraabdominal", "Genito-urinary", "CNS"];
-    const CULTURE_SENT_ARRAY = ["Blood", "Respiratory", "Urine", "CSF", "Wound", "Others"];
-    const IMMUNO_ARRAY = ["None", "Chronic pulmonary", "Chronic liver disease", "Chronic kidney disease", "Diabetes mellitus, poorly controlled",
-        "Malignancy", "Immunocompromised state", "Connective tissue disease", "Chronic steroid use", "Others"];
-    const INFECTIOUS_DIAGNOSIS_ARRAY = ["Deep-seated infections (e.g. abscess, empyema)", "Staphylococcus aureus bacteremia", "Meningitis or encephalitis",
-        "Septic arthritis", "Osteomyelitis", "Endocarditis", "Necrotizing soft tissue infections", "Infected implants or prosthesis", "Febrile neutropenia", "Others"];
-    const SEPSIS_CRITERIA_ARRAY = ["HR >90/min", "RR >20min or pCO2 <32 MMG", "Temperature ≥38°C or ≤36°C", "WBC >12,000 or <4,000 or >10% immature bands", "N/A"];
-    const DYSFUNCTION_CRITERIA_ARRAY = ["SBP <90 or droppped >40 mmHg from baseline", "New onset jaundice", "Platelet <100,000/uL or INR >1.5 not on anticoagulation",
-        "Upper or Lower GI bleeding", "Respiratory failure requiring ventilation; hypoxemiaL saO2 <90% air", "Urine Output <0.5 mL/kg/hr for > 6hr or azotemia (creatinine 2x baseline or >1.3 mg/dL)", "N/A"];
-    const STATIONS = ["ANNEX B", "ANNEX B", "	FEMALE MEDICAL", "FEMALE WARD", "GASTRO WARD", "GENERAL INTERMEDIATE CARE UNIT",
-        "GENERAL WARD", "GYNECOLOGY", "HALLWAY", "INFECTIOUS WARD (STATION 2)", "INFIRMARY A", "INFIRMARY B", "INTERMEDIATE CARE UNIT", "LABOR ROOM",
-        "LABOR ROOM NEWBORN", "MALE MEDICAL", "MEDICAL WARD", "MEDICAL WARD", "MEDICAL WARD (STATION 1)", "MEDICAL WARD (STATION 2)",
-        "NEONATAL CARE UNIT", "NEONATAL CARE UNIT", "NEWBORN WARD", "NICU", "OB HIGH RISK", "OB LOW RISK", "OB LOW RISK", "OB WARD", "OB WARD NEW",
-        "OB-GYNE WARD", "OBSERVARY WARD", "OBSERVATION WARD", "OBSTETRICS", "PAY WARD", "PEDIA GASTRO", "PEDIA RESPI WARD", "PEDIA WARD",
-        "PICU", "POST OP", "RESPI WARD", "SURGICAL WARD"];
     let definitive_details = {};
     $(document).ready(function () {
 
@@ -40,6 +24,12 @@
 
         $("#filter_date").focusout(function () {
             $(this).attr('type', 'text')
+        });
+
+        $("#btn_notification").click(function () {
+            if (notification_counter > 0) {
+                window.location.href = '{{ route('returned_prescription') }}';
+            }
         });
 
         $("#form_prescription_type").change(function () {
@@ -579,7 +569,7 @@
         $("#form_hospital_id").text(hospital_id);
         $("#form_patient").text(name);
         $("#form_birthdate").text(birthdate);
-        $("#form_age").text(moment().diff(moment(birthdate,"MM/DD/YYYY"), 'years'));
+        $("#form_age").text(moment().diff(moment(birthdate, "MM/DD/YYYY"), 'years'));
         $("#form_sex").text(sex);
         $("#form_station").val("");
         $("#form_ward").val("");
@@ -589,18 +579,25 @@
         $("#checkbox_urgent").prop("disabled", false);
         $("#medication_list").empty();
 
-        patient_modal.toggle();
-        prescription_modal.toggle();
+        $("#prescription_modal input").prop("disabled", false);
+        $("#prescription_modal input[type='checkbox']").prop("disabled", false);
+        $("#prescription_modal input[type='radio']").prop("disabled", false);
+        $("#prescription_modal select").prop("disabled", false);
 
         $("#btn_view_cart").removeClass("d-none");
         $("#btn_submit").removeClass("d-none");
         $("#form_remarks").removeClass("d-none");
         $("#transaction_container").addClass("d-none");
+
+        patient_modal.toggle();
+        prescription_modal.toggle();
+
+
     }
 
     function viewPrescription(id) {
         $("#btn_view_cart").addClass("d-none");
-        // $("#btn_submit").addClass("d-none");
+        $("#btn_submit").addClass("d-none");
         $("#form_remarks").addClass("d-none");
         $("#transaction_container").removeClass("d-none");
 
@@ -826,10 +823,11 @@
     }
 
     function insertPatient(params) {
-        fetch("api/insert_patient", {
+        fetch('{{ route('insert_patient') }}', {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             body: JSON.stringify(params)
         })
@@ -844,10 +842,11 @@
     function insertPrecription(params) {
         prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
-        fetch("api/insert_prescription", {
+        fetch('{{ route('insert_prescription') }}', {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             body: JSON.stringify(params)
         })
@@ -865,13 +864,21 @@
                 getPrescriptions();
 
                 //SEND NOTIFICATION TO NURSE
-                sendWebsocketServer({
-                    action: "INSERT PRESCRIPTION",
-                    body: {station: params.patient.station}
-                })
-
+                if (params.patient.type == "2") {
+                    sendWebsocketServer({
+                        action: "NOTIFY ROLE",
+                        body: {role: "ICC"}
+                    })
+                } else {
+                    sendWebsocketServer({
+                        action: "NOTIFY STATION",
+                        body: {station: params.patient.station}
+                    })
+                }
             }).catch(err => {
-            console.log(err);
+            $("#spinner").addClass("d-none");
+            $("#error_message").text(err);
+            error_modal.toggle();
         });
     }
 
@@ -888,7 +895,7 @@
             .then(data => {
                 $("#prescription_list").empty();
                 if (data.results.length < 1) {
-                    $("#prescription_list").append("<tr><td colspan='5'>No record found</td></tr>");
+                    $("#prescription_list").append("<tr><td colspan='6'>No record found</td></tr>");
                     return;
                 }
 
@@ -922,60 +929,59 @@
                     $("#prescription_list").append(tr);
                 });
             }).catch(err => {
+            $("#prescription_list").empty();
+            $("#prescription_list").append("<tr><td colspan='6'>Something went wrong, please refresh browser</td></tr>");
             console.log(err);
         });
     }
 
     function appendMedicine(id) {
+        //CHECK IF MEDICINE ALREADY IN PRESCRIPTIONS
         const description = $("#" + id + " td:eq(0)").text();
+        if (checkIfMedExists(description)) {
+            alert(description + " already exists in prescription");
+            return;
+        }
         const unit = $("#" + id + " td:eq(1)").text();
-        const tr = `<tr>
-                                        <td>` + description + `</td>
-                                        <td>
-                                            <div class="d-flex">
-                                                <input class="form-control text-center w-50" type="number"/>
-                                                <select class="form-control text-center w-50">
-                                                    <option value="">Select unit</option>
-                                                    <option>liter</option>
-                                                    <option>mG</option>
-                                                    <option>mL</option>
-                                                </select>
-                                            </div>
-                                        </td>
-                                        <td>` + unit + `</td>
-                                        <td>
-                                            <input class="form-control text-center" type="number"/>
-                                        </td>
-                                        <td>
-                                            <select class="form-control text-center">
-                                                <option value="">Select frequency</option>
-                                                <option>3X/DAY</option>
-                                                <option>1X/DAY</option>
-                                                <option>EVERYDAY</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-success">
-                                                <i class="bi bi-pencil-fill"></i>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-danger">
-                                                <i class="bi bi-trash-fill"></i>
-                                            </button>
-                                        </td>
-                                    </tr>`;
+        let tr = "<tr>";
+        tr += "<td>" + description + "</td>";
+        tr += "<td>";
+        tr += "<div class='d-flex'>";
+        tr += "<input class='form-control text-center w-50' type='number'/>"
+        tr += "<select class='form-control text-center w-50'>";
+        for (let i = 0; i < STRENGTH_UNIT.length; i++) {
+            tr += "<option>" + STRENGTH_UNIT[i] + "</option>"
+        }
+        tr += "</select>";
+        tr += "</div>";
+        tr += "</td>";
+        tr += "<td>" + unit + "</td>";
+        tr += "<td><input class='form-control text-center' type='number' /></td>";
+        tr += "<td>";
+        tr += "<select class='form-control text-center'>";
+        for (let i = 0; i < FREQUENCIES.length; i++) {
+            tr += "<option>" + FREQUENCIES[i] + "</option>"
+        }
+        tr += "</select>";
+        tr += "</td>";
+        tr += "<td>";
+        tr += "<button class='btn btn-sm btn-success'><i class='bi bi-pencil-fill'></i></button>"
+        tr += "</td>";
+        tr += "<td>";
+        tr += "<button class='btn btn-sm btn-danger'><i class='bi bi-trash-fill'></i></button>"
+        tr += "</td>";
+        tr += "</tr>";
 
         $("#medication_list").append(tr);
     }
 
     function activityLog(it) {
         return `<tr>
-                      <td>` + it.fname + ' ' + it.mname + ' ' + it.lname + ` <span class="badge bg-primary ms-2">` + it.origin + `</span></td>
-                      <td>` + it.remarks + `</td>
-                      <td><div class="badge bg-success p-1">` + it.released_to + `</div></td>
-                      <td>` + moment(it.date_forwarded).format("MM/DD/YYYY hh:mm:ss A") + `</td>
-                    </tr>`
+    <td>` + it.fname + ' ' + it.mname + ' ' + it.lname + ` <span class="badge bg-primary ms-2">` + it.origin + `</span></td>
+    <td>` + it.remarks + `</td>
+    <td><div class="badge bg-success p-1">` + it.released_to + `</div></td>
+    <td>` + moment(it.date_forwarded).format("MM/DD/YYYY hh:mm:ss A") + `</td>
+    </tr>`
     }
 
     function clearForms() {
@@ -985,5 +991,21 @@
         $("#prescription_modal input[type='radio']").prop("checked", false);
         $("#prescription_modal select").val("");
         $("#medication_list").empty();
+    }
+
+    function checkIfMedExists(_description) {
+        let is_exists = false;
+        for (let i = 0; i < $("#medication_list tr").length; i++) {
+            const description = $("#medication_list tr:eq(" + i + ") td:eq(0)").text().trim();
+            if (_description == description) {
+                is_exists = true;
+                break;
+            }
+        }
+        return is_exists;
+    }
+
+    function logout() {
+        window.location.href = '{{ route('logout') }}';
     }
 </script>

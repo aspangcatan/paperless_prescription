@@ -15,7 +15,7 @@ class CreateNurseStationsTable extends Migration
     {
         Schema::create('nurse_stations', function (Blueprint $table) {
             $table->id();
-            $table->integer('userid');
+            $table->integer('userid')->unique();
             $table->string('stations');
             $table->timestamps();
         });

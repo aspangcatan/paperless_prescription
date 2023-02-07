@@ -17,7 +17,11 @@
         <div class="card">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">For Reviews</h5>
+                    <h5 class="card-title">For Dispensing</h5>
+                    <button class="btn btn-sm btn-secondary" id="btn_notification">
+                        <i class="bi bi-bell"></i>
+                        <span class="badge bg-danger badge-number"></span>
+                    </button>
                 </div>
 
                 <div class="table-responsive">
