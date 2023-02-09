@@ -68,9 +68,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/update_nurse_station', [\App\Http\Controllers\NurseStationController::class, 'insertNurseStation'])->name('update_nurse_station');
 
     Route::get('/homis_patient/get/{keyword}', [\App\Http\Controllers\PatientController::class, 'searchHomisPatient']);
+
     Route::get('/patient/get', [\App\Http\Controllers\PatientController::class, 'getPatient']);
     Route::get('/medicine/get', [\App\Http\Controllers\MedicineController::class, 'getMedicine']);
-    Route::get('/medicine/get/{keyword}', [\App\Http\Controllers\MedicineController::class, 'searchMedicine']);
     Route::get('/user/get/doctors', [\App\Http\Controllers\UserController::class, 'getDoctors']);
     Route::get('/user/get/nurses', [\App\Http\Controllers\UserController::class, 'getNurses']);
 

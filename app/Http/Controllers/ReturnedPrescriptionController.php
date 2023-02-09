@@ -67,18 +67,27 @@ class ReturnedPrescriptionController extends Controller
             $prescription->bed_no = $patient['bed_no'];
             $prescription->urgency = $patient['urgency'];
             $prescription->type = $patient['type'];
-            $prescription->drug_allergy = $patient['drug_allergy'];
-            $prescription->weight = $patient['weight'];
-            $prescription->height = $patient['height'];
-            $prescription->serum_creatinine = $patient['serum_creatinine'];
-            $prescription->creatinine_clearance = $patient['creatinine_clearance'];
-            $prescription->sgpt = $patient['sgpt'];
-            $prescription->sgot = $patient['sgot'];
+            $prescription->drug_allergy = null;
+            $prescription->weight = null;
+            $prescription->height = null;
+            $prescription->serum_creatinine = null;
+            $prescription->creatinine_clearance = null;
+            $prescription->sgpt = null;
+            $prescription->sgot = null;
+            if ($patient['type'] == "2") {
+                $prescription->drug_allergy = $patient['drug_allergy'];
+                $prescription->weight = $patient['weight'];
+                $prescription->height = $patient['height'];
+                $prescription->serum_creatinine = $patient['serum_creatinine'];
+                $prescription->creatinine_clearance = $patient['creatinine_clearance'];
+                $prescription->sgpt = $patient['sgpt'];
+                $prescription->sgot = $patient['sgot'];
+            }
+
             $prescription->save();
 
             #REINSERT AMS
             if ($patient['type'] == "2") {
-
                 $indication_use_param = $request->indication_use;
                 $indication = IndicationUse::where('prescription_id', $prescription_id)->first();
                 $indication->prescription_id = $prescription_id;
@@ -147,6 +156,28 @@ class ReturnedPrescriptionController extends Controller
                     $dysfunction_criterias_params[$i]['prescription_id'] = $prescription_id;
                 }
                 DysfunctionCriteria::insert($dysfunction_criterias_params);
+            } else {
+                #DELETE AMS DATA
+                $indication = IndicationUse::where('prescription_id', $prescription_id)->first();
+                $indication->forceDelete();
+
+                $focus_infection_origin = FocusInfection::where('prescription_id', $prescription_id);
+                $focus_infection_origin->forceDelete();
+
+                $culture_sent_origin = CultureSent::where('prescription_id', $prescription_id);
+                $culture_sent_origin->forceDelete();
+
+                $immunocompromising_conditions_origin = Immunocompromising::where('prescription_id', $prescription_id);
+                $immunocompromising_conditions_origin->forceDelete();
+
+                $infectious_diagnosis = InfectiousDiagnosis::where('prescription_id', $prescription_id)->first();
+                $infectious_diagnosis->forceDelete();
+
+                $sepsis_criterias_origin = SepsisCriteria::where('prescription_id', $prescription_id);
+                $sepsis_criterias_origin->forceDelete();
+
+                $dysfunction_criterias_origin = DysfunctionCriteria::where('prescription_id', $prescription_id);
+                $dysfunction_criterias_origin->forceDelete();
             }
 
             $patient_history = PatientHistory::where('prescription_id', $prescription_id)->first();

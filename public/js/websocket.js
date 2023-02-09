@@ -1,4 +1,6 @@
-const ws = new WebSocket("ws://192.168.137.1:2020");
+// const ws = new WebSocket("ws://192.168.137.1:2020");
+const ws = new WebSocket("ws://192.168.5.178:2020");
+
 const station = $("#user_station").text().trim()
 const role = $("#user_role").text().trim();
 const code = $("#code").text().trim();

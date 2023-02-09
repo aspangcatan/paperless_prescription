@@ -41,7 +41,16 @@
         });
 
         $("input[name='indication_use']").change(function () {
-            definitive_modal.toggle();
+            $("#btn_show_definitive").prop("disabled", true);
+            if ($(this).next().text() == "Definitive" || $(this).next().text() == "Empiric then definitive") {
+                $("#btn_show_definitive").prop("disabled", false);
+                definitive_modal.toggle();
+            }
+        });
+
+        $("#btn_show_definitive").click(function () {
+            if ($("input[name='indication_use']:checked").next().text() == "Definitive" || $("input[name='indication_use']:checked").next().text() == "Empiric then definitive")
+                definitive_modal.toggle();
         });
 
         $("#btn_search_prescription").click(function () {
@@ -452,7 +461,7 @@
                     $("#prescription_modal .error_list").append("<li>Dosage strength unit is required</li>");
                 }
 
-                if (quantity < 0 || quantity == "") {
+                if (quantity < 1 || quantity == "") {
                     is_valid = false;
                     medication_flag = false;
                     $("#prescription_modal .error_list").append("<li>Quantity must be greater than 0</li>");
@@ -624,7 +633,7 @@
 
         $("#form_hospital_id").text(hospital_id);
         $("#form_patient").text(name);
-        $("#form_birthdate").text(birthdate);
+        $("#form_birthdate").text(moment(birthdate).format("MM/DD/YYYY"));
         $("#form_age").text(age);
         $("#form_sex").text(sex);
         $("#form_station").val(station);
@@ -640,9 +649,12 @@
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
 
+
+
         if (type == "2") {
             $(".ams_container").removeClass("d-none");
         }
+
 
         $("#prescription_modal input").prop("disabled", true);
         $("#prescription_modal input[type='checkbox']").prop("disabled", true);
@@ -671,6 +683,27 @@
 
                         const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
+                        $("#btn_show_definitive").prop("disabled", true);
+
+                        if (ams.indication_use.description == "Definitive" || ams.indication_use.description == "Empiric then definitive") {
+                            $("#btn_show_definitive").prop("disabled", false);
+
+                            $("#definitive_date").val(ams.indication_use.definitive_date);
+                            $("#definitive_specimen").val(ams.indication_use.specimen);
+                            ams.indication_details.forEach(it => {
+                                const tr = $("#indication_use_details tr:eq(" + it.row_id + ")");
+                                tr.find("td:eq(0) input").prop("checked", true);
+                                tr.find("td:eq(1) input").val(it.details);
+
+                                for (let i = 0; i < tr.find("input[type='radio']").length; i++) {
+                                    const radio = tr.find("input[type='radio']:eq(" + i + ")");
+                                    if (radio.next().text().trim() == it.pattern.trim()) {
+                                        radio.prop("checked", true);
+                                    }
+                                }
+                            });
+                        }
+
 
                         const focus_infection = ams.focus_infection;
                         for (let i = 0; i < focus_infection.length; i++) {
@@ -793,11 +826,7 @@
     }
 
     function getMedicine(key) {
-        let url = "{{ url('medicine/get') }}/" + key;
-        if (key == "") {
-            "{{ url('medicine/get') }}";
-        }
-        fetch(url, {
+        fetch("{{ url('medicine/get') }}?medicine=" + key, {
             method: "GET"
         })
             .then(res => res.json())
@@ -935,6 +964,17 @@
         });
     }
 
+    function editMedicine(id) {
+        prescribed_med_id = id;
+        medicine_modal.toggle();
+        $("#search_medicine").val($("#medication_id_" + id + " td:eq(0)").text().trim());
+        getMedicine($("#search_medicine").val());
+    }
+
+    function deleteMedicine(id) {
+        $("#medication_id_" + id).remove();
+    }
+
     function appendMedicine(id) {
         //CHECK IF MEDICINE ALREADY IN PRESCRIPTIONS
         const description = $("#" + id + " td:eq(0)").text();
@@ -943,7 +983,8 @@
             return;
         }
         const unit = $("#" + id + " td:eq(1)").text();
-        let tr = "<tr>";
+        const count = $("#medication_list tr").length;
+        let tr = "<tr id='medication_id_" + count + "'>";
         tr += "<td>" + description + "</td>";
         tr += "<td>";
         tr += "<div class='d-flex'>";
@@ -965,10 +1006,10 @@
         tr += "</select>";
         tr += "</td>";
         tr += "<td>";
-        tr += "<button class='btn btn-sm btn-success'><i class='bi bi-pencil-fill'></i></button>"
+        tr += "<button class='btn btn-sm btn-success' onclick='editMedicine(" + count + ")'><i class='bi bi-pencil-fill'></i></button>"
         tr += "</td>";
         tr += "<td>";
-        tr += "<button class='btn btn-sm btn-danger'><i class='bi bi-trash-fill'></i></button>"
+        tr += "<button class='btn btn-sm btn-danger' onclick='deleteMedicine(" + count + ")'><i class='bi bi-trash-fill'></i></button>"
         tr += "</td>";
         tr += "</tr>";
 

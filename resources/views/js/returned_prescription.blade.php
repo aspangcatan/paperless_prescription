@@ -44,6 +44,14 @@
             getMedicine($("#search_medicine").val().trim());
         });
 
+        $("#form_prescription_type").change(function () {
+            if ($(this).val() == "2") {
+                $(".ams_container").removeClass("d-none")
+            } else {
+                $(".ams_container").addClass("d-none")
+            }
+        });
+
         $("#search_medicine").keypress(function (e) {
             if (e.which == 13) {
                 getMedicine($(this).val().trim());
@@ -497,47 +505,84 @@
                     $("#medication_list").empty();
                     for (let i = 0; i < data.results.length; i++) {
                         const it = data.results[i];
-                        const tr = `<tr id='medication_id_` + i + `'>
-                                        <td>` + it.description + `</td>
-                                        <td>
-                                            <div class="d-flex">
-                                                <input class="form-control text-center w-50" type="number" value="` + it.dosage_strength + `"/>
-                                                <select class="form-control text-center w-50">
-                                                    <option value="">Select unit</option>
-                                                    <option>liter</option>
-                                                    <option>mG</option>
-                                                    <option>mL</option>
-                                                </select>
-                                            </div>
-                                        </td>
-                                        <td>` + it.unit + `</td>
-                                        <td>
-                                            <input class="form-control text-center" type="number" value="` + it.quantity_ordered + `"/>
-                                        </td>
-                                        <td>
-                                            <select class="form-control text-center">
-                                                <option value="">Select frequency</option>
-                                                <option>3X/DAY</option>
-                                                <option>1X/DAY</option>
-                                                <option>EVERYDAY</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-success" onclick="editMedicine(` + i + `)">
-                                                <i class="bi bi-pencil-fill"></i>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteMedicine(` + i + `)">
-                                                <i class="bi bi-trash-fill"></i>
-                                            </button>
-                                        </td>
-                                    </tr>`;
+
+                        let tr = "<tr id='medication_id_" + i + "'>";
+                        tr += "<td>" + it.description + "</td>";
+                        tr += "<td>";
+                        tr += "<div class='d-flex'>";
+                        tr += "<input class='form-control text-center w-50' type='number' value='" + it.dosage_strength + "'/>"
+                        tr += "<select class='form-control text-center w-50'>";
+                        for (let j = 0; j < STRENGTH_UNIT.length; j++) {
+                            if (it.dosage_unit == STRENGTH_UNIT[i])
+                                tr += "<option selected>" + STRENGTH_UNIT[j] + "</option>"
+                            else
+                                tr += "<option>" + STRENGTH_UNIT[j] + "</option>"
+                        }
+                        tr += "</select>";
+                        tr += "</div>";
+                        tr += "</td>";
+                        tr += "<td>" + it.unit + "</td>";
+                        tr += "<td><input class='form-control text-center' type='number' value='" + it.quantity_ordered + "'/></td>";
+                        tr += "<td>";
+                        tr += "<select class='form-control text-center'>";
+                        for (let j = 0; j < FREQUENCIES.length; j++) {
+                            if (it.frequency == FREQUENCIES[j])
+                                tr += "<option selected>" + FREQUENCIES[j] + "</option>"
+                            else
+                                tr += "<option>" + FREQUENCIES[j] + "</option>"
+                        }
+                        tr += "</select>";
+                        tr += "</td>";
+                        tr += "<td>";
+                        tr += "<button class='btn btn-sm btn-success' onclick='editMedicine(" + i + ")'><i class='bi bi-pencil-fill'></i></button>"
+                        tr += "</td>";
+                        tr += "<td>";
+                        tr += "<button class='btn btn-sm btn-danger' onclick='deleteMedicine(" + i + ")'><i class='bi bi-trash-fill'></i></button>"
+                        tr += "</td>";
+                        tr += "</tr>";
 
                         $("#medication_list").append(tr);
 
-                        $("#medication_id_" + i + " td:eq(1) select").val(it.dosage_unit);
-                        $("#medication_id_" + i + " td:eq(4) select").val(it.frequency);
+
+                        // const tr = `<tr id='medication_id_` + i + `'>
+                        //                 <td>` + it.description + `</td>
+                        //                 <td>
+                        //                     <div class="d-flex">
+                        //                         <input class="form-control text-center w-50" type="number" value="` + it.dosage_strength + `"/>
+                        //                         <select class="form-control text-center w-50">
+                        //                             <option value="">Select unit</option>
+                        //                             <option>liter</option>
+                        //                             <option>mG</option>
+                        //                             <option>mL</option>
+                        //                         </select>
+                        //                     </div>
+                        //                 </td>
+                        //                 <td>` + it.unit + `</td>
+                        //                 <td>
+                        //                     <input class="form-control text-center" type="number" value="` + it.quantity_ordered + `"/>
+                        //                 </td>
+                        //                 <td>
+                        //                     <select class="form-control text-center">
+                        //                         <option value="">Select frequency</option>
+                        //                         <option>3X/DAY</option>
+                        //                         <option>1X/DAY</option>
+                        //                         <option>EVERYDAY</option>
+                        //                     </select>
+                        //                 </td>
+                        //                 <td>
+                        //                     <button class="btn btn-sm btn-success" onclick="editMedicine(` + i + `)">
+                        //                         <i class="bi bi-pencil-fill"></i>
+                        //                     </button>
+                        //                 </td>
+                        //                 <td>
+                        //                     <button class="btn btn-sm btn-danger" onclick="deleteMedicine(` + i + `)">
+                        //                         <i class="bi bi-trash-fill"></i>
+                        //                     </button>
+                        //                 </td>
+                        //             </tr>`;
+                        //
+                        // $("#medication_list").append(tr);
+
                     }
                 }
             }).catch(err => {
@@ -548,7 +593,8 @@
     function editMedicine(id) {
         prescribed_med_id = id;
         medicine_modal.toggle();
-        getMedicine($("#search_medicine").val().trim());
+        $("#search_medicine").val($("#medication_id_" + id + " td:eq(0)").text().trim());
+        getMedicine($("#search_medicine").val());
     }
 
     function deleteMedicine(id) {
@@ -565,7 +611,7 @@
         const count = $("#medication_list").length;
         if (prescribed_med_id === "") {
             //APPEND NEW RECORD
-            let tr = "<tr id='medication_id_"+count+"'>";
+            let tr = "<tr id='medication_id_" + count + "'>";
             tr += "<td>" + description + "</td>";
             tr += "<td>";
             tr += "<div class='d-flex'>";
@@ -587,10 +633,10 @@
             tr += "</select>";
             tr += "</td>";
             tr += "<td>";
-            tr += "<button class='btn btn-sm btn-success'><i class='bi bi-pencil-fill'></i></button>"
+            tr += "<button class='btn btn-sm btn-success' onclick='editMedicine(" + count + ")'><i class='bi bi-pencil-fill'></i></button>"
             tr += "</td>";
             tr += "<td>";
-            tr += "<button class='btn btn-sm btn-danger'><i class='bi bi-trash-fill'></i></button>"
+            tr += "<button class='btn btn-sm btn-danger' onclick='deleteMedicine(" + count + ")'><i class='bi bi-trash-fill'></i></button>"
             tr += "</td>";
             tr += "</tr>";
 
@@ -643,12 +689,7 @@
     }
 
     function getMedicine(key) {
-        let url = "{{ url('medicine/get') }}/" + key;
-        if (key == "") {
-            "{{ url('medicine/get') }}";
-        }
-
-        fetch(url, {
+        fetch("{{ url('medicine/get') }}?medicine=" + key, {
             method: "GET"
         })
             .then(res => res.json())

@@ -174,6 +174,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                <button class="btn btn-sm btn-primary" id="btn_show_definitive" disabled>Show definitive</button>
                             </div>
                             <div class="col-md-6 mt-2">
                                 <div class="card-title text-dark p-0">Focus Infection</div>
@@ -568,11 +569,10 @@
 
 <div class="modal fade" id="definitive_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="card-title p-1" style="font-size: 24px">Additional Information</div>
-                <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="background: rgb(241,244,252)">
                 <div class="card">
@@ -609,8 +609,8 @@
                                 <thead class="text-center">
                                 <tr>
                                     <th style="width: 2%"></th>
-                                    <th style="width: 78%">Organism</th>
-                                    <th style="width: 20%">Susceptibility Result or Specific Resistance Pattern</th>
+                                    <th style="width: 58%">Organism</th>
+                                    <th style="width: 40%">Susceptibility Result or Specific Resistance Pattern</th>
                                 </tr>
                                 </thead>
                                 <tbody id="indication_use_details">

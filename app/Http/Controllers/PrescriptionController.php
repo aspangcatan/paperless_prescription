@@ -19,6 +19,7 @@ use App\Models\Prescription;
 use App\Models\PrescriptionLog;
 use App\Models\ReturnedPrescription;
 use App\Models\SepsisCriteria;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -103,6 +104,7 @@ class PrescriptionController extends Controller
             #PATIENT REQUEST DATA OBJECT
             $patient = $request->patient;
             $prescription = new Prescription;
+            $prescription->hospital_id = $patient['hospital_id'];
             $prescription->physician_id = Auth::id();
             $prescription->pgi_id = null;
             $prescription->station = $patient['station'];
@@ -214,10 +216,26 @@ class PrescriptionController extends Controller
             if ($patient['type'] == "2") {
                 #TODO: CHECK IF PRESCRIBED MEDICINE IS ALREADY APPROVED FOR CERTAIN DAYS
                 #IF ALREADY APPROVED, AUTOMATIC SEND TO NURSE REVIEW
+                #GET LATEST PRESCRIPTION BASED ON MEDICATION AND PATIENT AND GET DAYS APPROVED COMPARE TO CURRENT DAY IF WITHIN AND DEFINITIVE CASE
+                #$medications[0] is only one
+//                $latest_approved_prescription = DB::table('paperless_prescription.prescriptions as p')
+//                    ->join('paperless_prescription.indication_use as u', 'p.id', '=', 'u.prescription_id')
+//                    ->join('paperless_prescription.prescribed_medicines as m', 'p.id', '=', 'm.prescription_id')
+//                    ->where('p.hospital_id', '=', $patient['hospital_id'])
+//                    ->where('u.description', '=', $indication_use_param['description'])
+//                    ->where('m.description', '=', $medications[0]['description'])
+//                    ->orderBy('p.created_at', 'DESC')
+//                    ->get(['p.created_at', 'p.days_approved']);
 
-                $icc = new IccReview();
-                $icc->prescription_id = $prescription_id;
-                $icc->save();
+//                if (count($latest_approved_prescription) < 0) {
+                    $icc = new IccReview();
+                    $icc->prescription_id = $prescription_id;
+                    $icc->save();
+//                } else {
+//                    #CALCULATE DAYS PASSED SINCE THE APPROVAL
+//                }
+
+
             } else {
                 $nurse = new NurseReview();
                 $nurse->prescription_id = $prescription_id;
@@ -252,6 +270,8 @@ class PrescriptionController extends Controller
                 #UPDATE DAYS APPROVED
                 $doctor = Prescription::find($request->id);
                 $doctor->days_approved = $request->days_approved;
+                $doctor->approved_by = Auth::id();
+                $doctor->date_approved = Carbon::now();
                 $doctor->save();
                 #FORWARD TO PHARMACY
                 $nurse = new NurseReview();

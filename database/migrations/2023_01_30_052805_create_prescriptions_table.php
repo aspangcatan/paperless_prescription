@@ -15,6 +15,7 @@ class CreatePrescriptionsTable extends Migration
     {
         Schema::create('prescriptions', function (Blueprint $table) {
             $table->id();
+            $table->string('hospital_id');
             $table->integer('physician_id');
             $table->integer('pgi_id')->nullable();
             $table->string('station', 255);
@@ -31,6 +32,8 @@ class CreatePrescriptionsTable extends Migration
             $table->string('sgot', 50)->nullable();
             $table->integer('status')->default(1);
             $table->integer('days_approved')->nullable();
+            $table->integer('approved_by')->nullable();
+            $table->dateTime('date_approved')->nullable();
             $table->timestamps();
         });
     }

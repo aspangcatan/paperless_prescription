@@ -61,7 +61,7 @@
 
         $("#form_hospital_id").text(hospital_id);
         $("#form_patient").text(name);
-        $("#form_birthdate").text(birthdate);
+        $("#form_birthdate").text(moment(birthdate).format("MM/DD/YYYY"));
         $("#form_age").text(age);
         $("#form_sex").text(sex);
         $("#form_station").val(station);
