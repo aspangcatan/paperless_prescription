@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateInfectiousDiagnosisTable extends Migration
+class CreateConcurrentTherapyTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,15 @@ class CreateInfectiousDiagnosisTable extends Migration
      */
     public function up()
     {
-        Schema::create('infectious_diagnosis', function (Blueprint $table) {
+        Schema::create('concurrent_therapy', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('prescription_id')->unique();
-            $table->string('description');
-            $table->string('details')->nullable();
-            $table->timestamps();
+            $table->unsignedBigInteger('prescription_id');
+            $table->string('hospital_id');
+            $table->date('concurrent_date');
+            $table->string('antimicrobial');
+            $table->string('dosing_regimen');
+            $table->date('start_date');
+            $table->date('stop_date');
 
             $table->foreign('prescription_id')->references('id')->on('prescriptions')->onDelete('cascade');
         });
@@ -31,6 +34,6 @@ class CreateInfectiousDiagnosisTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('infectious_diagnosis');
+        Schema::dropIfExists('concurrent_therapy');
     }
 }

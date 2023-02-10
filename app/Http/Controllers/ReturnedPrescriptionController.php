@@ -9,6 +9,7 @@ use App\Models\Immunocompromising;
 use App\Models\IndicationUse;
 use App\Models\IndicationUseDetails;
 use App\Models\InfectiousDiagnosis;
+use App\Models\MicrobiologicalResult;
 use App\Models\NurseReview;
 use App\Models\PatientHistory;
 use App\Models\PrescribedMedicine;
@@ -90,72 +91,20 @@ class ReturnedPrescriptionController extends Controller
             if ($patient['type'] == "2") {
                 $indication_use_param = $request->indication_use;
                 $indication = IndicationUse::where('prescription_id', $prescription_id)->first();
-                $indication->prescription_id = $prescription_id;
                 $indication->description = $indication_use_param['description'];
-                $indication->definitive_date = $indication_use_param['definitive_date'];
-                $indication->specimen = $indication_use_param['specimen'];
+                $indication->reason = $indication_use_param['reason'];
                 $indication->save();
 
-                #INSERT INDICATION DETAILS
-                $indication_details_origin = IndicationUseDetails::where('indication_id', $indication->id);
-                $indication_details_origin->forceDelete();
-                $indication_details_list = $indication_use_param['organisms'];
-                for ($i = 0; $i < count($indication_details_list); $i++) {
-                    $indication_details_list[$i]['indication_id'] = $indication->id;
-                }
-                IndicationUseDetails::insert($indication_details_list);
+                #INSERT MICROBIOLOGICAL
+                $microbiological_origin = MicrobiologicalResult::where('prescription_id', $prescription_id);
+                $microbiological_origin->forceDelete();
 
-                #INSERT FOCUS INFECTIONS
-                $focus_infection_origin = FocusInfection::where('prescription_id', $prescription_id);
-                $focus_infection_origin->forceDelete();
-                $focus_infection_params = $request->focus_infections;
-                for ($i = 0; $i < count($focus_infection_params); $i++) {
-                    $focus_infection_params[$i]['prescription_id'] = $prescription_id;
+                $microbiologicals = $request->microbiologicals;
+                for ($i = 0; $i < count($microbiologicals); $i++) {
+                    $microbiologicals[$i]['prescription_id'] = $prescription_id;
                 }
-                FocusInfection::insert($focus_infection_params);
+                MicrobiologicalResult::insert($microbiologicals);
 
-                #INSERT CULTURE SENT
-                $culture_sent_origin = CultureSent::where('prescription_id', $prescription_id);
-                $culture_sent_origin->forceDelete();
-                $culture_sent_params = $request->culture_sents;
-                for ($i = 0; $i < count($culture_sent_params); $i++) {
-                    $culture_sent_params[$i]['prescription_id'] = $prescription_id;
-                }
-                CultureSent::insert($culture_sent_params);
-
-                #INSERT IMMUNOCOMPROMISING CONDITION
-                $immunocompromising_conditions_origin = Immunocompromising::where('prescription_id', $prescription_id);
-                $immunocompromising_conditions_origin->forceDelete();
-                $immunocompromising_conditions_params = $request->immunocompromising_conditions;
-                for ($i = 0; $i < count($immunocompromising_conditions_params); $i++) {
-                    $immunocompromising_conditions_params[$i]['prescription_id'] = $prescription_id;
-                }
-                Immunocompromising::insert($immunocompromising_conditions_params);
-
-                #INSERT INFECTIOUS DIAGNOSIS
-                $infectious_diagnosis_params = $request->infectious_diagnosis;
-                $infectious_diagnosis = InfectiousDiagnosis::where('prescription_id', $prescription_id)->first();
-                $infectious_diagnosis->description = $infectious_diagnosis_params['description'];
-                $infectious_diagnosis->details = $infectious_diagnosis_params['details'];
-                $infectious_diagnosis->save();
-
-                #INSERT SEPSIS CRITERIA
-                $sepsis_criterias_origin = SepsisCriteria::where('prescription_id', $prescription_id);
-                $sepsis_criterias_origin->forceDelete();
-                $sepsis_criterias_params = $request->sepsis_criterias;
-                for ($i = 0; $i < count($sepsis_criterias_params); $i++) {
-                    $sepsis_criterias_params[$i]['prescription_id'] = $prescription_id;
-                }
-                SepsisCriteria::insert($sepsis_criterias_params);
-
-                #INSERT SEPSIS CRITERIA
-                $dysfunction_criterias_origin = DysfunctionCriteria::where('prescription_id', $prescription_id);
-                $dysfunction_criterias_origin->forceDelete();
-                $dysfunction_criterias_params = $request->dysfunction_criterias;
-                for ($i = 0; $i < count($dysfunction_criterias_params); $i++) {
-                    $dysfunction_criterias_params[$i]['prescription_id'] = $prescription_id;
-                }
-                DysfunctionCriteria::insert($dysfunction_criterias_params);
             } else {
                 #DELETE AMS DATA
                 $indication = IndicationUse::where('prescription_id', $prescription_id)->first();

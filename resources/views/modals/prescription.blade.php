@@ -53,7 +53,7 @@
                                     <select class="form-control fw-bold text-center bg-white" id="form_station">
                                         <option value="">Select station</option>
                                     </select>
-                                    <small>(Station)</small>
+                                    <small>(Ward)</small>
                                 </div>
                             </div>
                             <div class="col-md-4 mt-2">
@@ -73,419 +73,148 @@
                                     <select class="form-control fw-bold text-center bg-white"
                                             id="form_prescription_type">
                                         <option value="">Select type</option>
-                                        <option value="1">Regular</option>
+                                        <option value="1" disabled>Regular</option>
                                         <option value="2">Anti-Microbial Stewardship Program</option>
                                     </select>
                                     <small>(Prescription Type)</small>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row ams_container">
-                            <div class="col-md-4 mt-2">
+
+                            <div class="col-md-4 mt-2 ams_container">
                                 <div class="text-center">
                                     <input class="form-control bg-white fw-bold text-center" id="form_drug_allergy"/>
                                     <small>(Drug Allergy)</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2">
+                            <div class="col-md-4 mt-2 ams_container">
                                 <div class="text-center">
                                     <input type="number" class="form-control bg-white fw-bold text-center"
                                            id="form_weight"/>
                                     <small>(Weight (kg))</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2">
+                            <div class="col-md-4 mt-2 ams_container">
                                 <div class="text-center">
                                     <input type="number" class="form-control bg-white fw-bold text-center"
                                            id="form_height"/>
                                     <small>(Height (cm))</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2">
+                            <div class="col-md-4 mt-2 ams_container">
                                 <div class="text-center">
                                     <input class="form-control bg-white fw-bold text-center"
                                            id="form_serum_creatinine"/>
-                                    <small>(Serum Creatinine (mg/dL)</small>
+                                    <small>(Serum Creatinine</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2">
+                            <div class="col-md-4 mt-2 ams_container">
                                 <div class="text-center">
                                     <input class="form-control bg-white fw-bold text-center"
                                            id="form_creatinine_clearance"/>
-                                    <small>(Creatinine clearance (mL/min))</small>
+                                    <small>(Creatinine clearance)</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2">
+                            <div class="col-md-4 mt-2 ams_container">
+                                <div class="text-center">
+                                    <input class="form-control bg-white fw-bold text-center"
+                                           id="form_transaminases"/>
+                                    <small>(Transaminases)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mt-2 ams_container">
                                 <div class="text-center">
                                     <input class="form-control bg-white fw-bold text-center"
                                            id="form_sgpt"/>
-                                    <small>(SGPT (IU/L))</small>
+                                    <small>(SGPT)</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2">
+                            <div class="col-md-4 mt-2 ams_container">
                                 <div class="text-center">
                                     <input class="form-control bg-white fw-bold text-center"
                                            id="form_sgot"/>
-                                    <small>(SGOT (IU/L))</small>
+                                    <small>(SGOT)</small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="card ams_container">
-                    <div class="card-body">
-                        <h6 class="card-title">Anti-microbial Stewardship (AMS) Program</h6>
-                        <div class="row">
-                            <div class="col-md-6 mt-2">
-                                <div class="card-title text-dark p-0">Indication for use</div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="indication_use">
-                                            <label class="form-check-label">Prophylactic</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="indication_use">
-                                            <label class="form-check-label">Empiric</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="indication_use">
-                                            <label class="form-check-label">Definitive</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="indication_use">
-                                            <label class="form-check-label">Empiric escalation</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="indication_use">
-                                            <label class="form-check-label">Empiric de-escalation</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="indication_use">
-                                            <label class="form-check-label">Empiric then definitive</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-primary" id="btn_show_definitive" disabled>Show definitive</button>
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <div class="card-title text-dark p-0">Focus Infection</div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="focus_infection">
-                                            <label class="form-check-label">HENT</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="focus_infection">
-                                            <label class="form-check-label">OCULAR</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="focus_infection">
-                                            <label class="form-check-label">Skin/Skin structure</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="focus_infection">
-                                            <label class="form-check-label">Bones/Joints</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="focus_infection">
-                                            <label class="form-check-label">Respiratory</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="focus_infection">
-                                            <label class="form-check-label">Cardiovascular</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="focus_infection">
-                                            <label class="form-check-label">GI/Intraabdominal</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="focus_infection">
-                                            <label class="form-check-label">Genito-urinary</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="focus_infection">
-                                            <label class="form-check-label">CNS</label>
-                                        </div>
-                                    </div>
+                <div class="ams_container">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="card-title">Concurrent Antimicrobial Therapy</h6>
+                                <div>
+                                    <button class="btn btn-sm btn-success" id="btn_add_concurrent">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                        <hr/>
-                        <div class="row">
-                            <div class="col-md-6 mt-2">
-                                <div class="card-title text-dark p-0">Culture Sent</div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="culture_sent">
-                                            <label class="form-check-label">Blood</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="culture_sent">
-                                            <label class="form-check-label">Respiratory</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="culture_sent">
-                                            <label class="form-check-label">Urine</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="culture_sent">
-                                            <label class="form-check-label">CSF</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="culture_sent">
-                                            <label class="form-check-label">Wound</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="culture_sent">
-                                            <label class="form-check-label">Others</label>
-                                            <input class="underline" id="culture_sent"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <div class="card-title text-dark p-0">Immunocompromising condition</div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="immunocompromising_condition">
-                                            <label class="form-check-label">None</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="immunocompromising_condition">
-                                            <label class="form-check-label">Chronic pulmonary</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="immunocompromising_condition">
-                                            <label class="form-check-label">Chronic liver disease</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="immunocompromising_condition">
-                                            <label class="form-check-label">Chronic kidney disease</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="immunocompromising_condition">
-                                            <label class="form-check-label">Diabetes mellitus, poorly controlled</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="immunocompromising_condition">
-                                            <label class="form-check-label">Malignancy</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="immunocompromising_condition">
-                                            <label class="form-check-label">Immunocompromised state</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="immunocompromising_condition">
-                                            <label class="form-check-label">Connective tissue disease</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="immunocompromising_condition">
-                                            <label class="form-check-label">Chronic steroid use</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="immunocompromising_condition">
-                                            <label class="form-check-label">Others</label>
-                                            <input class="underline" id="immunocompromising_condition"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <hr/>
-                        <div class="row">
-                            <div class="col-md-12 mt-2">
-                                <div class="card-title text-dark p-0">Infectious Diagnosis</div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="infectious_diagnosis">
-                                            <label class="form-check-label">Deep-seated infections (e.g. abscess,
-                                                empyema)</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="infectious_diagnosis">
-                                            <label class="form-check-label">Staphylococcus aureus bacteremia</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="infectious_diagnosis">
-                                            <label class="form-check-label">Meningitis or encephalitis</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="infectious_diagnosis">
-                                            <label class="form-check-label">Septic arthritis</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="infectious_diagnosis">
-                                            <label class="form-check-label">Osteomyelitis</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="infectious_diagnosis">
-                                            <label class="form-check-label">Endocarditis</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="infectious_diagnosis">
-                                            <label class="form-check-label">Necrotizing soft tissue infections</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="infectious_diagnosis">
-                                            <label class="form-check-label">Infected implants or prosthesis</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="infectious_diagnosis">
-                                            <label class="form-check-label">Febrile neutropenia</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="infectious_diagnosis">
-                                            <label class="form-check-label">Others</label>
-                                            <input class="underline" id="infectious_diagnosis"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <hr/>
-                        <div class="row">
-                            <div class="col-md-6 mt-2">
-                                <div class="card-title text-dark p-0">Sepsis Critieria</div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="sepsis_criteria">
-                                            <label class="form-check-label">HR >90/min</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="sepsis_criteria">
-                                            <label class="form-check-label">RR >20min or pCO2 &lt;32 MMG</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="sepsis_criteria">
-                                            <label class="form-check-label">Temperature &#8805;38&#176;C or &#8804;36&#176;C</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="sepsis_criteria">
-                                            <label class="form-check-label">WBC >12,000 or &lt;4,000 or >10% immature
-                                                bands</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="sepsis_criteria">
-                                            <label class="form-check-label">N/A</label>
-                                        </div>
-                                    </div>
 
+                            <div class="table-responsive">
+                                <table class="table text-center">
+                                    <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Antimicrobial</th>
+                                        <th>Dosing Regimen</th>
+                                        <th>Start Date</th>
+                                        <th>Stop Date</th>
+                                        <th colspan="2" style="width: 8%"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="concurrent_list" style="font-size: 12px"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">Indication for use</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       name="indication_use">
+                                <label class="form-check-label">Prophylactic</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       name="indication_use">
+                                <label class="form-check-label">Empiric</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       name="indication_use">
+                                <label class="form-check-label">Definitive</label>
+                            </div>
+                            <div class="mt-2">
+                                <h6>Include reason for not using recommended antimicrobial</h6>
+                                <textarea class="form-control" style="height:100px" id="indication_reason"></textarea>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="card-title">Microbiological Results</h6>
+                                <div>
+                                    <button class="btn btn-sm btn-success" id="btn_add_microbiological">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="col-md-6 mt-2">
-                                <div class="card-title text-dark p-0">Organ dysfunction criteria</div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="dysfunction_criteria">
-                                            <label class="form-check-label">SBP &lt;90 or droppped >40 mmHg from
-                                                baseline</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="dysfunction_criteria">
-                                            <label class="form-check-label">New onset jaundice</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="dysfunction_criteria">
-                                            <label class="form-check-label">
-                                                Platelet &lt;100,000/uL or INR >1.5 not on anticoagulation
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="dysfunction_criteria">
-                                            <label class="form-check-label">
-                                                Upper or Lower GI bleeding
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="dysfunction_criteria">
-                                            <label class="form-check-label">
-                                                Respiratory failure requiring ventilation; hypoxemiaL saO2 &lt;90% air
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="dysfunction_criteria">
-                                            <label class="form-check-label">
-                                                Urine Output &lt;0.5 mL/kg/hr for > 6hr or azotemia (creatinine 2x
-                                                baseline or >1.3 mg/dL)</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="dysfunction_criteria">
-                                            <label class="form-check-label">N/A</label>
-                                        </div>
-                                    </div>
-                                </div>
+
+                            <div class="table-responsive">
+                                <table class="table text-center">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 10%">Date</th>
+                                        <th style="width: 32%">Specimen</th>
+                                        <th style="width:50%">Pathogen identified & susceptibility results</th>
+                                        <th colspan="2" style="width: 8%"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="microbiological_result_list"></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -494,10 +223,10 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="card-title fs-2">Rx</h6>
+                            <h6 class="card-title fs-4">Rx</h6>
                             <div>
                                 <button class="btn btn-sm btn-success" id="btn_view_cart">
-                                    <i class="bi bi-cart-plus-fill me-2"></i>VIEW CART
+                                    <i class="bi bi-plus-lg"></i>
                                 </button>
                             </div>
                         </div>
@@ -533,7 +262,6 @@
                         </tr>
                     </div>
                 </div>
-
                 <div class="card" id="transaction_container">
                     <div class="card-body">
                         <div class="card-title">Activity Logs</div>
@@ -871,11 +599,13 @@
                                     <label>Lastname</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <input type="text" class="form-control bg-white" id="suffix" placeholder="" readonly>
+                                    <input type="text" class="form-control bg-white" id="suffix" placeholder=""
+                                           readonly>
                                     <label>Suffix</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <input type="date" class="form-control bg-white" id="birthdate" placeholder="" readonly>
+                                    <input type="date" class="form-control bg-white" id="birthdate" placeholder=""
+                                           readonly>
                                     <label>Birthdate</label>
                                 </div>
                                 <div class="form-floating mt-3">
@@ -888,10 +618,12 @@
                                 </div>
                                 <div class="row mt-3">
                                     <div class="col-md-6">
-                                        <button class="btn btn-lg form-control btn-secondary" id="btn_find">SEARCH</button>
+                                        <button class="btn btn-lg form-control btn-secondary" id="btn_find">SEARCH
+                                        </button>
                                     </div>
                                     <div class="col-md-6">
-                                        <button class="btn btn-lg form-control btn-success" id="btn_save_patient">ADD</button>
+                                        <button class="btn btn-lg form-control btn-success" id="btn_save_patient">ADD
+                                        </button>
                                     </div>
                                 </div>
 
@@ -951,7 +683,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-body">
-                <div class="text-center text-dark mb-5" style="font-size: 30px">Medicine</div>
+                <div class="text-center text-dark mb-5" style="font-size: 30px">Antimicroibals</div>
                 <input class="form-control mb-3" placeholder="Search by description" id="search_medicine"/>
                 <div class="card m-0 p-0">
                     <div class="card-body m-0 p-0">
@@ -959,18 +691,98 @@
                             <table class="table table-hover text-center">
                                 <thead>
                                 <tr>
-                                    <th style="width: 70%">Description</th>
-                                    <th style="width: 25%">Unit</th>
+                                    <th style="width: 95%">Description</th>
+
                                     <th style="width: 5%"></th>
                                 </tr>
                                 </thead>
-                                <tbody id="medicine_list" style="font-size: 12px">
+                                <tbody id="medicine_list">
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
                 <div class="text-center mt-5">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="microbiological_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="card-title">Add Microbiological Results</h6>
+                <div class="row mb-3 mt-2">
+                    <label for="inputText" class="col-sm-2 col-form-label">Date</label>
+                    <div class="col-sm-10">
+                        <input type="date" class="form-control" id="microbiological_date">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputText" class="col-sm-2 col-form-label">Specimen</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="microbiological_specimen">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputText" class="col-sm-12 col-form-label">Pathogen identified & susceptibility
+                        results</label>
+                    <div class="col-sm-12">
+                        <textarea class="form-control" style="height: 100px" id="microbiological_pathogen"></textarea>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <button class="btn btn-primary" id="btn_save_microbiological">SAVE</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="concurrent_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="card-title">Add Concurrent Antimicrobial Therapy</h6>
+                <div class="row mb-3 mt-2">
+                    <label for="inputText" class="col-sm-3 col-form-label">Date</label>
+                    <div class="col-sm-9">
+                        <input type="date" class="form-control" id="concurrent_date">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Antimicrobial</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="concurrent_antimicrobial">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Dosing Regimen</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="concurrent_dosing_regimen">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Start Date</label>
+                    <div class="col-sm-9">
+                        <input type="date" class="form-control" id="concurrent_start_date">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Stop Date</label>
+                    <div class="col-sm-9">
+                        <input type="date" class="form-control" id="concurrent_stop_date">
+                    </div>
+                </div>
+                <div class="text-center mt-5">
+                    <button class="btn btn-primary" id="btn_save_concurrent">SAVE</button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">CLOSE</button>
                 </div>
             </div>

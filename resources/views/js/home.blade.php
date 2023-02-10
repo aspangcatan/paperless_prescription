@@ -6,6 +6,8 @@
     const definitive_modal = new bootstrap.Modal(document.getElementById('definitive_modal'));
     const patient_modal = new bootstrap.Modal(document.getElementById('patient_modal'));
     const medicine_modal = new bootstrap.Modal(document.getElementById('medicine_modal'));
+    const microbiological_modal = new bootstrap.Modal(document.getElementById('microbiological_modal'));
+    const concurrent_modal = new bootstrap.Modal(document.getElementById('concurrent_modal'));
 
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
     const error_modal = new bootstrap.Modal(document.getElementById('error_modal'));
@@ -69,13 +71,26 @@
             patient_modal.toggle();
         });
 
+        $("#btn_add_concurrent").click(function () {
+            prescribed_med_id = "";
+
+            clearConcurrent();
+            concurrent_modal.toggle();
+        });
+
+        $("#btn_add_microbiological").click(function () {
+            prescribed_med_id = "";
+            clearMicrobiological();
+            microbiological_modal.toggle();
+
+        });
+
         $("#btn_view_cart").click(function () {
             medicine_modal.toggle();
             getMedicine("");
         });
 
         $("#btn_find").click(function () {
-
             const key = $("#hospital_id").val().trim();
             if (key == "") return;
 
@@ -143,60 +158,50 @@
             insertPatient(params);
         });
 
-        $("#btn_save_definitive").click(function () {
-            const definitive_date = $("#definitive_date").val();
-            const definitive_specimen = $("#definitive_specimen").val().trim();
+        $("#btn_save_concurrent").click(function () {
+            const concurrent_date = $("#concurrent_date").val();
+            const antimicrobial = $("#concurrent_antimicrobial").val().trim();
+            const dosing_regimen = $("#concurrent_dosing_regimen").val().trim();
+            const start_date = $("#concurrent_start_date").val();
+            const stop_date = $("#concurrent_stop_date").val();
 
-            const organisms = [];
-            for (let i = 0; i < $("#indication_use_details tr").length; i++) {
-                const tr = $("#indication_use_details tr:eq(" + i + ")");
-                const checkbox = tr.find("td:eq(0) input");
+            let tr = "<tr>";
+            tr += "<td>" + moment(concurrent_date).format("MM/DD/YYYY") + " </td>";
+            tr += "<td>" + antimicrobial + "</td>";
+            tr += "<td>" + dosing_regimen + "</td>";
+            tr += "<td>" + moment(start_date).format("MM/DD/YYYY") + "</td>";
+            tr += "<td>" + moment(stop_date).format("MM/DD/YYYY") + "</td>";
+            tr += "<td>";
+            tr += "<button class='btn btn-sm btn-success' onclick='editMicrobiological(" + 0 + ")'><i class='bi bi-pencil-fill'></i></button>"
+            tr += "</td>";
+            tr += "<td>";
+            tr += "<button class='btn btn-sm btn-danger' onclick='deleteMicrobiological(" + 0 + ")'><i class='bi bi-trash-fill'></i></button>"
+            tr += "</td>";
+            tr += "</tr>";
 
-                if (checkbox.is(":checked")) {
-                    let details = "";
-                    const organism = tr.find("td:eq(1)").text().trim();
-                    const pattern = tr.find("td:eq(2) input[type='radio']:checked").next().text();
-                    if (i == 1 || i == 15) {
-                        details = tr.find("td:eq(1) input").val().trim();
-                    }
+            $("#concurrent_list").append(tr);
+            clearConcurrent();
+        });
 
-                    organisms.push({row_id: i, organism: organism, details: details, pattern: pattern});
-                }
-            }
+        $("#btn_save_microbiological").click(function () {
+            const date = $("#microbiological_date").val();
+            const specimen = $("#microbiological_specimen").val();
+            const pathogen = $("#microbiological_pathogen").val();
 
-            let is_valid = true;
-            $("#definitive_modal .is-invalid").removeClass("is-invalid");
-            $("#definitive_modal .error_container").addClass("d-none");
-            $("#definitive_modal .error_list").empty();
+            let tr = "<tr>";
+            tr += "<td>" + moment(date).format("MM/DD/YYYY") + " </td>";
+            tr += "<td>" + specimen + "</td>";
+            tr += "<td>" + pathogen + "</td>";
+            tr += "<td>";
+            tr += "<button class='btn btn-sm btn-success' onclick='editMicrobiological(" + 0 + ")'><i class='bi bi-pencil-fill'></i></button>"
+            tr += "</td>";
+            tr += "<td>";
+            tr += "<button class='btn btn-sm btn-danger' onclick='deleteMicrobiological(" + 0 + ")'><i class='bi bi-trash-fill'></i></button>"
+            tr += "</td>";
+            tr += "</tr>";
 
-            if (definitive_date == "") {
-                is_valid = false;
-                $("#definitive_modal .error_list").append("<li>Date is required</li>");
-            }
-
-            if (definitive_specimen == "") {
-                is_valid = false;
-                $("#definitive_modal .error_list").append("<li>Specimen is required</li>");
-            }
-
-            if (organisms.length < 1) {
-                is_valid = false;
-                $("#definitive_modal .error_list").append("<li>Specify at least 1 organism/pattern</li>");
-            }
-
-
-            if (!is_valid) {
-                $("#definitive_modal .error_container").removeClass("d-none");
-                return;
-            }
-
-            definitive_details = {
-                definitive_date: definitive_date,
-                definitive_specimen: definitive_specimen,
-                organisms: organisms
-            }
-
-            definitive_modal.toggle();
+            $("#microbiological_result_list").append(tr);
+            clearMicrobiological();
         });
 
         $("#btn_submit").click(function () {
@@ -215,6 +220,7 @@
             const height = $("#form_height").val();
             const serum_creatinine = $("#form_serum_creatinine").val();
             const creatinine_clearance = $("#form_creatinine_clearance").val();
+            const transaminases = $("#form_transaminases").val();
             const sgpt = $("#form_sgpt").val().trim();
             const sgot = $("#form_sgot").val().trim();
 
@@ -267,7 +273,6 @@
 
             //CHECK IF PRESCRIPTION TYPE IS AMS
             if (type == 2) {
-
                 if (drug_allergy == "") {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Drug allergy is required, put N/A if not applicable</li>");
@@ -304,139 +309,54 @@
                 }
 
                 const indication_use = $("input[name='indication_use']:checked").next().text().trim();
+                const indication_reason = $("#indication_reason").val().trim();
 
                 if (indication_use == "") {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Indication for use is required</li>");
                 }
 
-                if ((indication_use == "Definitive" || indication_use == "Empiric then definitive") && jQuery.isEmptyObject(definitive_details)) {
+                if (indication_reason == "") {
                     is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Definitive organisms/patterns is required</li>");
-                }
-
-
-                const focus_infections = [];
-                for (let i = 0; i < $("input[name='focus_infection']").length; i++) {
-                    if ($("input[name='focus_infection']:eq(" + i + ")").is(":checked")) {
-                        focus_infections.push({description: FOCUS_INFECTION_ARRAY[i]});
-                    }
-                }
-
-                if (focus_infections.length < 1) {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Focus Infection is required</li>");
-                }
-
-                const culture_sents = [];
-                for (let i = 0; i < $("input[name='culture_sent']").length; i++) {
-                    if ($("input[name='culture_sent']:eq(" + i + ")").is(":checked")) {
-                        const culture_sent = CULTURE_SENT_ARRAY[i];
-                        let details = "";
-                        if (culture_sent == "Others") {
-                            details = $("#culture_sent").val().trim();
-                        }
-
-                        if (culture_sent == "Others" && details == "") {
-                            is_valid = false;
-                            $("#prescription_modal .error_list").append("<li>Culture sent (Others) please specify</li>");
-                            continue;
-                        }
-
-                        culture_sents.push({description: culture_sent, details: details});
-                    }
-                }
-
-                if (culture_sents.length < 1) {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Culture sent is required</li>");
-                }
-
-                const immunocompromising_conditions = [];
-                for (let i = 0; i < $("input[name='immunocompromising_condition']").length; i++) {
-                    if ($("input[name='immunocompromising_condition']:eq(" + i + ")").is(":checked")) {
-                        const immunocompromising_condition = IMMUNO_ARRAY[i];
-                        let details = "";
-                        if (immunocompromising_condition == "Others") {
-                            details = $("#immunocompromising_condition").val().trim();
-                        }
-
-                        if (immunocompromising_condition == "Others" && details == "") {
-                            is_valid = false;
-                            $("#prescription_modal .error_list").append("<li>Immunocompromising condition (Others) please specify</li>");
-                            continue;
-                        }
-
-                        immunocompromising_conditions.push({
-                            description: immunocompromising_condition,
-                            details: details
-                        });
-                    }
-                }
-
-                if (immunocompromising_conditions.length < 1) {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Immunocompromising condition is required</li>");
-                }
-
-                let infectious_details = null;
-                let infectious_description = $("input[name='infectious_diagnosis']:checked").next().text();
-                if (infectious_description == "Others") {
-                    infectious_details = $("#infectious_diagnosis").val().trim();
-                }
-
-                if (infectious_description == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Infectious diagnosis is required</li>");
-                }
-
-                if (infectious_description == "Others" && infectious_details == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Infectious diagnosis (Others) please specify</li>");
-                }
-
-                const infectious_diagnosis = {
-                    description: infectious_description,
-                    details: infectious_details
-                }
-
-                const sepsis_criterias = [];
-                for (let i = 0; i < $("input[name='sepsis_criteria']").length; i++) {
-                    if ($("input[name='sepsis_criteria']:eq(" + i + ")").is(":checked")) {
-                        sepsis_criterias.push({description: SEPSIS_CRITERIA_ARRAY[i]});
-                    }
-                }
-
-                if (sepsis_criterias.length < 1) {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Sepsis criteria is required</li>");
-                }
-
-                const dysfunction_criterias = [];
-                for (let i = 0; i < $("input[name='dysfunction_criteria']").length; i++) {
-                    if ($("input[name='dysfunction_criteria']:eq(" + i + ")").is(":checked")) {
-                        dysfunction_criterias.push({description: DYSFUNCTION_CRITERIA_ARRAY[i]});
-                    }
-                }
-
-                if (dysfunction_criterias.length < 1) {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Dysfunction criteria is required</li>");
+                    $("#prescription_modal .error_list").append("<li>Include reason for not using recommended antimicrobial </li>");
                 }
 
                 params.indication_use = {
                     description: indication_use,
-                    definitive_date: (definitive_details.definitive_date === undefined) ? null : definitive_details.definitive_date,
-                    specimen: (definitive_details.definitive_specimen === undefined) ? null : definitive_details.definitive_specimen,
-                    organisms: (definitive_details.organisms === undefined) ? [] : definitive_details.organisms
+                    reason: indication_reason
                 };
 
-                params.focus_infections = focus_infections;
-                params.culture_sents = culture_sents;
-                params.immunocompromising_conditions = immunocompromising_conditions;
-                params.infectious_diagnosis = infectious_diagnosis;
-                params.sepsis_criterias = sepsis_criterias;
-                params.dysfunction_criterias = dysfunction_criterias;
+            }
+
+            const concurrent_therapy = [];
+            for (let i = 0; i < $("#concurrent_list tr").length; i++) {
+                const concurrent_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(0)").text();
+                const antimicrobial = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(1)").text();
+                const dosing_regimen = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(2)").text();
+                const start_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(3)").text();
+                const stop_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(4)").text();
+
+                concurrent_therapy.push({
+                    hospital_id:hospital_id,
+                    concurrent_date: moment(concurrent_date).format("YYYY-MM-DD"),
+                    antimicrobial: antimicrobial,
+                    dosing_regimen: dosing_regimen,
+                    start_date: moment(start_date).format("YYYY-MM-DD"),
+                    stop_date: moment(stop_date).format("YYYY-MM-DD"),
+                });
+            }
+
+            const microbiologicals = [];
+            for (let i = 0; i < $("#microbiological_result_list tr").length; i++) {
+                const date = $("#microbiological_result_list tr:eq(" + i + ")").find("td:eq(0)").text();
+                const specimen = $("#microbiological_result_list tr:eq(" + i + ")").find("td:eq(1)").text();
+                const pathogen = $("#microbiological_result_list tr:eq(" + i + ")").find("td:eq(2)").text();
+
+                microbiologicals.push({
+                    date: moment(date).format("YYYY-MM-DD"),
+                    specimen: specimen,
+                    pathogen: pathogen
+                });
             }
 
             const medications = [];
@@ -511,13 +431,15 @@
                 height: height,
                 serum_creatinine: serum_creatinine,
                 creatinine_clearance: creatinine_clearance,
+                transaminases: transaminases,
                 sgpt: sgpt,
                 sgot: sgot
             }
 
             params.patient = patient;
             params.medications = medications;
-
+            params.microbiologicals = microbiologicals;
+            params.concurrent_therapy = concurrent_therapy;
             insertPrecription(params);
         });
 
@@ -592,8 +514,11 @@
         $("#prescription_modal input[type='checkbox']").prop("disabled", false);
         $("#prescription_modal input[type='radio']").prop("disabled", false);
         $("#prescription_modal select").prop("disabled", false);
+        $("#prescription_modal textarea").prop("disabled", false);
 
         $("#btn_view_cart").removeClass("d-none");
+        $("#btn_add_microbiological").removeClass("d-none");
+        $("#btn_add_concurrent").removeClass("d-none");
         $("#btn_submit").removeClass("d-none");
         $("#form_remarks").removeClass("d-none");
         $("#transaction_container").addClass("d-none");
@@ -601,11 +526,14 @@
         patient_modal.toggle();
         prescription_modal.toggle();
 
-
+        //LOAD CONCURRENT
+        getConcurrentTherapy(hospital_id);
     }
 
     function viewPrescription(id) {
         $("#btn_view_cart").addClass("d-none");
+        $("#btn_add_microbiological").addClass("d-none");
+        $("#btn_add_concurrent").addClass("d-none");
         $("#btn_submit").addClass("d-none");
         $("#form_remarks").addClass("d-none");
         $("#transaction_container").removeClass("d-none");
@@ -625,8 +553,9 @@
         const height = $("#prescription_id_" + id + " td:eq(12)").text();
         const serum_creatinine = $("#prescription_id_" + id + " td:eq(13)").text();
         const creatinine_clearance = $("#prescription_id_" + id + " td:eq(14)").text();
-        const sgpt = $("#prescription_id_" + id + " td:eq(15)").text();
-        const sgot = $("#prescription_id_" + id + " td:eq(16)").text();
+        const transaminases = $("#prescription_id_" + id + " td:eq(15)").text();
+        const sgpt = $("#prescription_id_" + id + " td:eq(16)").text();
+        const sgot = $("#prescription_id_" + id + " td:eq(17)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -646,9 +575,9 @@
         $("#form_height").val(height);
         $("#form_serum_creatinine").val(serum_creatinine);
         $("#form_creatinine_clearance").val(creatinine_clearance);
+        $("#form_transaminases").val(transaminases);
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
-
 
 
         if (type == "2") {
@@ -660,11 +589,43 @@
         $("#prescription_modal input[type='checkbox']").prop("disabled", true);
         $("#prescription_modal input[type='radio']").prop("disabled", true);
         $("#prescription_modal select").prop("disabled", true);
+        $("#prescription_modal textarea").prop("disabled", true);
 
 
         getMedications(id);
         getPrescriptionLogs(id);
+        getConcurrentTherapy(hospital_id);
         prescription_modal.toggle();
+    }
+
+    function getConcurrentTherapy(hospital_id) {
+        $("#concurrent_list").empty();
+        fetch("{{ route('getConcurrentTherapy') }}?hospital_id=" + hospital_id, {
+            method: "GET"
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code == 500) {
+                    $("#concurrent_list").append("<tr class='text-center'><td colspan='5'>Something went wrong while loading concurrent, please refresh browser</td></tr>");
+                    return;
+                }
+
+                data.results.forEach(it => {
+                    let tr = "<tr>";
+                    tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
+                    tr += "<td>" + it.antimicrobial + "</td>";
+                    tr += "<td>" + it.dosing_regimen + "</td>";
+                    tr += "<td>" + moment(it.start_date).format("MM/DD/YYYY") + "</td>";
+                    tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
+                    tr += "<td></td>";
+                    tr += "<td></td>";
+                    tr += "</tr>";
+
+                    $("#concurrent_list").append(tr);
+                });
+            }).catch(err => {
+            console.log(err);
+        });
     }
 
     function getMedications(id) {
@@ -677,79 +638,28 @@
             .then(data => {
                 if (data.code == 200) {
                     //POPULATE AMS
+                    $("#microbiological_result_list").empty();
+                    $("#medication_list").empty();
 
                     if (!jQuery.isEmptyObject(data.ams)) {
                         const ams = data.ams;
 
+                        $("#indication_reason").val(ams.indication_use.reason);
                         const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
-                        $("#btn_show_definitive").prop("disabled", true);
 
-                        if (ams.indication_use.description == "Definitive" || ams.indication_use.description == "Empiric then definitive") {
-                            $("#btn_show_definitive").prop("disabled", false);
+                        ams.microbiologicals.forEach(it => {
+                            let tr = "<tr>";
+                            tr += "<td>" + moment(it.date).format("MM/DD/YYYY") + " </td>";
+                            tr += "<td>" + it.specimen + "</td>";
+                            tr += "<td colspan='3'>" + it.pathogen + "</td>";
+                            tr += "</tr>";
 
-                            $("#definitive_date").val(ams.indication_use.definitive_date);
-                            $("#definitive_specimen").val(ams.indication_use.specimen);
-                            ams.indication_details.forEach(it => {
-                                const tr = $("#indication_use_details tr:eq(" + it.row_id + ")");
-                                tr.find("td:eq(0) input").prop("checked", true);
-                                tr.find("td:eq(1) input").val(it.details);
-
-                                for (let i = 0; i < tr.find("input[type='radio']").length; i++) {
-                                    const radio = tr.find("input[type='radio']:eq(" + i + ")");
-                                    if (radio.next().text().trim() == it.pattern.trim()) {
-                                        radio.prop("checked", true);
-                                    }
-                                }
-                            });
-                        }
-
-
-                        const focus_infection = ams.focus_infection;
-                        for (let i = 0; i < focus_infection.length; i++) {
-                            const focus_infection_index = FOCUS_INFECTION_ARRAY.indexOf(focus_infection[i].description);
-                            $("input[name='focus_infection']:eq(" + focus_infection_index + ")").prop("checked", true);
-                        }
-
-                        const culture_sent = ams.culture_sent;
-                        for (let i = 0; i < culture_sent.length; i++) {
-                            const culture_sent_index = CULTURE_SENT_ARRAY.indexOf(culture_sent[i].description);
-                            $("input[name='culture_sent']:eq(" + culture_sent_index + ")").prop("checked", true);
-                            if (culture_sent[i].description == "Others") {
-                                $("#culture_sent").val(culture_sent[i].details);
-                            }
-                        }
-
-                        const immuno = ams.immuno;
-                        for (let i = 0; i < immuno.length; i++) {
-                            const immuno_index = IMMUNO_ARRAY.indexOf(immuno[i].description);
-                            $("input[name='immunocompromising_condition']:eq(" + immuno_index + ")").prop("checked", true);
-                            if (immuno[i].description == "Others") {
-                                $("#immunocompromising_condition").val(immuno[i].details);
-                            }
-                        }
-
-                        const infectious_index = INFECTIOUS_DIAGNOSIS_ARRAY.indexOf(ams.infectious.description);
-                        $("input[name='infectious_diagnosis']:eq(" + infectious_index + ")").prop("checked", true);
-                        if (ams.infectious.description == "Others") {
-                            $("#infectious_diagnosis").val(ams.infectious.details);
-                        }
-
-                        const sepsis_criteria = ams.sepsis_criteria;
-                        for (let i = 0; i < sepsis_criteria.length; i++) {
-                            const sepsis_criteria_index = SEPSIS_CRITERIA_ARRAY.indexOf(sepsis_criteria[i].description);
-                            $("input[name='sepsis_criteria']:eq(" + sepsis_criteria_index + ")").prop("checked", true);
-                        }
-
-                        const dysfunction_criteria = ams.dysfunction_criteria;
-                        for (let i = 0; i < dysfunction_criteria.length; i++) {
-                            const dysfunction_criteria_index = DYSFUNCTION_CRITERIA_ARRAY.indexOf(dysfunction_criteria[i].description);
-                            $("input[name='dysfunction_criteria']:eq(" + dysfunction_criteria_index + ")").prop("checked", true);
-                        }
+                            $("#microbiological_result_list").append(tr);
+                        });
 
                     }
 
-                    $("#medication_list").empty();
                     data.results.forEach(it => {
                         const tr = `<tr>
                                             <td>` + it.description + `</td>
@@ -946,6 +856,7 @@
                                 <td class="d-none">` + it.height + `</td>
                                 <td class="d-none">` + it.serum_creatinine + `</td>
                                 <td class="d-none">` + it.creatinine_clearance + `</td>
+                                <td class="d-none">` + it.transaminases + `</td>
                                 <td class="d-none">` + it.sgpt + `</td>
                                 <td class="d-none">` + it.sgot + `</td>
                                 <td>
@@ -997,7 +908,7 @@
         tr += "</div>";
         tr += "</td>";
         tr += "<td>" + unit + "</td>";
-        tr += "<td><input class='form-control text-center' type='number' /></td>";
+        tr += "<td><input class='form-control text-center' type='number' value='1' disabled/></td>";
         tr += "<td>";
         tr += "<select class='form-control text-center'>";
         for (let i = 0; i < FREQUENCIES.length; i++) {
@@ -1031,7 +942,24 @@
         $("#prescription_modal input[type='checkbox']").prop("checked", false);
         $("#prescription_modal input[type='radio']").prop("checked", false);
         $("#prescription_modal select").val("");
+        $("#prescription_modal textarea").val("");
+        $("#microbiological_result_list").empty();
+        $("#concurrent_list").empty();
         $("#medication_list").empty();
+    }
+
+    function clearConcurrent() {
+        $("#concurrent_date").val("");
+        $("#concurrent_antimicrobial").val("");
+        $("#concurrent_dosing_regimen").val("");
+        $("#concurrent_start_date").val("");
+        $("#concurrent_stop_date").val("");
+    }
+
+    function clearMicrobiological() {
+        $("#microbiological_date").val("");
+        $("#microbiological_specimen").val("");
+        $("#microbiological_pathogen").val("");
     }
 
     function checkIfMedExists(_description) {

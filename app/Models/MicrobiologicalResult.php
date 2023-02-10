@@ -5,15 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CultureSent extends Model
+class MicrobiologicalResult extends Model
 {
     use HasFactory;
 
     protected $connection = 'mysql';
-    protected $table = 'culture_sents';
+    protected $table = 'microbiological_results';
 
     protected $fillable = [
         'prescription_id',
-        'description'
+        'date',
+        'specimen',
+        'pathogen'
     ];
+
 }

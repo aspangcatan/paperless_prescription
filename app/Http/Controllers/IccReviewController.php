@@ -31,7 +31,7 @@ class IccReviewController extends Controller
                 ->skip(0)
                 ->take(10)
                 ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
-            return response(['code' => 200, 'results' => $prescriptions,'filters'=>$search_filters]);
+            return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
         }

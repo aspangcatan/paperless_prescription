@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ConcurrentTherapy;
 use App\Models\CultureSent;
 use App\Models\DysfunctionCriteria;
 use App\Models\ErrorLog;
@@ -11,6 +12,7 @@ use App\Models\Immunocompromising;
 use App\Models\IndicationUse;
 use App\Models\IndicationUseDetails;
 use App\Models\InfectiousDiagnosis;
+use App\Models\MicrobiologicalResult;
 use App\Models\NurseReview;
 use App\Models\PatientHistory;
 use App\Models\PharmacyReview;
@@ -20,12 +22,22 @@ use App\Models\PrescriptionLog;
 use App\Models\ReturnedPrescription;
 use App\Models\SepsisCriteria;
 use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PrescriptionController extends Controller
 {
+    public function addDays()
+    {
+        $date = Carbon::now();
+        $daysToAdd = 4;
+        $date = $date->addDays($daysToAdd);
+        return date('Y-m-d', strtotime($date));
+    }
+
+
     public function getPrescription(Request $request)
     {
         try {
@@ -62,22 +74,23 @@ class PrescriptionController extends Controller
             if ($prescription->type == '2') {
                 #GET AMS
                 $indication = IndicationUse::where('prescription_id', $id)->first();
-                $indication_details = IndicationUseDetails::where('indication_id', $indication->id)->get();
-                $focus_infecction = FocusInfection::where('prescription_id', $id)->get();
-                $culute_sent = CultureSent::where('prescription_id', $id)->get();
-                $immuno = Immunocompromising::where('prescription_id', $id)->get();
-                $infectious_diagnosis = InfectiousDiagnosis::where('prescription_id', $id)->first();
-                $sepsis_criteria = SepsisCriteria::where('prescription_id', $id)->get();
-                $dysnfunction_criteria = DysfunctionCriteria::where('prescription_id', $id)->get();
+                $microbiologicals = MicrobiologicalResult::where('prescription_id', $id)->get();
 
-                $ams = ['indication_use' => $indication, 'indication_details' => $indication_details,
-                    'focus_infection' => $focus_infecction, 'culture_sent' => $culute_sent, 'immuno' => $immuno,
-                    'infectious' => $infectious_diagnosis, 'sepsis_criteria' => $sepsis_criteria,
-                    'dysfunction_criteria' => $dysnfunction_criteria];
+                $ams = ['indication_use' => $indication, 'microbiologicals' => $microbiologicals];
             }
             #GET MEDICATIONS
             $medications = PrescribedMedicine::where('prescription_id', $id)->get();
             return response(['code' => 200, 'results' => $medications, 'ams' => $ams]);
+        } catch (\Exception $exception) {
+            return response(['code' => 500, 'message' => $exception->getMessage()]);
+        }
+    }
+
+    public function getConcurrentTherapy(Request $request)
+    {
+        try {
+            $concurrent = ConcurrentTherapy::where('hospital_id', $request->hospital_id)->get();
+            return response(['code' => 200, 'results' => $concurrent]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
         }
@@ -119,6 +132,7 @@ class PrescriptionController extends Controller
                 $prescription->height = $patient['height'];
                 $prescription->serum_creatinine = $patient['serum_creatinine'];
                 $prescription->creatinine_clearance = $patient['creatinine_clearance'];
+                $prescription->transaminases = $patient['transaminases'];
                 $prescription->sgpt = $patient['sgpt'];
                 $prescription->sgot = $patient['sgot'];
             }
@@ -133,59 +147,21 @@ class PrescriptionController extends Controller
                 $indication = new IndicationUse;
                 $indication->prescription_id = $prescription_id;
                 $indication->description = $indication_use_param['description'];
-                $indication->definitive_date = $indication_use_param['definitive_date'];
-                $indication->specimen = $indication_use_param['specimen'];
+                $indication->reason = $indication_use_param['reason'];
                 $indication->save();
 
-                #INSERT INDICATION DETAILS
-                $indication_details_list = $indication_use_param['organisms'];
-                for ($i = 0; $i < count($indication_details_list); $i++) {
-                    $indication_details_list[$i]['indication_id'] = $indication->id;
+                #INSERT MICROBIOLOGICAL
+                $microbiologicals = $request->microbiologicals;
+                for ($i = 0; $i < count($microbiologicals); $i++) {
+                    $microbiologicals[$i]['prescription_id'] = $prescription_id;
                 }
-                IndicationUseDetails::insert($indication_details_list);
+                MicrobiologicalResult::insert($microbiologicals);
 
-                #INSERT FOCUS INFECTIONS
-                $focus_infection_params = $request->focus_infections;
-                for ($i = 0; $i < count($focus_infection_params); $i++) {
-                    $focus_infection_params[$i]['prescription_id'] = $prescription_id;
+                $concurrent_therapy = $request->concurrent_therapy;
+                for ($i = 0; $i < count($concurrent_therapy); $i++) {
+                    $concurrent_therapy[$i]['prescription_id'] = $prescription_id;
                 }
-                FocusInfection::insert($focus_infection_params);
-
-                #INSERT CULTURE SENT
-                $culture_sent_params = $request->culture_sents;
-                for ($i = 0; $i < count($culture_sent_params); $i++) {
-                    $culture_sent_params[$i]['prescription_id'] = $prescription_id;
-                }
-                CultureSent::insert($culture_sent_params);
-
-                #INSERT IMMUNOCOMPROMISING CONDITION
-                $immunocompromising_conditions_params = $request->immunocompromising_conditions;
-                for ($i = 0; $i < count($immunocompromising_conditions_params); $i++) {
-                    $immunocompromising_conditions_params[$i]['prescription_id'] = $prescription_id;
-                }
-                Immunocompromising::insert($immunocompromising_conditions_params);
-
-                #INSERT INFECTIOUS DIAGNOSIS
-                $infectious_diagnosis_params = $request->infectious_diagnosis;
-                $infectious_diagnosis = new InfectiousDiagnosis;
-                $infectious_diagnosis->prescription_id = $prescription_id;
-                $infectious_diagnosis->description = $infectious_diagnosis_params['description'];
-                $infectious_diagnosis->details = $infectious_diagnosis_params['details'];
-                $infectious_diagnosis->save();
-
-                #INSERT SEPSIS CRITERIA
-                $sepsis_criterias_params = $request->sepsis_criterias;
-                for ($i = 0; $i < count($sepsis_criterias_params); $i++) {
-                    $sepsis_criterias_params[$i]['prescription_id'] = $prescription_id;
-                }
-                SepsisCriteria::insert($sepsis_criterias_params);
-
-                #INSERT SEPSIS CRITERIA
-                $dysfunction_criterias_params = $request->dysfunction_criterias;
-                for ($i = 0; $i < count($dysfunction_criterias_params); $i++) {
-                    $dysfunction_criterias_params[$i]['prescription_id'] = $prescription_id;
-                }
-                DysfunctionCriteria::insert($dysfunction_criterias_params);
+                ConcurrentTherapy::insert($concurrent_therapy);
             }
 
             #INSERT PATIENT HISTORY
@@ -204,43 +180,63 @@ class PrescriptionController extends Controller
             }
             PrescribedMedicine::insert($medications);
 
-            #INSERT LOGS IF REGULAR PRESCRIPTION
-            $logs = new PrescriptionLog;
-            $logs->prescription_id = $prescription_id;
-            $logs->origin = "DOCTOR";
-            $logs->released_by = Auth::id();
-            $logs->released_to = "NURSE";
-            $logs->remarks = $patient['remarks'];
-            $logs->save();
-
+            $released_to = "NURSE";
             if ($patient['type'] == "2") {
                 #TODO: CHECK IF PRESCRIBED MEDICINE IS ALREADY APPROVED FOR CERTAIN DAYS
                 #IF ALREADY APPROVED, AUTOMATIC SEND TO NURSE REVIEW
                 #GET LATEST PRESCRIPTION BASED ON MEDICATION AND PATIENT AND GET DAYS APPROVED COMPARE TO CURRENT DAY IF WITHIN AND DEFINITIVE CASE
                 #$medications[0] is only one
-//                $latest_approved_prescription = DB::table('paperless_prescription.prescriptions as p')
-//                    ->join('paperless_prescription.indication_use as u', 'p.id', '=', 'u.prescription_id')
-//                    ->join('paperless_prescription.prescribed_medicines as m', 'p.id', '=', 'm.prescription_id')
-//                    ->where('p.hospital_id', '=', $patient['hospital_id'])
-//                    ->where('u.description', '=', $indication_use_param['description'])
-//                    ->where('m.description', '=', $medications[0]['description'])
-//                    ->orderBy('p.created_at', 'DESC')
-//                    ->get(['p.created_at', 'p.days_approved']);
+                $latest_approved_prescription = DB::table('paperless_prescription.prescriptions as p')
+                    ->join('paperless_prescription.indication_use as u', 'p.id', '=', 'u.prescription_id')
+                    ->join('paperless_prescription.prescribed_medicines as m', 'p.id', '=', 'm.prescription_id')
+                    ->where('p.hospital_id', '=', $patient['hospital_id'])
+                    ->where('u.description', '=', $indication_use_param['description'])
+                    ->where('m.description', '=', $medications[0]['description'])
+                    ->whereNotNull(['p.date_approved'])
+                    ->orderBy('p.created_at', 'DESC')
+                    ->get(['p.id', 'p.created_at', 'p.days_approved'])
+                    ->first();
 
-//                if (count($latest_approved_prescription) < 0) {
+                if (!$latest_approved_prescription) {
+                    $released_to = "IPCC";
                     $icc = new IccReview();
                     $icc->prescription_id = $prescription_id;
                     $icc->save();
-//                } else {
-//                    #CALCULATE DAYS PASSED SINCE THE APPROVAL
-//                }
+                } else {
+                    #CALCULATE DAYS PASSED SINCE THE APPROVAL
+                    $earlier = new DateTime($latest_approved_prescription->created_at);
+                    $later = Carbon::now();
 
-
+                    #CHECK IF THE NO. OF DAYS APPROVED ARE BEYOND TODAYS TODATE
+                    #IF BEYOND, PROCEED TO IPCC FOR ANOTHER APPROVAL
+                    if ($later->diff($earlier)->format("%a") + 1 > $latest_approved_prescription->days_approved) {
+                        #PROCEED TO ICC
+                        $released_to = "IPCC";
+                        $icc = new IccReview();
+                        $icc->prescription_id = $prescription_id;
+                        $icc->save();
+                    } else {
+                        $prescription->latest_approved_id = $latest_approved_prescription->id;
+                        $prescription->save();
+                        $nurse = new NurseReview();
+                        $nurse->prescription_id = $prescription_id;
+                        $nurse->save();
+                    }
+                }
             } else {
                 $nurse = new NurseReview();
                 $nurse->prescription_id = $prescription_id;
                 $nurse->save();
             }
+
+            #INSERT LOGS IF REGULAR PRESCRIPTION
+            $logs = new PrescriptionLog;
+            $logs->prescription_id = $prescription_id;
+            $logs->origin = "DOCTOR";
+            $logs->released_by = Auth::id();
+            $logs->released_to = $released_to;
+            $logs->remarks = $patient['remarks'];
+            $logs->save();
 
             return response(['code' => 200, 'message' => 'Prescribe successfully']);
         } catch (\Exception $exception) {
@@ -265,13 +261,37 @@ class PrescriptionController extends Controller
                 return response(['code' => 500, 'message' => 'Prescription dont exists']);
             }
 
+            $date_approved = Carbon::now();
             $released_to = "PHARMACY";
             if ($request->origin == "ICC") {
+                #GET MEDICATIONS
+                #INSERT CONCURRENT ANTI MICROBIAL THERAPY
+                #CALCULATE STOP DATE BASED ON THE DAYS APPROVED AND DATE APPROVED
+                $date = Carbon::now();
+                $date = $date->addDays($request->days_approved - 1);
+                $stop_date = date('Y-m-d', strtotime($date));
+
+                $medications = PrescribedMedicine::where('prescription_id', $request->id)
+                    ->get(['description', 'dosage_strength', 'dosage_unit', 'frequency']);
+
+
+                for ($i = 0; $i < count($medications); $i++) {
+                    $concurrent = new ConcurrentTherapy;
+                    $concurrent->prescription_id = $request->id;
+                    $concurrent->hospital_id = $request->hospital_id;
+                    $concurrent->concurrent_date = $date_approved;
+                    $concurrent->antimicrobial = $medications[$i]->description;
+                    $concurrent->dosing_regimen = $medications[$i]->dosage_strength . '' . $medications[$i]->dosage_unit . ' ' . $medications[$i]->frequency;
+                    $concurrent->start_date = $date_approved;
+                    $concurrent->stop_date = $stop_date;
+                    $concurrent->save();
+                }
+
                 #UPDATE DAYS APPROVED
                 $doctor = Prescription::find($request->id);
                 $doctor->days_approved = $request->days_approved;
                 $doctor->approved_by = Auth::id();
-                $doctor->date_approved = Carbon::now();
+                $doctor->date_approved = $date_approved;
                 $doctor->save();
                 #FORWARD TO PHARMACY
                 $nurse = new NurseReview();
@@ -291,14 +311,14 @@ class PrescriptionController extends Controller
             $logs->origin = $request->origin;
             $logs->released_by = Auth::id();
             $logs->released_to = $released_to;
-            $logs->remarks = $request->remarks;
+            $logs->remarks = "<span class='badge bg-success text-white'>Approved <i class='bi bi-hand-thumbs-up-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
             $logs->save();
 
             $prescription->forceDelete();
             return response(['code' => 200, 'message' => 'Prescription approved']);
         } catch (\Exception $exception) {
             self::insertErrorLogs(Auth::id(), 'approvePrescription', $request, $exception->getMessage());
-            return response(['code' => 200, 'message' => "Something went wrong"]);
+            return response(['code' => 500, 'message' => "Something went wrong"]);
         }
     }
 
@@ -307,6 +327,8 @@ class PrescriptionController extends Controller
         try {
             if ($request->origin == "NURSE")
                 $prescription = NurseReview::where('prescription_id', $request->id);
+            else if ($request->origin == "ICC")
+                $prescription = IccReview::where('prescription_id', $request->id);
             else
                 $prescription = PharmacyReview::where('prescription_id', $request->id);
 
@@ -324,7 +346,7 @@ class PrescriptionController extends Controller
             $logs->origin = $request->origin;
             $logs->released_by = Auth::id();
             $logs->released_to = "DOCTOR";
-            $logs->remarks = $request->remarks;
+            $logs->remarks = "<span class='badge bg-danger text-white'>Rejected <i class='bi bi-hand-thumbs-down-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
             $logs->save();
 
             #AFTER RETURNED DELETE RECORD

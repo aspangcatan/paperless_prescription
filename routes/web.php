@@ -21,6 +21,9 @@ Route::get('/', function () {
     return view('login');
 })->name('login');
 
+Route::get('/calculate', [\App\Http\Controllers\PrescriptionController::class, 'addDays'])->name('compute');
+
+
 Route::get('/logout', function () {
     Auth::logout();
     Session::flush();
@@ -76,6 +79,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     #DOCTORS ROUTES
     Route::get('/prescription/get', [\App\Http\Controllers\PrescriptionController::class, 'getPrescription']);
+    Route::get('/patient/get/concurrent', [\App\Http\Controllers\PrescriptionController::class, 'getConcurrentTherapy'])->name('getConcurrentTherapy');
     Route::get('/prescription/get/{id}', [\App\Http\Controllers\PrescriptionController::class, 'getPrescriptionDetails']);
     Route::get('/prescription/get/logs/{id}', [\App\Http\Controllers\PrescriptionController::class, 'getPrescriptionLogs']);
     #NURSES ROUTES

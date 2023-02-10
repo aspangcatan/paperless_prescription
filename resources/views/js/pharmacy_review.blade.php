@@ -140,6 +140,8 @@
     function viewPrescription(id) {
         prescription_id = id;
         $("#btn_view_cart").addClass("d-none");
+        $("#btn_add_microbiological").addClass("d-none");
+        $("#btn_add_concurrent").addClass("d-none");
         $("#btn_submit").val(id);
         $("#btn_reject").val(id);
         $("#btn_submit").text("APPROVE");
@@ -161,8 +163,9 @@
         const height = $("#prescription_id_" + id + " td:eq(12)").text();
         const serum_creatinine = $("#prescription_id_" + id + " td:eq(13)").text();
         const creatinine_clearance = $("#prescription_id_" + id + " td:eq(14)").text();
-        const sgpt = $("#prescription_id_" + id + " td:eq(15)").text();
-        const sgot = $("#prescription_id_" + id + " td:eq(16)").text();
+        const transaminases = $("#prescription_id_" + id + " td:eq(15)").text();
+        const sgpt = $("#prescription_id_" + id + " td:eq(16)").text();
+        const sgot = $("#prescription_id_" + id + " td:eq(17)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -182,6 +185,7 @@
         $("#form_height").val(height);
         $("#form_serum_creatinine").val(serum_creatinine);
         $("#form_creatinine_clearance").val(creatinine_clearance);
+        $("#form_transaminases").val(transaminases);
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
 
@@ -193,11 +197,43 @@
         $("#prescription_modal input[type='checkbox']").prop("disabled", true);
         $("#prescription_modal input[type='radio']").prop("disabled", true);
         $("#prescription_modal select").prop("disabled", true);
+        $("#prescription_modal textarea").prop("disabled", true);
 
 
         getMedications(id);
         getPrescriptionLogs(id);
+        getConcurrentTherapy(hospital_id);
         prescription_modal.toggle();
+    }
+
+    function getConcurrentTherapy(hospital_id) {
+        $("#concurrent_list").empty();
+        fetch("{{ route('getConcurrentTherapy') }}?hospital_id=" + hospital_id, {
+            method: "GET"
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code == 500) {
+                    $("#concurrent_list").append("<tr class='text-center'><td colspan='5'>Something went wrong while loading concurrent, please refresh browser</td></tr>");
+                    return;
+                }
+
+                data.results.forEach(it => {
+                    let tr = "<tr>";
+                    tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
+                    tr += "<td>" + it.antimicrobial + "</td>";
+                    tr += "<td>" + it.dosing_regimen + "</td>";
+                    tr += "<td>" + moment(it.start_date).format("MM/DD/YYYY") + "</td>";
+                    tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
+                    tr += "<td></td>";
+                    tr += "<td></td>";
+                    tr += "</tr>";
+
+                    $("#concurrent_list").append(tr);
+                });
+            }).catch(err => {
+            console.log(err);
+        });
     }
 
     function getMedications(id) {
@@ -208,57 +244,26 @@
         })
             .then(res => res.json())
             .then(data => {
+                $("#medication_list").empty();
                 if (data.code == 200) {
                     if (!jQuery.isEmptyObject(data.ams)) {
                         const ams = data.ams;
 
+                        $("#indication_reason").val(ams.indication_use.reason);
                         const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
 
-                        const focus_infection = ams.focus_infection;
-                        for (let i = 0; i < focus_infection.length; i++) {
-                            const focus_infection_index = FOCUS_INFECTION_ARRAY.indexOf(focus_infection[i].description);
-                            $("input[name='focus_infection']:eq(" + focus_infection_index + ")").prop("checked", true);
-                        }
+                        ams.microbiologicals.forEach(it => {
+                            let tr = "<tr>";
+                            tr += "<td>" + moment(it.date).format("MM/DD/YYYY") + " </td>";
+                            tr += "<td>" + it.specimen + "</td>";
+                            tr += "<td colspan='3'>" + it.pathogen + "</td>";
+                            tr += "</tr>";
 
-                        const culture_sent = ams.culture_sent;
-                        for (let i = 0; i < culture_sent.length; i++) {
-                            const culture_sent_index = CULTURE_SENT_ARRAY.indexOf(culture_sent[i].description);
-                            $("input[name='culture_sent']:eq(" + culture_sent_index + ")").prop("checked", true);
-                            if (culture_sent[i].description == "Others") {
-                                $("#culture_sent").val(culture_sent[i].details);
-                            }
-                        }
-
-                        const immuno = ams.immuno;
-                        for (let i = 0; i < immuno.length; i++) {
-                            const immuno_index = IMMUNO_ARRAY.indexOf(immuno[i].description);
-                            $("input[name='immunocompromising_condition']:eq(" + immuno_index + ")").prop("checked", true);
-                            if (immuno[i].description == "Others") {
-                                $("#immunocompromising_condition").val(immuno[i].details);
-                            }
-                        }
-
-                        const infectious_index = INFECTIOUS_DIAGNOSIS_ARRAY.indexOf(ams.infectious.description);
-                        $("input[name='infectious_diagnosis']:eq(" + infectious_index + ")").prop("checked", true);
-                        if (ams.infectious.description == "Others") {
-                            $("#infectious_diagnosis").val(ams.infectious.details);
-                        }
-
-                        const sepsis_criteria = ams.sepsis_criteria;
-                        for (let i = 0; i < sepsis_criteria.length; i++) {
-                            const sepsis_criteria_index = SEPSIS_CRITERIA_ARRAY.indexOf(sepsis_criteria[i].description);
-                            $("input[name='sepsis_criteria']:eq(" + sepsis_criteria_index + ")").prop("checked", true);
-                        }
-
-                        const dysfunction_criteria = ams.dysfunction_criteria;
-                        for (let i = 0; i < dysfunction_criteria.length; i++) {
-                            const dysfunction_criteria_index = DYSFUNCTION_CRITERIA_ARRAY.indexOf(dysfunction_criteria[i].description);
-                            $("input[name='dysfunction_criteria']:eq(" + dysfunction_criteria_index + ")").prop("checked", true);
-                        }
-
+                            $("#microbiological_result_list").append(tr);
+                        });
                     }
-                    $("#medication_list").empty();
+
                     data.results.forEach(it => {
                         const tr = `<tr>
                                             <td class="d-none">` + it.id + `</td>
@@ -335,6 +340,7 @@
                                 <td class="d-none">` + it.height + `</td>
                                 <td class="d-none">` + it.serum_creatinine + `</td>
                                 <td class="d-none">` + it.creatinine_clearance + `</td>
+                                <td class="d-none">` + it.transaminases + `</td>
                                 <td class="d-none">` + it.sgpt + `</td>
                                 <td class="d-none">` + it.sgot + `</td>
                                 <td>
@@ -430,6 +436,8 @@
         $("#prescription_modal input[type='checkbox']").prop("checked", false);
         $("#prescription_modal input[type='radio']").prop("checked", false);
         $("#prescription_modal select").val("");
+        $("#prescription_modal textarea").val("");
+        $("#microbiological_result_list").empty();
         $("#medication_list").empty();
     }
 

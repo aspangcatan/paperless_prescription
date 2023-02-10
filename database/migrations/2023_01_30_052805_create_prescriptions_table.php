@@ -28,11 +28,13 @@ class CreatePrescriptionsTable extends Migration
             $table->decimal('height', 10, 2)->nullable();
             $table->string('serum_creatinine', 50)->nullable();
             $table->string('creatinine_clearance', 50)->nullable();
+            $table->string('transaminases', 50)->nullable();
             $table->string('sgpt', 50)->nullable();
             $table->string('sgot', 50)->nullable();
             $table->integer('status')->default(1);
             $table->integer('days_approved')->nullable();
             $table->integer('approved_by')->nullable();
+            $table->integer('latest_approved_id')->nullable();
             $table->dateTime('date_approved')->nullable();
             $table->timestamps();
         });
