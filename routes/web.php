@@ -61,8 +61,13 @@ Route::group(['middleware' => 'auth'], function () {
         return view('nurse_admin');
     })->name('nurse_admin');
 
+    Route::get('/medicine', function () {
+        return view('medicine');
+    })->name('medicine');
+
     #APIS
     Route::post('/insert_patient', [\App\Http\Controllers\PatientController::class, 'store'])->name('insert_patient');
+    Route::post('/insert_medicine', [\App\Http\Controllers\MedicineController::class, 'store'])->name('insert_medicine');
     Route::post('/insert_prescription', [\App\Http\Controllers\PrescriptionController::class, 'insertPrescription'])->name('insert_prescription');
     Route::post('/approve_prescription', [\App\Http\Controllers\PrescriptionController::class, 'approvePrescription'])->name('approve_prescription');
     Route::post('/reject_prescription', [\App\Http\Controllers\PrescriptionController::class, 'rejectPrescription'])->name('reject_prescription');
@@ -73,7 +78,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/homis_patient/get/{keyword}', [\App\Http\Controllers\PatientController::class, 'searchHomisPatient']);
 
     Route::get('/patient/get', [\App\Http\Controllers\PatientController::class, 'getPatient']);
-    Route::get('/medicine/get', [\App\Http\Controllers\MedicineController::class, 'getMedicine']);
+    Route::get('/medicine/get/master', [\App\Http\Controllers\MedicineController::class, 'getMedicine']);
+    Route::get('/medicine/get', [\App\Http\Controllers\MedicineController::class, 'getMedicineList']);
+
     Route::get('/user/get/doctors', [\App\Http\Controllers\UserController::class, 'getDoctors']);
     Route::get('/user/get/nurses', [\App\Http\Controllers\UserController::class, 'getNurses']);
 

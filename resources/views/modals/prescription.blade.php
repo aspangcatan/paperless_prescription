@@ -53,7 +53,7 @@
                                     <select class="form-control fw-bold text-center bg-white" id="form_station">
                                         <option value="">Select station</option>
                                     </select>
-                                    <small>(Ward)</small>
+                                    <small>(Station)</small>
                                 </div>
                             </div>
                             <div class="col-md-4 mt-2">
@@ -74,9 +74,11 @@
                                             id="form_prescription_type">
                                         <option value="">Select type</option>
                                         <option value="1" disabled>Regular</option>
-                                        <option value="2">Anti-Microbial Stewardship Program</option>
+                                        <option value="2">Restricted</option>
+                                        <option value="3">Seventh Day Auto Stop</option>
+                                        <option value="4">Intravenous to Oral</option>
                                     </select>
-                                    <small>(Prescription Type)</small>
+                                    <small>(AMS Type)</small>
                                 </div>
                             </div>
 
@@ -186,10 +188,13 @@
                                 <label class="form-check-label">Definitive</label>
                             </div>
                             <div class="mt-2">
+                                <div>Duration requested</div>
+                                <input type="number" class="form-control" style="width: unset !important;" id="duration_requested"/>
+                            </div>
+                            <div class="mt-2">
                                 <h6>Include reason for not using recommended antimicrobial</h6>
                                 <textarea class="form-control" style="height:100px" id="indication_reason"></textarea>
                             </div>
-
                         </div>
                     </div>
                     <div class="card">
@@ -295,279 +300,6 @@
     </div>
 </div>
 
-<div class="modal fade" id="definitive_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
-     data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="card-title p-1" style="font-size: 24px">Additional Information</div>
-            </div>
-            <div class="modal-body" style="background: rgb(241,244,252)">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="text-white bg-danger rounded p-2 error_container d-none mt-4">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <div>There are some errors, please correct them below:</div>
-                            </div>
-                            <ul class="error_list"></ul>
-                        </div>
-                        <h6 class="card-title">Definitive Use</h6>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div>
-                                    <label>Date</label>
-                                    <input type="date" class="form-control" id="definitive_date"/>
-                                </div>
-                            </div>
-                            <div class="col-md-9">
-                                <div>
-                                    <label>Specimen</label>
-                                    <input type="text" class="form-control" id="definitive_specimen"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <h6 class="card-title">Sample Organisms</h6>
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead class="text-center">
-                                <tr>
-                                    <th style="width: 2%"></th>
-                                    <th style="width: 58%">Organism</th>
-                                    <th style="width: 40%">Susceptibility Result or Specific Resistance Pattern</th>
-                                </tr>
-                                </thead>
-                                <tbody id="indication_use_details">
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Acinetobacterbaumannii</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_1">
-                                                <label class="form-check-label">MDR</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_1">
-                                                <label class="form-check-label">XDR</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_1">
-                                                <label class="form-check-label">PDR</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>
-                                        <div>Candida, specify species:</div>
-                                        <input class="d-inline-block form-control underline"/>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_2">
-                                                <label class="form-check-label">Fluconazole-resistant</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Clostridium difficile (by toxin assay only)</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Enterococcus faecium/faecalis</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_4">
-                                                <label class="form-check-label">Vancomycin-resistant</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Escherichia coli</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_5">
-                                                <label class="form-check-label">ESBL</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_5">
-                                                <label class="form-check-label">CRE</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Enterobacteriaceae other than E. coli, Klebsiella</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_6">
-                                                <label class="form-check-label">ESBL</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_6">
-                                                <label class="form-check-label">CRE</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Haemophilus influenzae</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_7">
-                                                <label class="form-check-label">Ampicilin-resistant</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Klebsiella pneumoniae</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_8">
-                                                <label class="form-check-label">ESBL</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_8">
-                                                <label class="form-check-label">CRE</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Neisseria gonnorrhoeae</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_9">
-                                                <label class="form-check-label">Ceftriaxone-resistant</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Pseudomonas aeruginosa</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_10">
-                                                <label class="form-check-label">MDR</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_10">
-                                                <label class="form-check-label">XDR</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_10">
-                                                <label class="form-check-label">PDR</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Salmonella, non-typhoidal</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_11">
-                                                <label class="form-check-label">Ceftriaxone-resistant</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Salmonella enterica (typhi)</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_12">
-                                                <label class="form-check-label">Ceftriaxone-resistant</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Shigella spp.</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_13">
-                                                <label class="form-check-label">Ciprofloxacin-resistant</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Staphylococcus aureus</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_14">
-                                                <label class="form-check-label">Methicilin-resistant</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>Streptococcus pneumoniae</td>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="organism_15">
-                                                <label class="form-check-label">Penicilin-resistant</label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input"/></td>
-                                    <td>
-                                        <div>Others, please specify:</div>
-                                        <input class="form-control underline" id="infection_focus"/>
-                                    </td>
-                                    <td></td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-end mt-2">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">CANCEL</button>
-                    <button class="btn btn-primary" id="btn_save_definitive">SAVE</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="modal fade" id="patient_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -581,7 +313,7 @@
                     <div class="col-md-4">
                         <div class="card">
                             <div class="card-body">
-                                <div class="mt-3 fs-5 fw-bold">Search patient</div>
+                                <div class="mt-3 fs-5 fw-bold">Search patient in HOMIS</div>
                                 <div class="form-floating mt-3">
                                     <input type="text" class="form-control" id="hospital_id" placeholder="">
                                     <label>Hospital ID</label>
@@ -609,7 +341,7 @@
                                     <label>Birthdate</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <select class="form-control" id="sex">
+                                    <select class="form-control bg-white" id="sex" disabled>
                                         <option value="">Select sex</option>
                                         <option value="M">MALE</option>
                                         <option value="F">FEMALE</option>
@@ -617,12 +349,12 @@
                                     <label>Sex</label>
                                 </div>
                                 <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <button class="btn btn-lg form-control btn-secondary" id="btn_find">SEARCH
+                                    <div class="col-md-12">
+                                        <button class="btn form-control btn-secondary" id="btn_find">SEARCH
                                         </button>
                                     </div>
-                                    <div class="col-md-6">
-                                        <button class="btn btn-lg form-control btn-success" id="btn_save_patient">ADD
+                                    <div class="col-md-12 mt-2">
+                                        <button class="btn form-control btn-success" id="btn_save_patient">ADD / UPDATE
                                         </button>
                                     </div>
                                 </div>
@@ -692,7 +424,6 @@
                                 <thead>
                                 <tr>
                                     <th style="width: 95%">Description</th>
-
                                     <th style="width: 5%"></th>
                                 </tr>
                                 </thead>
@@ -716,6 +447,13 @@
         <div class="modal-content">
             <div class="modal-body">
                 <h6 class="card-title">Add Microbiological Results</h6>
+                <div class="text-white bg-danger rounded p-2 error_container d-none">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <div>There are some errors, please correct them below:</div>
+                    </div>
+                    <ul class="error_list"></ul>
+                </div>
                 <div class="row mb-3 mt-2">
                     <label for="inputText" class="col-sm-2 col-form-label">Date</label>
                     <div class="col-sm-10">
@@ -751,6 +489,13 @@
         <div class="modal-content">
             <div class="modal-body">
                 <h6 class="card-title">Add Concurrent Antimicrobial Therapy</h6>
+                <div class="text-white bg-danger rounded p-2 error_container d-none">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <div>There are some errors, please correct them below:</div>
+                    </div>
+                    <ul class="error_list"></ul>
+                </div>
                 <div class="row mb-3 mt-2">
                     <label for="inputText" class="col-sm-3 col-form-label">Date</label>
                     <div class="col-sm-9">

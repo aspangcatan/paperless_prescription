@@ -52,7 +52,6 @@
             $("#rendered_list").empty();
             $(".is-invalid").removeClass("is-invalid");
 
-
             let is_filled_up = true;
             let li = "";
             for (let i = 0; i < $("#medication_list tr").length; i++) {
@@ -70,8 +69,8 @@
                                     <span class="me-2">` + description + `</span><i class="bi bi-check-circle-fill text-success"></i>
                                </li>`;
                 } else {
-                    li += `<li style="font-size: 13px">
-                                    <span class="me-2" ">` + description + `</span><i class="bi bi-exclamation-circle-fill text-danger"></i>
+                    li += `<li style="font-size: 13px" class="text-danger">
+                                    <span class="me-2" ">` + description + `</span><i class="bi bi-exclamation-circle-fill"></i>
                                </li>`;
                 }
             }
@@ -250,6 +249,7 @@
                         const ams = data.ams;
 
                         $("#indication_reason").val(ams.indication_use.reason);
+                        $("#duration_requested").val(ams.indication_use.duration_requested);
                         const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
 

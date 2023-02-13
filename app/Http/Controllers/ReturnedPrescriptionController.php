@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CultureSent;
 use App\Models\DysfunctionCriteria;
 use App\Models\FocusInfection;
+use App\Models\IccReview;
 use App\Models\Immunocompromising;
 use App\Models\IndicationUse;
 use App\Models\IndicationUseDetails;
@@ -18,6 +19,7 @@ use App\Models\PrescriptionLog;
 use App\Models\ReturnedPrescription;
 use App\Models\SepsisCriteria;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ReturnedPrescriptionController extends Controller
@@ -25,7 +27,7 @@ class ReturnedPrescriptionController extends Controller
     public function getPrescriptions(Request $request)
     {
         try {
-            $search_filters = [['p.physician_id', '=', 1116]];
+            $search_filters = [['p.physician_id', '=', Auth::id()]];
 
             if ($request->filter_patient != "") {
                 $search_filters[] = ['h.name', 'LIKE', "%" . $request->filter_patient . "%"];
@@ -61,6 +63,7 @@ class ReturnedPrescriptionController extends Controller
             if (!$prescription) {
                 return response(['code' => 500, 'message' => 'Prescription dont exists']);
             }
+
             $patient = $request->patient;
 
             $prescription->station = $patient['station'];
@@ -92,6 +95,7 @@ class ReturnedPrescriptionController extends Controller
                 $indication_use_param = $request->indication_use;
                 $indication = IndicationUse::where('prescription_id', $prescription_id)->first();
                 $indication->description = $indication_use_param['description'];
+                $indication->duration_requested = $indication_use_param['duration_requested'];
                 $indication->reason = $indication_use_param['reason'];
                 $indication->save();
 
@@ -104,29 +108,6 @@ class ReturnedPrescriptionController extends Controller
                     $microbiologicals[$i]['prescription_id'] = $prescription_id;
                 }
                 MicrobiologicalResult::insert($microbiologicals);
-
-            } else {
-                #DELETE AMS DATA
-                $indication = IndicationUse::where('prescription_id', $prescription_id)->first();
-                $indication->forceDelete();
-
-                $focus_infection_origin = FocusInfection::where('prescription_id', $prescription_id);
-                $focus_infection_origin->forceDelete();
-
-                $culture_sent_origin = CultureSent::where('prescription_id', $prescription_id);
-                $culture_sent_origin->forceDelete();
-
-                $immunocompromising_conditions_origin = Immunocompromising::where('prescription_id', $prescription_id);
-                $immunocompromising_conditions_origin->forceDelete();
-
-                $infectious_diagnosis = InfectiousDiagnosis::where('prescription_id', $prescription_id)->first();
-                $infectious_diagnosis->forceDelete();
-
-                $sepsis_criterias_origin = SepsisCriteria::where('prescription_id', $prescription_id);
-                $sepsis_criterias_origin->forceDelete();
-
-                $dysfunction_criterias_origin = DysfunctionCriteria::where('prescription_id', $prescription_id);
-                $dysfunction_criterias_origin->forceDelete();
             }
 
             $patient_history = PatientHistory::where('prescription_id', $prescription_id)->first();
@@ -147,24 +128,32 @@ class ReturnedPrescriptionController extends Controller
                 $medications[$i]['prescription_id'] = $prescription_id;
             }
             PrescribedMedicine::insert($medications);
+            $released_to = "NURSE";
+            if ($patient['type'] == "2") {
+                $released_to = "ICC";
+                $icc = IccReview::where('prescription_id', $prescription_id)->first();
+                if (!$icc) {
+                    $icc = new NurseReview();
+                    $icc->prescription_id = $prescription_id;
+                    $icc->save();
+                }
+            }else{
+                $nurse = NurseReview::where('prescription_id', $prescription_id)->first();
+                if (!$nurse) {
+                    $nurse = new NurseReview();
+                    $nurse->prescription_id = $prescription_id;
+                    $nurse->save();
+                }
+            }
 
             #INSERT LOGS IF REGULAR PRESCRIPTION
             $logs = new PrescriptionLog;
             $logs->prescription_id = $prescription_id;
             $logs->origin = "DOCTOR";
             $logs->released_by = 1116;
-            $logs->released_to = "NURSE";
+            $logs->released_to = $released_to;
             $logs->remarks = $patient['remarks'];
             $logs->save();
-
-            #TODO: ICC REVIEW
-            #FOR THE MEANTIME SET AS NURSE
-            $nurse = NurseReview::where('prescription_id', $prescription_id)->first();
-            if (!$nurse) {
-                $nurse = new NurseReview();
-                $nurse->prescription_id = $prescription_id;
-                $nurse->save();
-            }
 
             $returned_prescription = ReturnedPrescription::where('prescription_id', $prescription_id)->first();
             if ($returned_prescription) {

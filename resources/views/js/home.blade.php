@@ -3,7 +3,6 @@
 <script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
-    const definitive_modal = new bootstrap.Modal(document.getElementById('definitive_modal'));
     const patient_modal = new bootstrap.Modal(document.getElementById('patient_modal'));
     const medicine_modal = new bootstrap.Modal(document.getElementById('medicine_modal'));
     const microbiological_modal = new bootstrap.Modal(document.getElementById('microbiological_modal'));
@@ -35,24 +34,7 @@
         });
 
         $("#form_prescription_type").change(function () {
-            if ($(this).val() == "2") {
-                $(".ams_container").removeClass("d-none")
-            } else {
-                $(".ams_container").addClass("d-none")
-            }
-        });
 
-        $("input[name='indication_use']").change(function () {
-            $("#btn_show_definitive").prop("disabled", true);
-            if ($(this).next().text() == "Definitive" || $(this).next().text() == "Empiric then definitive") {
-                $("#btn_show_definitive").prop("disabled", false);
-                definitive_modal.toggle();
-            }
-        });
-
-        $("#btn_show_definitive").click(function () {
-            if ($("input[name='indication_use']:checked").next().text() == "Definitive" || $("input[name='indication_use']:checked").next().text() == "Empiric then definitive")
-                definitive_modal.toggle();
         });
 
         $("#btn_search_prescription").click(function () {
@@ -72,20 +54,19 @@
         });
 
         $("#btn_add_concurrent").click(function () {
-            prescribed_med_id = "";
-
+            $("#btn_save_concurrent").val("");
             clearConcurrent();
             concurrent_modal.toggle();
         });
 
         $("#btn_add_microbiological").click(function () {
-            prescribed_med_id = "";
+            $("#btn_save_microbiological").val("");
             clearMicrobiological();
             microbiological_modal.toggle();
-
         });
 
         $("#btn_view_cart").click(function () {
+            prescribed_med_id = "";
             medicine_modal.toggle();
             getMedicine("");
         });
@@ -137,7 +118,6 @@
         });
 
         $("#btn_save_patient").click(function () {
-            //@TODO: CHECK IF EMPTY
             const hospital_id = $("#hospital_id").val().trim();
             const fname = $("#fname").val().trim().toUpperCase();
             const mname = $("#mname").val().trim().toUpperCase();
@@ -155,6 +135,10 @@
                 sex: sex
             }
 
+            $(this).prop("disabled", true);
+            $(this).html(` <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                           <span class="sr-only">Loading...</span>`);
+
             insertPatient(params);
         });
 
@@ -165,21 +149,67 @@
             const start_date = $("#concurrent_start_date").val();
             const stop_date = $("#concurrent_stop_date").val();
 
-            let tr = "<tr>";
-            tr += "<td>" + moment(concurrent_date).format("MM/DD/YYYY") + " </td>";
-            tr += "<td>" + antimicrobial + "</td>";
-            tr += "<td>" + dosing_regimen + "</td>";
-            tr += "<td>" + moment(start_date).format("MM/DD/YYYY") + "</td>";
-            tr += "<td>" + moment(stop_date).format("MM/DD/YYYY") + "</td>";
-            tr += "<td>";
-            tr += "<button class='btn btn-sm btn-success' onclick='editMicrobiological(" + 0 + ")'><i class='bi bi-pencil-fill'></i></button>"
-            tr += "</td>";
-            tr += "<td>";
-            tr += "<button class='btn btn-sm btn-danger' onclick='deleteMicrobiological(" + 0 + ")'><i class='bi bi-trash-fill'></i></button>"
-            tr += "</td>";
-            tr += "</tr>";
+            let is_valid = true;
+            $("#concurrent_modal .is-invalid").removeClass("is-invalid");
+            $("#concurrent_modal .error_container").addClass("d-none");
+            $("#concurrent_modal .error_list").empty();
 
-            $("#concurrent_list").append(tr);
+            if (concurrent_date == "") {
+                is_valid = false;
+                $("#concurrent_modal .error_list").append("<li>Date is required</li>");
+            }
+
+            if (antimicrobial == "") {
+                is_valid = false;
+                $("#concurrent_modal .error_list").append("<li>Antimicrobial is required</li>");
+            }
+
+            if (dosing_regimen == "") {
+                is_valid = false;
+                $("#concurrent_modal .error_list").append("<li>Dosing regimen is required</li>");
+            }
+
+            if (start_date == "") {
+                is_valid = false;
+                $("#concurrent_modal .error_list").append("<li>Start date is required</li>");
+            }
+
+            if (stop_date == "") {
+                is_valid = false;
+                $("#concurrent_modal .error_list").append("<li>Stop date is required</li>");
+            }
+
+            if (!is_valid) {
+                $("#concurrent_modal .error_container").removeClass("d-none");
+                return;
+            }
+
+            if ($(this).val() == "") {
+                const count = $("#concurrent_list tr").length;
+                let tr = "<tr>";
+                tr += "<td>" + moment(concurrent_date).format("MM/DD/YYYY") + " </td>";
+                tr += "<td>" + antimicrobial + "</td>";
+                tr += "<td>" + dosing_regimen + "</td>";
+                tr += "<td>" + moment(start_date).format("MM/DD/YYYY") + "</td>";
+                tr += "<td>" + moment(stop_date).format("MM/DD/YYYY") + "</td>";
+                tr += "<td>";
+                tr += "<button class='btn btn-sm btn-success' onclick='editConcurrent(" + count + ")'><i class='bi bi-pencil-fill'></i></button>"
+                tr += "</td>";
+                tr += "<td>";
+                tr += "<button class='btn btn-sm btn-danger' onclick='deleteConcurrent(" + count + ")'><i class='bi bi-trash-fill'></i></button>"
+                tr += "</td>";
+                tr += "</tr>";
+
+                $("#concurrent_list").append(tr);
+                toastr.success('Information', 'New item added')
+            } else {
+                $("#concurrent_list tr:eq(" + $(this).val() + ") td:eq(0)").text(moment(concurrent_date).format("MM/DD/YYYY"));
+                $("#concurrent_list tr:eq(" + $(this).val() + ") td:eq(1)").text(antimicrobial);
+                $("#concurrent_list tr:eq(" + $(this).val() + ") td:eq(2)").text(dosing_regimen);
+                $("#concurrent_list tr:eq(" + $(this).val() + ") td:eq(3)").text(moment(start_date).format("MM/DD/YYYY"));
+                $("#concurrent_list tr:eq(" + $(this).val() + ") td:eq(4)").text(moment(stop_date).format("MM/DD/YYYY"));
+                toastr.success('Information', 'Item updated')
+            }
             clearConcurrent();
         });
 
@@ -188,19 +218,54 @@
             const specimen = $("#microbiological_specimen").val();
             const pathogen = $("#microbiological_pathogen").val();
 
-            let tr = "<tr>";
-            tr += "<td>" + moment(date).format("MM/DD/YYYY") + " </td>";
-            tr += "<td>" + specimen + "</td>";
-            tr += "<td>" + pathogen + "</td>";
-            tr += "<td>";
-            tr += "<button class='btn btn-sm btn-success' onclick='editMicrobiological(" + 0 + ")'><i class='bi bi-pencil-fill'></i></button>"
-            tr += "</td>";
-            tr += "<td>";
-            tr += "<button class='btn btn-sm btn-danger' onclick='deleteMicrobiological(" + 0 + ")'><i class='bi bi-trash-fill'></i></button>"
-            tr += "</td>";
-            tr += "</tr>";
+            let is_valid = true;
+            $("#microbiological_modal .is-invalid").removeClass("is-invalid");
+            $("#microbiological_modal .error_container").addClass("d-none");
+            $("#microbiological_modal .error_list").empty();
 
-            $("#microbiological_result_list").append(tr);
+            if (date == "") {
+                is_valid = false;
+                $("#microbiological_modal .error_list").append("<li>Date is required</li>");
+            }
+
+            if (specimen == "") {
+                is_valid = false;
+                $("#microbiological_modal .error_list").append("<li>Specimen is required</li>");
+            }
+
+            if (pathogen == "") {
+                is_valid = false;
+                $("#microbiological_modal .error_list").append("<li>Pathogen is required</li>");
+            }
+
+            if (!is_valid) {
+                $("#microbiological_modal .error_container").removeClass("d-none");
+                return;
+            }
+
+            const count = $("#microbiological_result_list tr").length;
+            if ($(this).val() == "") {
+                let tr = "<tr>";
+                tr += "<td>" + moment(date).format("MM/DD/YYYY") + " </td>";
+                tr += "<td>" + specimen + "</td>";
+                tr += "<td>" + pathogen + "</td>";
+                tr += "<td>";
+                tr += "<button class='btn btn-sm btn-success' onclick='editMicrobiological(" + count + ")'><i class='bi bi-pencil-fill'></i></button>"
+                tr += "</td>";
+                tr += "<td>";
+                tr += "<button class='btn btn-sm btn-danger' onclick='deleteMicrobiological(" + count + ")'><i class='bi bi-trash-fill'></i></button>"
+                tr += "</td>";
+                tr += "</tr>";
+
+                $("#microbiological_result_list").append(tr);
+                toastr.success('Information', 'New item added');
+            } else {
+                $("#microbiological_result_list tr:eq(" + $(this).val() + ") td:eq(0)").text(moment(date).format("MM/DD/YYYY"));
+                $("#microbiological_result_list tr:eq(" + $(this).val() + ") td:eq(1)").text(specimen);
+                $("#microbiological_result_list tr:eq(" + $(this).val() + ") td:eq(2)").text(pathogen);
+                toastr.success('Information', 'Item updated');
+            }
+
             clearMicrobiological();
         });
 
@@ -309,11 +374,17 @@
                 }
 
                 const indication_use = $("input[name='indication_use']:checked").next().text().trim();
+                const duration_requested = $("#duration_requested").val();
                 const indication_reason = $("#indication_reason").val().trim();
 
                 if (indication_use == "") {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Indication for use is required</li>");
+                }
+
+                if (duration_requested == "") {
+                    is_valid = false;
+                    $("#prescription_modal .error_list").append("<li>Indicate duration requested, put '0' if not applicable</li>");
                 }
 
                 if (indication_reason == "") {
@@ -323,9 +394,9 @@
 
                 params.indication_use = {
                     description: indication_use,
+                    duration_requested: duration_requested,
                     reason: indication_reason
                 };
-
             }
 
             const concurrent_therapy = [];
@@ -337,7 +408,7 @@
                 const stop_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(4)").text();
 
                 concurrent_therapy.push({
-                    hospital_id:hospital_id,
+                    hospital_id: hospital_id,
                     concurrent_date: moment(concurrent_date).format("YYYY-MM-DD"),
                     antimicrobial: antimicrobial,
                     dosing_regimen: dosing_regimen,
@@ -579,11 +650,7 @@
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
 
-
-        if (type == "2") {
-            $(".ams_container").removeClass("d-none");
-        }
-
+        $("#form_prescription_type").prop("disabled", true);
 
         $("#prescription_modal input").prop("disabled", true);
         $("#prescription_modal input[type='checkbox']").prop("disabled", true);
@@ -643,9 +710,10 @@
 
                     if (!jQuery.isEmptyObject(data.ams)) {
                         const ams = data.ams;
+                        const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
 
                         $("#indication_reason").val(ams.indication_use.reason);
-                        const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
+                        $("#duration_requested").val(ams.indication_use.duration_requested);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
 
                         ams.microbiologicals.forEach(it => {
@@ -657,7 +725,6 @@
 
                             $("#microbiological_result_list").append(tr);
                         });
-
                     }
 
                     data.results.forEach(it => {
@@ -772,7 +839,23 @@
         })
             .then(res => res.json())
             .then(data => {
-                alert(data.message);
+                $("#btn_save_patient").prop("disabled", false);
+                $("#btn_save_patient").html("ADD / UPDATE");
+
+                if (data.code == 500) {
+                    toastr.danger(data.message, "Something went wrong")
+                    return;
+                }
+
+                $("#hospital_id").val("")
+                $("#fname").val("")
+                $("#mname").val("")
+                $("#lname").val("")
+                $("#suffix").val("")
+                $("#birthdate").val("");
+                $("#sex").val("");
+                toastr.success(data.message,"Information");
+
             }).catch(err => {
             console.log(err);
         });
@@ -878,24 +961,69 @@
     function editMedicine(id) {
         prescribed_med_id = id;
         medicine_modal.toggle();
-        $("#search_medicine").val($("#medication_id_" + id + " td:eq(0)").text().trim());
+        $("#search_medicine").val($("#medication_list tr:eq(" + id + ")").text().trim());
         getMedicine($("#search_medicine").val());
     }
 
+    function editConcurrent(id) {
+        concurrent_modal.toggle();
+        //SET FORMS DATA
+        const concurrent_date = $("#concurrent_list tr:eq(" + id + ") td:eq(0)").text().trim();
+        const antimicrobial = $("#concurrent_list tr:eq(" + id + ") td:eq(1)").text().trim();
+        const dosing_regimen = $("#concurrent_list tr:eq(" + id + ") td:eq(2)").text().trim();
+        const start_date = $("#concurrent_list tr:eq(" + id + ") td:eq(3)").text();
+        const stop_date = $("#concurrent_list tr:eq(" + id + ") td:eq(4)").text();
+
+        $("#concurrent_date").val(concurrent_date);
+        $("#concurrent_antimicrobial").val(antimicrobial);
+        $("#concurrent_dosing_regimen").val(dosing_regimen);
+        $("#concurrent_start_date").val(moment(start_date, "MM/DD/YYYY").format("YYYY-MM-DD"));
+        $("#concurrent_stop_date").val(moment(stop_date, "MM/DD/YYYY").format("YYYY-MM-DD"));
+
+        $("#btn_save_concurrent").val(id);
+    }
+
+
+    function editMicrobiological(id) {
+        microbiological_modal.toggle();
+        //SET FORMS DATA
+        const date = $("#microbiological_result_list tr:eq(" + id + ") td:eq(0)").text().trim();
+        const specimen = $("#microbiological_result_list tr:eq(" + id + ") td:eq(1)").text().trim();
+        const pathogen = $("#microbiological_result_list tr:eq(" + id + ") td:eq(2)").text().trim();
+
+        $("#microbiological_date").val(moment(date, "MM/DD/YYYY").format("YYYY-MM-DD"));
+        $("#microbiological_specimen").val(specimen);
+        $("#microbiological_microbiological_pathogen").val(pathogen);
+        $("#btn_save_microbiological").val(id);
+    }
+
     function deleteMedicine(id) {
-        $("#medication_id_" + id).remove();
+        $("#medication_list tr:eq(" + id + ")").remove();
+    }
+
+    function deleteConcurrent(id) {
+        $("#concurrent_list tr:eq(" + id + ")").remove();
+    }
+
+    function deleteMicrobiological(id) {
+        $("#microbiological_result_list tr:eq(" + id + ")").remove();
     }
 
     function appendMedicine(id) {
         //CHECK IF MEDICINE ALREADY IN PRESCRIPTIONS
         const description = $("#" + id + " td:eq(0)").text();
+        const unit = $("#" + id + " td:eq(1)").text();
         if (checkIfMedExists(description)) {
             alert(description + " already exists in prescription");
             return;
         }
-        const unit = $("#" + id + " td:eq(1)").text();
+
+        if (prescribed_med_id != "") {
+            $("#medication_list tr:eq(" + prescribed_med_id + ")").remove();
+        }
+
         const count = $("#medication_list tr").length;
-        let tr = "<tr id='medication_id_" + count + "'>";
+        let tr = "<tr>";
         tr += "<td>" + description + "</td>";
         tr += "<td>";
         tr += "<div class='d-flex'>";
@@ -925,6 +1053,7 @@
         tr += "</tr>";
 
         $("#medication_list").append(tr);
+
     }
 
     function activityLog(it) {
@@ -937,7 +1066,6 @@
     }
 
     function clearForms() {
-        $(".ams_container").addClass("d-none");
         $("#prescription_modal input").val("");
         $("#prescription_modal input[type='checkbox']").prop("checked", false);
         $("#prescription_modal input[type='radio']").prop("checked", false);

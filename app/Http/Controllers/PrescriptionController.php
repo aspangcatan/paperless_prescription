@@ -147,6 +147,7 @@ class PrescriptionController extends Controller
                 $indication = new IndicationUse;
                 $indication->prescription_id = $prescription_id;
                 $indication->description = $indication_use_param['description'];
+                $indication->duration_requested = $indication_use_param['duration_requested'];
                 $indication->reason = $indication_use_param['reason'];
                 $indication->save();
 
@@ -182,6 +183,11 @@ class PrescriptionController extends Controller
 
             $released_to = "NURSE";
             if ($patient['type'] == "2") {
+                $released_to = "IPCC";
+                $icc = new IccReview();
+                $icc->prescription_id = $prescription_id;
+                $icc->save();
+                /*
                 #TODO: CHECK IF PRESCRIBED MEDICINE IS ALREADY APPROVED FOR CERTAIN DAYS
                 #IF ALREADY APPROVED, AUTOMATIC SEND TO NURSE REVIEW
                 #GET LATEST PRESCRIPTION BASED ON MEDICATION AND PATIENT AND GET DAYS APPROVED COMPARE TO CURRENT DAY IF WITHIN AND DEFINITIVE CASE
@@ -223,6 +229,7 @@ class PrescriptionController extends Controller
                         $nurse->save();
                     }
                 }
+                */
             } else {
                 $nurse = new NurseReview();
                 $nurse->prescription_id = $prescription_id;

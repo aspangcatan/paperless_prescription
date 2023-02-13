@@ -145,6 +145,7 @@
                         const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
 
                         $("#indication_reason").val(ams.indication_use.reason);
+                        $("#duration_requested").val(ams.indication_use.duration_requested);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
                         ams.microbiologicals.forEach(it => {
                             let tr = "<tr>";

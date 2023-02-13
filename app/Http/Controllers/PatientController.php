@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ErrorLog;
 use App\Models\HomisPatient;
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PatientController extends Controller
 {
@@ -55,15 +57,14 @@ class PatientController extends Controller
     public function store(Request $request)
     {
         try {
-            #CHECK IF HOSPITAL ID ALREADY EXISTS
-            #ELSE RETURNS HOSPITAL ALREADY EXISTS
+            $message = "Patient information updated";
             $patient = Patient::where('hospital_id', $request->hospital_id)->first();
-            if ($patient) {
-                return response(['code' => 500, 'message' => 'Hospital ID already exists']);
+            if (!$patient) {
+                $message = "New patient added";
+                $patient = new Patient();
+                $patient->hospital_id = $request->hospital_id;
             }
 
-            $patient = new Patient;
-            $patient->hospital_id = $request->hospital_id;
             $patient->fname = $request->fname;
             $patient->mname = $request->mname;
             $patient->lname = $request->lname;
@@ -71,10 +72,21 @@ class PatientController extends Controller
             $patient->birthdate = $request->birthdate;
             $patient->sex = $request->sex;
             $patient->save();
-            return response(['code' => 200, 'message' => 'New patient added']);
+            return response(['code' => 200, 'message' => $message]);
         } catch (\Exception $exception) {
+            self::insertErrorLogs(Auth::id(), 'insertPatient', $request, $exception->getMessage());
             return response(['code' => 500, 'message' => $exception->getMessage()]);
         }
+    }
+
+    public function insertErrorLogs($action_by, $action, $params, $details)
+    {
+        $log = new ErrorLog;
+        $log->action_by = $action_by;
+        $log->action = $action;
+        $log->params = $params;
+        $log->details = $details;
+        $log->save();
     }
 }
 

@@ -19,7 +19,7 @@ class CreatePatientsTable extends Migration
             $table->string('fname');
             $table->string('mname');
             $table->string('lname');
-            $table->string('suffix');
+            $table->string('suffix')->nullable();
             $table->date('birthdate');
             $table->string('sex');
         });

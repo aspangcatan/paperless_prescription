@@ -184,6 +184,7 @@
                         const ams = data.ams;
 
                         $("#indication_reason").val(ams.indication_use.reason);
+                        $("#duration_requested").val(ams.indication_use.duration_requested);
                         const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
 
