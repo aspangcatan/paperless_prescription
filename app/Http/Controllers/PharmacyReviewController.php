@@ -9,6 +9,7 @@ use App\Models\PrescribedMedicine;
 use App\Models\PrescriptionLog;
 use App\Models\RenderedPrescription;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PharmacyReviewController extends Controller
@@ -35,7 +36,7 @@ class PharmacyReviewController extends Controller
                 ->where($search_filters)
                 ->skip(0)
                 ->take(10)
-                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
+                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex','n.created_at as date_forwarded']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
@@ -54,14 +55,14 @@ class PharmacyReviewController extends Controller
             $medications = $request->medications;
             for ($i = 0; $i < count($medications); $i++) {
                 $medication = PrescribedMedicine::find($medications[$i]["id"]);
-                $medication->quantity_rendered = $medications[$i]["quantity_rendered"];
+                $medication->availability = $medications[$i]["availability"];
                 $medication->save();
             }
 
             $logs = new PrescriptionLog;
             $logs->prescription_id = $request->prescription_id;
             $logs->origin = "PHARMACY";
-            $logs->released_by = 1116;
+            $logs->released_by = Auth::id();
             $logs->released_to = "NURSE";
             $logs->remarks = $request->remarks;
             $logs->save();
@@ -75,7 +76,7 @@ class PharmacyReviewController extends Controller
             $prescription->forceDelete();
             return response(['code' => 200, 'message' => 'Prescription rendered']);
         } catch (\Exception $exception) {
-            self::insertErrorLogs(1116, 'renderPrescription', $request, $exception->getMessage());
+            self::insertErrorLogs(Auth::id(), 'renderPrescription', $request, $exception->getMessage());
             return response(['code' => 200, 'message' => "Something went wrong"]);
         }
     }

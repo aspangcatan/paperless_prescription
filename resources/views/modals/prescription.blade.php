@@ -116,25 +116,32 @@
                                     <small>(Creatinine clearance)</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2 ams_container">
+                            <div class="col-md-4 mt-2 ams_container d-none" id="transaminases_container">
                                 <div class="text-center">
                                     <input class="form-control bg-white fw-bold text-center"
                                            id="form_transaminases"/>
                                     <small>(Transaminases)</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2 ams_container">
+                            <div class="col-md-4 mt-2 ams_container" id="sgpt_container">
                                 <div class="text-center">
                                     <input class="form-control bg-white fw-bold text-center"
                                            id="form_sgpt"/>
                                     <small>(SGPT)</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2 ams_container">
+                            <div class="col-md-4 mt-2 ams_container" id="sgot_container">
                                 <div class="text-center">
                                     <input class="form-control bg-white fw-bold text-center"
                                            id="form_sgot"/>
                                     <small>(SGOT)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mt-2 ams_container" id="days_requested_container">
+                                <div class="text-center">
+                                    <input type="number" class="form-control bg-white fw-bold text-center"
+                                           id="form_days_requested"/>
+                                    <small>(Duration requested (days))</small>
                                 </div>
                             </div>
                         </div>
@@ -169,7 +176,52 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card" id="intervention_form_container">
+                        <div class="card-body">
+                            <h6 class="card-title">Your patient fulfills the following criteria to switch to oral (PO)
+                                antimicrobial</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div>Clinical Stability:</div>
+                                    <div class="mt-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="clinical_stability">
+                                            <label class="form-check-label">Afebrile</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="clinical_stability">
+                                            <label class="form-check-label">Downward trend or normalization of Inflammatory markers</label>
+                                            <small class="d-block">(C-reactive protein, white blood cell count, procalcitonin)</small>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="clinical_stability">
+                                            <label class="form-check-label">Stable vital signs</label>
+                                            <small class="d-block">(No unexplained tachycardia, hypotension, tachypnea)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div>Able to tolerate oral intake:</div>
+                                    <div class="mt-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="oral_intake">
+                                            <label class="form-check-label">Patient is not nil by mouth</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="oral_intake">
+                                            <label class="form-check-label">Tolerating oral diet, medications and/or enteral feeds</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="oral_intake">
+                                            <label class="form-check-label">Oral abosrption is not compromised</label>
+                                            <small class="d-block">(e.g. No vomiting or diarrhea, malabsorptive disorder)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" id="indication_use_container">
                         <div class="card-body">
                             <h6 class="card-title">Indication for use</h6>
                             <div class="form-check">
@@ -187,17 +239,9 @@
                                        name="indication_use">
                                 <label class="form-check-label">Definitive</label>
                             </div>
-                            <div class="mt-2">
-                                <div>Duration requested</div>
-                                <input type="number" class="form-control" style="width: unset !important;" id="duration_requested"/>
-                            </div>
-                            <div class="mt-2">
-                                <h6>Include reason for not using recommended antimicrobial</h6>
-                                <textarea class="form-control" style="height:100px" id="indication_reason"></textarea>
-                            </div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card" id="microbiological_container">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h6 class="card-title">Microbiological Results</h6>
@@ -224,7 +268,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
@@ -242,9 +285,9 @@
                                     <th>Medicine</th>
                                     <th style="width: 20%">Strength</th>
                                     <th style="width: 10%">Unit</th>
-                                    <th style="width: 10%">Quantity</th>
+                                    <th class="d-none">Quantity</th>
                                     <th style="width: 15%">Frequency</th>
-                                    <th colspan="2" style="width: 8%" id="quantity_render_th"></th>
+                                    <th colspan="2" style="width: 15%" id="quantity_render_th"></th>
                                 </tr>
                                 </thead>
                                 <tbody id="medication_list" style="font-size: 12px">
@@ -292,8 +335,8 @@
                 </div>
 
                 <div class="text-end mt-5">
-                    <button class="btn btn-danger" id="btn_reject">REJECT</button>
-                    <button class="btn btn-primary" id="btn_submit">SUBMIT</button>
+                    <button class="btn btn-danger" id="btn_reject" style="width: 103.58px">REJECT</button>
+                    <button class="btn btn-primary" id="btn_submit" style="width: 103.58px">SUBMIT</button>
                 </div>
             </div>
         </div>

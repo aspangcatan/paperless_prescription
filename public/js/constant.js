@@ -12,3 +12,5 @@ const DYSFUNCTION_CRITERIA_ARRAY = ["SBP <90 or droppped >40 mmHg from baseline"
     "Upper or Lower GI bleeding", "Respiratory failure requiring ventilation; hypoxemiaL saO2 <90% air", "Urine Output <0.5 mL/kg/hr for > 6hr or azotemia (creatinine 2x baseline or >1.3 mg/dL)", "N/A"];
 const STATIONS = ["INTERMEDIATE CARE UNIT", "LABOR ROOM", "LABOR ROOM NEWBORN", "MEDICAL WARD (STATION 1)", "MEDICAL WARD (STATION 2)",
     "NEWBORN WARD", "NICU", "OB HIGH RISK", "OB LOW RISK", "PEDIA WARD", "PICU", "SURGICAL WARD"];
+const CLINICAL_STABILITY = ["Afebrile","Downward trend or normalization of Inflammatory markers","Stable vital signs"];
+const ORAL_INTAKE = ["Patient is not nil by mouth","Tolerating oral diet, medications and/or enteral feeds","Oral abosrption is not compromised"];

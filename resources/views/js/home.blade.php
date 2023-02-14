@@ -1,5 +1,5 @@
 <script src="js/moment.min.js"></script>
-<script src="js/constant.js"></script>
+<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
 <script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
@@ -34,7 +34,32 @@
         });
 
         $("#form_prescription_type").change(function () {
+            $("#intervention_form_container").addClass("d-none");
+            $("#indication_use_container").addClass("d-none");
+            $("#transaminases_container").addClass("d-none");
+            $("#microbiological_container").removeClass("d-none");
+            $("#sgpt_container").removeClass("d-none");
+            $("#sgot_container").removeClass("d-none");
+            $("#days_requested_container").removeClass("d-none");
 
+            switch ($(this).val()) {
+                //REGULAR TEMPORARILY DISABLED
+                case "1":
+                    break;
+                case "2":
+                    $("#indication_use_container").removeClass("d-none");
+                    $("#transaminases_container").removeClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    break;
+                case "4":
+                    //INTERVENTION ON GOING
+                    $("#intervention_form_container").removeClass("d-none");
+                    $("#microbiological_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    break;
+            }
         });
 
         $("#btn_search_prescription").click(function () {
@@ -288,6 +313,7 @@
             const transaminases = $("#form_transaminases").val();
             const sgpt = $("#form_sgpt").val().trim();
             const sgot = $("#form_sgot").val().trim();
+            const days_requested = $("#form_days_requested").val().trim();
 
             let is_valid = true;
             $("#prescription_modal .is-invalid").removeClass("is-invalid");
@@ -337,65 +363,61 @@
             }
 
             //CHECK IF PRESCRIPTION TYPE IS AMS
-            if (type == 2) {
-                if (drug_allergy == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Drug allergy is required, put N/A if not applicable</li>");
-                }
 
-                if (weight == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Weight is required, put '0' if not applicable</li>");
-                }
+            if (drug_allergy == "") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Drug allergy is required, put N/A if not applicable</li>");
+            }
 
-                if (height == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Height is required, put '0' if not applicable</li>");
-                }
+            if (weight == "") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Weight is required, put '0' if not applicable</li>");
+            }
 
-                if (serum_creatinine == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Serum creatinine is required, put '0' if not applicable</li>");
-                }
+            if (height == "") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Height is required, put '0' if not applicable</li>");
+            }
 
-                if (creatinine_clearance == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Creatinine clearance is required, put '0' if not applicable</li>");
-                }
+            if (serum_creatinine == "") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Serum creatinine is required, put '0' if not applicable</li>");
+            }
 
-                if (sgpt == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>SGPT is required, put '0' if not applicable</li>");
-                }
+            if (creatinine_clearance == "") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Creatinine clearance is required, put '0' if not applicable</li>");
+            }
 
-                if (sgot == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>SGOT is required, put '0' if not applicable</li>");
-                }
+            if (sgpt == "" && type == "3") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>SGPT is required, put '0' if not applicable</li>");
+            }
 
+            if (sgot == "" && type == "3") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>SGOT is required, put '0' if not applicable</li>");
+            }
+
+            if (transaminases == "" && type == "2") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Transaminases is required, put '0' if not applicable</li>");
+            }
+
+            if (days_requested == "" && type == "3") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Duration requested is required, put '0' if not applicable</li>");
+            }
+
+            if (type == "2") {
                 const indication_use = $("input[name='indication_use']:checked").next().text().trim();
-                const duration_requested = $("#duration_requested").val();
-                const indication_reason = $("#indication_reason").val().trim();
-
                 if (indication_use == "") {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Indication for use is required</li>");
                 }
 
-                if (duration_requested == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Indicate duration requested, put '0' if not applicable</li>");
-                }
-
-                if (indication_reason == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Include reason for not using recommended antimicrobial </li>");
-                }
-
                 params.indication_use = {
-                    description: indication_use,
-                    duration_requested: duration_requested,
-                    reason: indication_reason
+                    description: indication_use
                 };
             }
 
@@ -406,15 +428,26 @@
                 const dosing_regimen = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(2)").text();
                 const start_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(3)").text();
                 const stop_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(4)").text();
+                const buttons = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(5) button");
 
-                concurrent_therapy.push({
-                    hospital_id: hospital_id,
-                    concurrent_date: moment(concurrent_date).format("YYYY-MM-DD"),
-                    antimicrobial: antimicrobial,
-                    dosing_regimen: dosing_regimen,
-                    start_date: moment(start_date).format("YYYY-MM-DD"),
-                    stop_date: moment(stop_date).format("YYYY-MM-DD"),
-                });
+                //CHECK IF NEWLY ADDED
+                if (buttons.length > 0) {
+                    concurrent_therapy.push({
+                        hospital_id: hospital_id,
+                        concurrent_date: moment(concurrent_date).format("YYYY-MM-DD"),
+                        antimicrobial: antimicrobial,
+                        dosing_regimen: dosing_regimen,
+                        start_date: moment(start_date).format("YYYY-MM-DD"),
+                        stop_date: moment(stop_date).format("YYYY-MM-DD"),
+                    });
+                }
+            }
+
+            const clinical_stability = $("input[name='clinical_stability']:checked").next().text().trim();
+            const oral_intake = $("input[name='oral_intake']:checked").next().text().trim();
+            const intervention = {
+                clinical_stability: clinical_stability,
+                oral_intake: oral_intake
             }
 
             const microbiologicals = [];
@@ -437,8 +470,7 @@
                 const dosage_strength = $("#medication_list tr:eq(" + i + ")").find("td:eq(1) input").val();
                 const dosage_unit = $("#medication_list tr:eq(" + i + ")").find("td:eq(1) select").val();
                 const unit = $("#medication_list tr:eq(" + i + ")").find("td:eq(2)").text();
-                const quantity = $("#medication_list tr:eq(" + i + ")").find("td:eq(3) input").val();
-                const frequency = $("#medication_list tr:eq(" + i + ")").find("td:eq(4) select").val();
+                const frequency = $("#medication_list tr:eq(" + i + ")").find("td:eq(3) select").val();
 
                 if (dosage_strength == "") {
                     is_valid = false;
@@ -450,12 +482,6 @@
                     is_valid = false;
                     medication_flag = false;
                     $("#prescription_modal .error_list").append("<li>Dosage strength unit is required</li>");
-                }
-
-                if (quantity < 1 || quantity == "") {
-                    is_valid = false;
-                    medication_flag = false;
-                    $("#prescription_modal .error_list").append("<li>Quantity must be greater than 0</li>");
                 }
 
                 if (frequency == "") {
@@ -470,7 +496,6 @@
                         unit: unit,
                         dosage_strength: dosage_strength,
                         dosage_unit: dosage_unit,
-                        quantity_ordered: quantity,
                         frequency: frequency
                     });
                 }
@@ -478,7 +503,12 @@
 
             if (medications.length < 1 && is_valid) {
                 is_valid = false;
-                $("#prescription_modal .error_list").append("<li>There must be at least 1 medication</li>");
+                $("#prescription_modal .error_list").append("<li>There must be a medication</li>");
+            }
+
+            if (medications.length > 1 && is_valid) {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Maximum of 1 medication per prescription</li>");
             }
 
             if (!is_valid) {
@@ -504,13 +534,19 @@
                 creatinine_clearance: creatinine_clearance,
                 transaminases: transaminases,
                 sgpt: sgpt,
-                sgot: sgot
+                sgot: sgot,
+                days_requested: days_requested
             }
 
             params.patient = patient;
+            if (type == "4")
+                params.intervention = intervention;
+            else
+                params.microbiologicals = microbiologicals;
+
             params.medications = medications;
-            params.microbiologicals = microbiologicals;
             params.concurrent_therapy = concurrent_therapy;
+
             insertPrecription(params);
         });
 
@@ -627,6 +663,7 @@
         const transaminases = $("#prescription_id_" + id + " td:eq(15)").text();
         const sgpt = $("#prescription_id_" + id + " td:eq(16)").text();
         const sgot = $("#prescription_id_" + id + " td:eq(17)").text();
+        const days_requested = $("#prescription_id_" + id + " td:eq(18)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -640,7 +677,7 @@
         $("#form_ward").val(ward);
         $("#form_bed_no").val(bed_no);
         $("#checkbox_urgent").prop("checked", (urgency == "Urgent"));
-        $("#form_prescription_type").val(type);
+        $("#form_prescription_type").val(type).change();
         $("#form_drug_allergy").val(drug_allergy);
         $("#form_weight").val(weight);
         $("#form_height").val(height);
@@ -649,6 +686,7 @@
         $("#form_transaminases").val(transaminases);
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
+        $("#form_days_requested").val(days_requested);
 
         $("#form_prescription_type").prop("disabled", true);
 
@@ -698,24 +736,29 @@
     function getMedications(id) {
         $("#medication_list").empty();
         $("#medication_list").append("<tr><td colspan='7'>Loading medications...</td></tr>");
+        $("#microbiological_result_list").empty();
+
         fetch("{{ url('prescription/get') }}/" + id, {
             method: "GET"
         })
             .then(res => res.json())
             .then(data => {
+                $("#medication_list").empty();
                 if (data.code == 200) {
-                    //POPULATE AMS
-                    $("#microbiological_result_list").empty();
-                    $("#medication_list").empty();
-
-                    if (!jQuery.isEmptyObject(data.ams)) {
-                        const ams = data.ams;
+                    const ams = data.ams;
+                    if (!jQuery.isEmptyObject(ams.indication_use)) {
                         const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
-
-                        $("#indication_reason").val(ams.indication_use.reason);
-                        $("#duration_requested").val(ams.indication_use.duration_requested);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
+                    }
+                    if (!jQuery.isEmptyObject(ams.intervention)) {
+                        const clinical_index = CLINICAL_STABILITY.indexOf(ams.intervention.clinical_stability);
+                        const oral_index = ORAL_INTAKE.indexOf(ams.intervention.oral_intake);
 
+                        $("input[name='clinical_stability']:eq(" + clinical_index + ")").prop("checked", true);
+                        $("input[name='oral_intake']:eq(" + oral_index + ")").prop("checked", true);
+                    }
+
+                    if (!jQuery.isEmptyObject(ams.microbiologicals)) {
                         ams.microbiologicals.forEach(it => {
                             let tr = "<tr>";
                             tr += "<td>" + moment(it.date).format("MM/DD/YYYY") + " </td>";
@@ -854,7 +897,7 @@
                 $("#suffix").val("")
                 $("#birthdate").val("");
                 $("#sex").val("");
-                toastr.success(data.message,"Information");
+                toastr.success(data.message, "Information");
 
             }).catch(err => {
             console.log(err);
@@ -885,18 +928,11 @@
                 success_modal.toggle();
                 getPrescriptions();
 
-                //SEND NOTIFICATION TO NURSE
-                if (params.patient.type == "2") {
-                    sendWebsocketServer({
-                        action: "NOTIFY ROLE",
-                        body: {role: "ICC"}
-                    })
-                } else {
-                    sendWebsocketServer({
-                        action: "NOTIFY STATION",
-                        body: {station: params.patient.station}
-                    })
-                }
+                sendWebsocketServer({
+                    action: "NOTIFY ROLE",
+                    body: {role: "ICC"}
+                })
+
             }).catch(err => {
             $("#spinner").addClass("d-none");
             $("#error_message").text(err);
@@ -942,6 +978,7 @@
                                 <td class="d-none">` + it.transaminases + `</td>
                                 <td class="d-none">` + it.sgpt + `</td>
                                 <td class="d-none">` + it.sgot + `</td>
+                                <td class="d-none">` + it.days_requested + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
@@ -1036,7 +1073,6 @@
         tr += "</div>";
         tr += "</td>";
         tr += "<td>" + unit + "</td>";
-        tr += "<td><input class='form-control text-center' type='number' value='1' disabled/></td>";
         tr += "<td>";
         tr += "<select class='form-control text-center'>";
         for (let i = 0; i < FREQUENCIES.length; i++) {

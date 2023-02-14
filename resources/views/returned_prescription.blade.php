@@ -35,8 +35,9 @@
                             <th>Hospital ID</th>
                             <th>Patient</th>
                             <th>Station</th>
+                            <th>Date Returned</th>
                             <th>Date Prescribed</th>
-                            <th colspan="2" style="width:4%"></th>
+                            <th style="width:4%"></th>
                         </tr>
                         </thead>
                         <tbody id="prescription_list"></tbody>

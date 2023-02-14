@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ConcurrentTherapy;
 use App\Models\CultureSent;
 use App\Models\DysfunctionCriteria;
+use App\Models\ErrorLog;
 use App\Models\FocusInfection;
 use App\Models\IccReview;
 use App\Models\Immunocompromising;
@@ -47,7 +49,7 @@ class ReturnedPrescriptionController extends Controller
                 ->where($search_filters)
                 ->skip(0)
                 ->take(10)
-                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
+                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex', 'n.created_at as date_forwarded']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
@@ -71,23 +73,15 @@ class ReturnedPrescriptionController extends Controller
             $prescription->bed_no = $patient['bed_no'];
             $prescription->urgency = $patient['urgency'];
             $prescription->type = $patient['type'];
-            $prescription->drug_allergy = null;
-            $prescription->weight = null;
-            $prescription->height = null;
-            $prescription->serum_creatinine = null;
-            $prescription->creatinine_clearance = null;
-            $prescription->sgpt = null;
-            $prescription->sgot = null;
-            if ($patient['type'] == "2") {
-                $prescription->drug_allergy = $patient['drug_allergy'];
-                $prescription->weight = $patient['weight'];
-                $prescription->height = $patient['height'];
-                $prescription->serum_creatinine = $patient['serum_creatinine'];
-                $prescription->creatinine_clearance = $patient['creatinine_clearance'];
-                $prescription->sgpt = $patient['sgpt'];
-                $prescription->sgot = $patient['sgot'];
-            }
-
+            $prescription->drug_allergy = $patient['drug_allergy'];
+            $prescription->weight = $patient['weight'];
+            $prescription->height = $patient['height'];
+            $prescription->serum_creatinine = $patient['serum_creatinine'];
+            $prescription->creatinine_clearance = $patient['creatinine_clearance'];
+            $prescription->transaminases = $patient['transaminases'];
+            $prescription->sgpt = $patient['sgpt'];
+            $prescription->sgot = $patient['sgot'];
+            $prescription->days_requested = $patient['days_requested'];
             $prescription->save();
 
             #REINSERT AMS
@@ -95,20 +89,26 @@ class ReturnedPrescriptionController extends Controller
                 $indication_use_param = $request->indication_use;
                 $indication = IndicationUse::where('prescription_id', $prescription_id)->first();
                 $indication->description = $indication_use_param['description'];
-                $indication->duration_requested = $indication_use_param['duration_requested'];
-                $indication->reason = $indication_use_param['reason'];
                 $indication->save();
-
-                #INSERT MICROBIOLOGICAL
-                $microbiological_origin = MicrobiologicalResult::where('prescription_id', $prescription_id);
-                $microbiological_origin->forceDelete();
-
-                $microbiologicals = $request->microbiologicals;
-                for ($i = 0; $i < count($microbiologicals); $i++) {
-                    $microbiologicals[$i]['prescription_id'] = $prescription_id;
-                }
-                MicrobiologicalResult::insert($microbiologicals);
             }
+
+            #INSERT MICROBIOLOGICAL
+            $microbiological_origin = MicrobiologicalResult::where('prescription_id', $prescription_id);
+            $microbiological_origin->forceDelete();
+
+            $microbiologicals = $request->microbiologicals;
+            for ($i = 0; $i < count($microbiologicals); $i++) {
+                $microbiologicals[$i]['prescription_id'] = $prescription_id;
+            }
+            MicrobiologicalResult::insert($microbiologicals);
+
+            #DONT REMOVE CONCURRENT THERAPY THAT ARE APPROVED BY THE IPCC
+            #REQUEST FROM IT TO MANUALLY DELETE THE CONCURRENT THERAPY
+            $concurrent_therapy = $request->concurrent_therapy;
+            for ($i = 0; $i < count($concurrent_therapy); $i++) {
+                $concurrent_therapy[$i]['prescription_id'] = $prescription_id;
+            }
+            ConcurrentTherapy::insert($concurrent_therapy);
 
             $patient_history = PatientHistory::where('prescription_id', $prescription_id)->first();
             $patient_history->prescription_id = $prescription_id;
@@ -127,30 +127,21 @@ class ReturnedPrescriptionController extends Controller
             for ($i = 0; $i < count($medications); $i++) {
                 $medications[$i]['prescription_id'] = $prescription_id;
             }
+
             PrescribedMedicine::insert($medications);
-            $released_to = "NURSE";
-            if ($patient['type'] == "2") {
-                $released_to = "ICC";
-                $icc = IccReview::where('prescription_id', $prescription_id)->first();
-                if (!$icc) {
-                    $icc = new NurseReview();
-                    $icc->prescription_id = $prescription_id;
-                    $icc->save();
-                }
-            }else{
-                $nurse = NurseReview::where('prescription_id', $prescription_id)->first();
-                if (!$nurse) {
-                    $nurse = new NurseReview();
-                    $nurse->prescription_id = $prescription_id;
-                    $nurse->save();
-                }
+            $released_to = "ICC";
+            $icc = IccReview::where('prescription_id', $prescription_id)->first();
+            if (!$icc) {
+                $icc = new IccReview();
+                $icc->prescription_id = $prescription_id;
+                $icc->save();
             }
 
             #INSERT LOGS IF REGULAR PRESCRIPTION
             $logs = new PrescriptionLog;
             $logs->prescription_id = $prescription_id;
             $logs->origin = "DOCTOR";
-            $logs->released_by = 1116;
+            $logs->released_by = Auth::id();
             $logs->released_to = $released_to;
             $logs->remarks = $patient['remarks'];
             $logs->save();
@@ -161,7 +152,18 @@ class ReturnedPrescriptionController extends Controller
             }
             return response(['code' => 200, 'message' => 'Prescription updated']);
         } catch (\Exception $exception) {
+            self::insertErrorLogs(Auth::id(), 'updatePrescription', $request, $exception->getMessage());
             return response(['code' => 500, 'message' => $exception->getMessage()]);
         }
+    }
+
+    public function insertErrorLogs($action_by, $action, $params, $details)
+    {
+        $log = new ErrorLog;
+        $log->action_by = $action_by;
+        $log->action = $action;
+        $log->params = $params;
+        $log->details = $details;
+        $log->save();
     }
 }

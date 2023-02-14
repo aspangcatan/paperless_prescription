@@ -12,6 +12,7 @@ use App\Models\Immunocompromising;
 use App\Models\IndicationUse;
 use App\Models\IndicationUseDetails;
 use App\Models\InfectiousDiagnosis;
+use App\Models\InterventionDetail;
 use App\Models\MicrobiologicalResult;
 use App\Models\NurseReview;
 use App\Models\PatientHistory;
@@ -68,16 +69,22 @@ class PrescriptionController extends Controller
 
     public function getPrescriptionDetails($id)
     {
-        $ams = (object)[];
+        $ams = [];
         try {
             $prescription = Prescription::find($id);
             if ($prescription->type == '2') {
-                #GET AMS
                 $indication = IndicationUse::where('prescription_id', $id)->first();
-                $microbiologicals = MicrobiologicalResult::where('prescription_id', $id)->get();
-
-                $ams = ['indication_use' => $indication, 'microbiologicals' => $microbiologicals];
+                $ams['indication_use'] = $indication;
             }
+
+            if ($prescription->type != '4') {
+                $microbiologicals = MicrobiologicalResult::where('prescription_id', $id)->get();
+                $ams['microbiologicals'] = $microbiologicals;
+            } else {
+                $intervention = InterventionDetail::where('prescription_id', $id)->first();
+                $ams['intervention'] = $intervention;
+            }
+
             #GET MEDICATIONS
             $medications = PrescribedMedicine::where('prescription_id', $id)->get();
             return response(['code' => 200, 'results' => $medications, 'ams' => $ams]);
@@ -125,45 +132,49 @@ class PrescriptionController extends Controller
             $prescription->bed_no = $patient['bed_no'];
             $prescription->urgency = $patient['urgency'];
             $prescription->type = $patient['type'];
-            #INSERT AMS ADDITIONAL INFORMATION
-            if ($patient['type'] == "2") {
-                $prescription->drug_allergy = $patient['drug_allergy'];
-                $prescription->weight = $patient['weight'];
-                $prescription->height = $patient['height'];
-                $prescription->serum_creatinine = $patient['serum_creatinine'];
-                $prescription->creatinine_clearance = $patient['creatinine_clearance'];
-                $prescription->transaminases = $patient['transaminases'];
-                $prescription->sgpt = $patient['sgpt'];
-                $prescription->sgot = $patient['sgot'];
-            }
+            $prescription->drug_allergy = $patient['drug_allergy'];
+            $prescription->weight = $patient['weight'];
+            $prescription->height = $patient['height'];
+            $prescription->serum_creatinine = $patient['serum_creatinine'];
+            $prescription->creatinine_clearance = $patient['creatinine_clearance'];
+            $prescription->transaminases = $patient['transaminases'];
+            $prescription->sgpt = $patient['sgpt'];
+            $prescription->sgot = $patient['sgot'];
+            $prescription->days_requested = $patient['days_requested'];
+
             $prescription->save();
             $prescription_id = $prescription->id;
 
             if ($patient['type'] == "2") {
-                #THIS IS SEPARATED BECAUSE WE NEED THE PRESCRIPTION ID
                 #INSERT INDICATION USE
-
                 $indication_use_param = $request->indication_use;
                 $indication = new IndicationUse;
                 $indication->prescription_id = $prescription_id;
                 $indication->description = $indication_use_param['description'];
-                $indication->duration_requested = $indication_use_param['duration_requested'];
-                $indication->reason = $indication_use_param['reason'];
                 $indication->save();
+            } else if ($patient['type'] == "4") {
+                $intervention_param = $request->intervention;
+                $intervention = new InterventionDetail;
+                $intervention->prescription_id = $prescription_id;
+                $intervention->clinical_stability = $intervention_param['clinical_stability'];
+                $intervention->oral_intake = $intervention_param['oral_intake'];
+                $intervention->save();
+            }
 
-                #INSERT MICROBIOLOGICAL
+            #INSERT MICROBIOLOGICAL
+            if ($patient['type'] != '4') {
                 $microbiologicals = $request->microbiologicals;
                 for ($i = 0; $i < count($microbiologicals); $i++) {
                     $microbiologicals[$i]['prescription_id'] = $prescription_id;
                 }
                 MicrobiologicalResult::insert($microbiologicals);
-
-                $concurrent_therapy = $request->concurrent_therapy;
-                for ($i = 0; $i < count($concurrent_therapy); $i++) {
-                    $concurrent_therapy[$i]['prescription_id'] = $prescription_id;
-                }
-                ConcurrentTherapy::insert($concurrent_therapy);
             }
+
+            $concurrent_therapy = $request->concurrent_therapy;
+            for ($i = 0; $i < count($concurrent_therapy); $i++) {
+                $concurrent_therapy[$i]['prescription_id'] = $prescription_id;
+            }
+            ConcurrentTherapy::insert($concurrent_therapy);
 
             #INSERT PATIENT HISTORY
             $patient_history = new PatientHistory;
@@ -181,60 +192,62 @@ class PrescriptionController extends Controller
             }
             PrescribedMedicine::insert($medications);
 
-            $released_to = "NURSE";
-            if ($patient['type'] == "2") {
-                $released_to = "IPCC";
-                $icc = new IccReview();
-                $icc->prescription_id = $prescription_id;
-                $icc->save();
-                /*
-                #TODO: CHECK IF PRESCRIBED MEDICINE IS ALREADY APPROVED FOR CERTAIN DAYS
-                #IF ALREADY APPROVED, AUTOMATIC SEND TO NURSE REVIEW
-                #GET LATEST PRESCRIPTION BASED ON MEDICATION AND PATIENT AND GET DAYS APPROVED COMPARE TO CURRENT DAY IF WITHIN AND DEFINITIVE CASE
-                #$medications[0] is only one
-                $latest_approved_prescription = DB::table('paperless_prescription.prescriptions as p')
-                    ->join('paperless_prescription.indication_use as u', 'p.id', '=', 'u.prescription_id')
-                    ->join('paperless_prescription.prescribed_medicines as m', 'p.id', '=', 'm.prescription_id')
-                    ->where('p.hospital_id', '=', $patient['hospital_id'])
-                    ->where('u.description', '=', $indication_use_param['description'])
-                    ->where('m.description', '=', $medications[0]['description'])
-                    ->whereNotNull(['p.date_approved'])
-                    ->orderBy('p.created_at', 'DESC')
-                    ->get(['p.id', 'p.created_at', 'p.days_approved'])
-                    ->first();
+            $released_to = "IPCC";
+            $icc = new IccReview();
+            $icc->prescription_id = $prescription_id;
+            $icc->save();
 
-                if (!$latest_approved_prescription) {
-                    $released_to = "IPCC";
-                    $icc = new IccReview();
-                    $icc->prescription_id = $prescription_id;
-                    $icc->save();
-                } else {
-                    #CALCULATE DAYS PASSED SINCE THE APPROVAL
-                    $earlier = new DateTime($latest_approved_prescription->created_at);
-                    $later = Carbon::now();
-
-                    #CHECK IF THE NO. OF DAYS APPROVED ARE BEYOND TODAYS TODATE
-                    #IF BEYOND, PROCEED TO IPCC FOR ANOTHER APPROVAL
-                    if ($later->diff($earlier)->format("%a") + 1 > $latest_approved_prescription->days_approved) {
-                        #PROCEED TO ICC
-                        $released_to = "IPCC";
-                        $icc = new IccReview();
-                        $icc->prescription_id = $prescription_id;
-                        $icc->save();
-                    } else {
-                        $prescription->latest_approved_id = $latest_approved_prescription->id;
-                        $prescription->save();
-                        $nurse = new NurseReview();
-                        $nurse->prescription_id = $prescription_id;
-                        $nurse->save();
-                    }
-                }
-                */
-            } else {
-                $nurse = new NurseReview();
-                $nurse->prescription_id = $prescription_id;
-                $nurse->save();
-            }
+//            $released_to = "NURSE";
+//            if ($patient['type'] == "2") {
+//
+//                /*
+//                #TODO: CHECK IF PRESCRIBED MEDICINE IS ALREADY APPROVED FOR CERTAIN DAYS
+//                #IF ALREADY APPROVED, AUTOMATIC SEND TO NURSE REVIEW
+//                #GET LATEST PRESCRIPTION BASED ON MEDICATION AND PATIENT AND GET DAYS APPROVED COMPARE TO CURRENT DAY IF WITHIN AND DEFINITIVE CASE
+//                #$medications[0] is only one
+//                $latest_approved_prescription = DB::table('paperless_prescription.prescriptions as p')
+//                    ->join('paperless_prescription.indication_use as u', 'p.id', '=', 'u.prescription_id')
+//                    ->join('paperless_prescription.prescribed_medicines as m', 'p.id', '=', 'm.prescription_id')
+//                    ->where('p.hospital_id', '=', $patient['hospital_id'])
+//                    ->where('u.description', '=', $indication_use_param['description'])
+//                    ->where('m.description', '=', $medications[0]['description'])
+//                    ->whereNotNull(['p.date_approved'])
+//                    ->orderBy('p.created_at', 'DESC')
+//                    ->get(['p.id', 'p.created_at', 'p.days_approved'])
+//                    ->first();
+//
+//                if (!$latest_approved_prescription) {
+//                    $released_to = "IPCC";
+//                    $icc = new IccReview();
+//                    $icc->prescription_id = $prescription_id;
+//                    $icc->save();
+//                } else {
+//                    #CALCULATE DAYS PASSED SINCE THE APPROVAL
+//                    $earlier = new DateTime($latest_approved_prescription->created_at);
+//                    $later = Carbon::now();
+//
+//                    #CHECK IF THE NO. OF DAYS APPROVED ARE BEYOND TODAYS TODATE
+//                    #IF BEYOND, PROCEED TO IPCC FOR ANOTHER APPROVAL
+//                    if ($later->diff($earlier)->format("%a") + 1 > $latest_approved_prescription->days_approved) {
+//                        #PROCEED TO ICC
+//                        $released_to = "IPCC";
+//                        $icc = new IccReview();
+//                        $icc->prescription_id = $prescription_id;
+//                        $icc->save();
+//                    } else {
+//                        $prescription->latest_approved_id = $latest_approved_prescription->id;
+//                        $prescription->save();
+//                        $nurse = new NurseReview();
+//                        $nurse->prescription_id = $prescription_id;
+//                        $nurse->save();
+//                    }
+//                }
+//                */
+//            } else {
+//                $nurse = new NurseReview();
+//                $nurse->prescription_id = $prescription_id;
+//                $nurse->save();
+//            }
 
             #INSERT LOGS IF REGULAR PRESCRIPTION
             $logs = new PrescriptionLog;
@@ -258,10 +271,8 @@ class PrescriptionController extends Controller
         try {
             if ($request->origin == "NURSE")
                 $prescription = NurseReview::where('prescription_id', $request->id);
-            else if ($request->origin == "ICC") {
+            else {
                 $prescription = IccReview::where('prescription_id', $request->id);
-            } else {
-                $prescription = PharmacyReview::where('prescription_id', $request->id);
             }
 
             if (!$prescription) {
@@ -280,7 +291,6 @@ class PrescriptionController extends Controller
 
                 $medications = PrescribedMedicine::where('prescription_id', $request->id)
                     ->get(['description', 'dosage_strength', 'dosage_unit', 'frequency']);
-
 
                 for ($i = 0; $i < count($medications); $i++) {
                     $concurrent = new ConcurrentTherapy;

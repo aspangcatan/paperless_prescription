@@ -32,12 +32,6 @@
                 </a>
             </li>
         @endif
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ route('rendered_prescription') }}">
-                <i class="bi bi-grid"></i>
-                <span>Rendered Prescription</span>
-            </a>
-        </li>
         @if(session('access_rights') == "Doctor")
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{ route('returned_prescription') }}">
@@ -49,7 +43,7 @@
 
         @if(session('access_rights') == "Pharmacist Admin")
             <li class="nav-item">
-                <a class="nav-link collapsed" href="index.html">
+                <a class="nav-link collapsed" href="{{ route('medicine') }}">
                     <i class="bi bi-grid"></i>
                     <span>Medicine Management</span>
                 </a>
@@ -62,11 +56,12 @@
                 </a>
             </li>
         @endif
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="{{ route('medicine') }}">
-                    <i class="bi bi-grid"></i>
-                    <span>Medicine Management</span>
-                </a>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ route('rendered_prescription') }}">
+                <i class="bi bi-grid"></i>
+                <span>Rendered Prescription</span>
+            </a>
+        </li>
     </ul>
 
 </aside><!-- End Sidebar-->

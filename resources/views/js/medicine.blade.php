@@ -30,12 +30,12 @@
 
             if (description == "") {
                 is_valid = false;
-                $("#medicine_modal .error_list").append("<li>Date is required</li>");
+                $("#medicine_modal .error_list").append("<li>Description is required</li>");
             }
 
             if (unit == "") {
                 is_valid = false;
-                $("#medicine_modal .error_list").append("<li>Date is required</li>");
+                $("#medicine_modal .error_list").append("<li>Unit is required</li>");
             }
 
             if (!is_valid) {

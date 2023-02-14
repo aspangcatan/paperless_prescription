@@ -17,8 +17,6 @@ class CreateIndicationUseTable extends Migration
             $table->id();
             $table->unsignedBigInteger('prescription_id')->unique();
             $table->string('description');
-            $table->integer('duration_requested')->nullable();
-            $table->text('reason');
             $table->timestamps();
 
             $table->foreign('prescription_id')->references('id')->on('prescriptions')->onDelete('cascade');

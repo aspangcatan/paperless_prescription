@@ -17,9 +17,7 @@ class PrescribedMedicine extends Model
         'unit',
         'dosage_strength',
         'dosage_unit',
-        'frequency',
-        'quantity_ordered',
-        'quantity_returned'
+        'frequency'
     ];
 
     public $timestamps = false;

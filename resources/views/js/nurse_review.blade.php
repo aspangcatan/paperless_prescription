@@ -1,5 +1,5 @@
 <script src="js/moment.min.js"></script>
-<script src="js/constant.js"></script>
+<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
 <script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
@@ -22,6 +22,35 @@
 
         $("#filter_date").focusout(function () {
             $(this).attr('type', 'text')
+        });
+
+        $("#form_prescription_type").change(function () {
+            $("#intervention_form_container").addClass("d-none");
+            $("#indication_use_container").addClass("d-none");
+            $("#transaminases_container").addClass("d-none");
+            $("#microbiological_container").removeClass("d-none");
+            $("#sgpt_container").removeClass("d-none");
+            $("#sgot_container").removeClass("d-none");
+            $("#days_requested_container").removeClass("d-none");
+
+            switch ($(this).val()) {
+                //REGULAR TEMPORARILY DISABLED
+                case "1":
+                    break;
+                case "2":
+                    $("#indication_use_container").removeClass("d-none");
+                    $("#transaminases_container").removeClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    break;
+                case "4":
+                    //INTERVENTION ON GOING
+                    $("#intervention_form_container").removeClass("d-none");
+                    $("#microbiological_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    break;
+            }
         });
 
         $("#btn_search_prescription").click(function () {
@@ -99,6 +128,7 @@
         const transaminases = $("#prescription_id_" + id + " td:eq(16)").text();
         const sgpt = $("#prescription_id_" + id + " td:eq(17)").text();
         const sgot = $("#prescription_id_" + id + " td:eq(18)").text();
+        const days_requested = $("#prescription_id_" + id + " td:eq(19)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -112,7 +142,7 @@
         $("#form_ward").val(ward);
         $("#form_bed_no").val(bed_no);
         $("#checkbox_urgent").prop("checked", (urgency == "Urgent"));
-        $("#form_prescription_type").val(type);
+        $("#form_prescription_type").val(type).change();
         $("#form_drug_allergy").val(drug_allergy);
         $("#form_weight").val(weight);
         $("#form_height").val(height);
@@ -121,10 +151,7 @@
         $("#form_transaminases").val(transaminases);
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
-
-        if (type == "2") {
-            $(".ams_container").removeClass("d-none");
-        }
+        $("#form_days_requested").val(days_requested);
 
         $("#prescription_modal input").prop("disabled", true);
         $("#prescription_modal input[type='checkbox']").prop("disabled", true);
@@ -171,23 +198,28 @@
     function getMedications(id) {
         $("#medication_list").empty();
         $("#medication_list").append("<tr><td colspan='7'>Loading medications...</td></tr>");
+        $("#microbiological_result_list").empty();
         fetch("{{ url('prescription/get') }}/" + id, {
             method: "GET"
         })
             .then(res => res.json())
             .then(data => {
-                $("#microbiological_result_list").empty();
                 $("#medication_list").empty();
-
                 if (data.code == 200) {
-                    if (!jQuery.isEmptyObject(data.ams)) {
-                        const ams = data.ams;
-
-                        $("#indication_reason").val(ams.indication_use.reason);
-                        $("#duration_requested").val(ams.indication_use.duration_requested);
+                    const ams = data.ams;
+                    if (!jQuery.isEmptyObject(ams.indication_use)) {
                         const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
+                    }
+                    if (!jQuery.isEmptyObject(ams.intervention)) {
+                        const clinical_index = CLINICAL_STABILITY.indexOf(ams.intervention.clinical_stability);
+                        const oral_index = ORAL_INTAKE.indexOf(ams.intervention.oral_intake);
 
+                        $("input[name='clinical_stability']:eq(" + clinical_index + ")").prop("checked", true);
+                        $("input[name='oral_intake']:eq(" + oral_index + ")").prop("checked", true);
+                    }
+
+                    if (!jQuery.isEmptyObject(ams.microbiologicals)) {
                         ams.microbiologicals.forEach(it => {
                             let tr = "<tr>";
                             tr += "<td>" + moment(it.date).format("MM/DD/YYYY") + " </td>";
@@ -204,7 +236,6 @@
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
                                             <td>` + it.unit + `</td>
-                                            <td>` + it.quantity_ordered + `</td>
                                             <td>` + it.frequency + `</td>
                                             <td></td>
                                          </tr>`;
@@ -276,6 +307,7 @@
                                 <td class="d-none">` + it.transaminases + `</td>
                                 <td class="d-none">` + it.sgpt + `</td>
                                 <td class="d-none">` + it.sgot + `</td>
+                                <td class="d-none">` + it.days_requested + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
@@ -368,7 +400,6 @@
     }
 
     function clearForms() {
-        $(".ams_container").addClass("d-none");
         $("#prescription_modal input").val("");
         $("#prescription_modal input[type='checkbox']").prop("checked", false);
         $("#prescription_modal input[type='radio']").prop("checked", false);

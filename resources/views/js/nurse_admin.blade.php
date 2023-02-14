@@ -1,5 +1,5 @@
 <script src="js/moment.min.js"></script>
-<script src="js/constant.js"></script>
+<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
 <script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const nurses_modal = new bootstrap.Modal(document.getElementById('nurses_modal'));

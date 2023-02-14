@@ -32,6 +32,7 @@
                             <th>Hospital ID</th>
                             <th>Patient</th>
                             <th>Station</th>
+                            <th>Date Forwarded</th>
                             <th>Date Prescribed</th>
                             <th colspan="2" style="width:4%"></th>
                         </tr>
