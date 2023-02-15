@@ -15,6 +15,12 @@
                     <span>Nurse Review</span>
                 </a>
             </li>
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="{{ route('rendered_prescription') }}">
+                        <i class="bi bi-grid"></i>
+                        <span>Rendered Prescription</span>
+                    </a>
+                </li>
         @endif
         @if(session('access_rights') == "ICC")
             <li class="nav-item">
@@ -56,12 +62,6 @@
                 </a>
             </li>
         @endif
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ route('rendered_prescription') }}">
-                <i class="bi bi-grid"></i>
-                <span>Rendered Prescription</span>
-            </a>
-        </li>
     </ul>
 
 </aside><!-- End Sidebar-->

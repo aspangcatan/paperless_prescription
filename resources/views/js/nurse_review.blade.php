@@ -83,10 +83,16 @@
         });
 
         $("#btn_proceed").click(function () {
+            const remarks = $("#common_remarks").val().trim();
+            if (remarks == "") {
+                alert("Please specify remarks or instructions for the receiver");
+                return;
+            }
+
             const params = {
                 id: prescription_id,
                 origin: "NURSE",
-                remarks: $("#common_remarks").val().trim()
+                remarks: remarks
             }
 
             remarks_modal.toggle();
@@ -101,6 +107,7 @@
     });
 
     function viewPrescription(id) {
+        prescription_id = id;
         $("#btn_view_cart").addClass("d-none");
         $("#btn_add_microbiological").addClass("d-none");
         $("#btn_add_concurrent").addClass("d-none");
@@ -179,6 +186,9 @@
 
                 data.results.forEach(it => {
                     let tr = "<tr>";
+                    if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
+                        tr = "<tr class='pointer active'>";
+
                     tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
                     tr += "<td>" + it.antimicrobial + "</td>";
                     tr += "<td>" + it.dosing_regimen + "</td>";

@@ -96,7 +96,9 @@ class PrescriptionController extends Controller
     public function getConcurrentTherapy(Request $request)
     {
         try {
-            $concurrent = ConcurrentTherapy::where('hospital_id', $request->hospital_id)->get();
+            $concurrent = ConcurrentTherapy::where('hospital_id', $request->hospital_id)
+                ->orderBy('start_date', 'ASC')
+                ->get();
             return response(['code' => 200, 'results' => $concurrent]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
@@ -144,6 +146,7 @@ class PrescriptionController extends Controller
 
             $prescription->save();
             $prescription_id = $prescription->id;
+            $intervention_param = $request->intervention;
 
             if ($patient['type'] == "2") {
                 #INSERT INDICATION USE
@@ -153,12 +156,17 @@ class PrescriptionController extends Controller
                 $indication->description = $indication_use_param['description'];
                 $indication->save();
             } else if ($patient['type'] == "4") {
-                $intervention_param = $request->intervention;
                 $intervention = new InterventionDetail;
                 $intervention->prescription_id = $prescription_id;
                 $intervention->clinical_stability = $intervention_param['clinical_stability'];
                 $intervention->oral_intake = $intervention_param['oral_intake'];
                 $intervention->save();
+
+                if ($intervention_param['concurrent_id'] != "") {
+                    $get_concurrent_id = ConcurrentTherapy::where('prescription_id', $intervention_param['concurrent_id'])->first();
+                    $get_concurrent_id->for_switch = $prescription_id;
+                    $get_concurrent_id->save();
+                }
             }
 
             #INSERT MICROBIOLOGICAL
@@ -173,6 +181,9 @@ class PrescriptionController extends Controller
             $concurrent_therapy = $request->concurrent_therapy;
             for ($i = 0; $i < count($concurrent_therapy); $i++) {
                 $concurrent_therapy[$i]['prescription_id'] = $prescription_id;
+                if ($concurrent_therapy[$i]['for_switch'] == "1") {
+                    $concurrent_therapy[$i]['for_switch'] = $prescription_id;
+                }
             }
             ConcurrentTherapy::insert($concurrent_therapy);
 
@@ -291,6 +302,14 @@ class PrescriptionController extends Controller
 
                 $medications = PrescribedMedicine::where('prescription_id', $request->id)
                     ->get(['description', 'dosage_strength', 'dosage_unit', 'frequency']);
+
+                #CHECK IF TYPE IS INTERVENTION FORM
+                #UPDATE SELECTED AMS STOP DATE INTO TODAYS DATE
+                if ($request->type == "4") {
+                    $get_selected_concurrent = ConcurrentTherapy::where("for_switch", $request->id)->first();
+                    $get_selected_concurrent->stop_date = $date_approved;
+                    $get_selected_concurrent->save();
+                }
 
                 for ($i = 0; $i < count($medications); $i++) {
                     $concurrent = new ConcurrentTherapy;

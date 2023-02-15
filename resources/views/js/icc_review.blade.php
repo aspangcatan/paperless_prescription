@@ -85,11 +85,17 @@
         });
 
         $("#btn_proceed").click(function () {
+            const remarks = $("#common_remarks").val().trim();
+            if (remarks == "") {
+                alert("Please specify remarks or instructions for the receiver");
+                return;
+            }
             const params = {
                 id: prescription_id,
                 hospital_id: $("#form_hospital_id").text().trim(),
+                type: $("#form_prescription_type").val(),
                 origin: "ICC",
-                remarks: $("#common_remarks").val().trim()
+                remarks: remarks
             }
 
             remarks_modal.toggle();
@@ -120,6 +126,7 @@
     });
 
     function viewPrescription(id) {
+        prescription_id = id;
         $("#btn_view_cart").addClass("d-none");
         $("#btn_add_microbiological").addClass("d-none");
         $("#btn_add_concurrent").addClass("d-none");
@@ -197,18 +204,22 @@
                 }
 
                 data.results.forEach(it => {
-                    let tr = "<tr>";
-                    tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
-                    tr += "<td>" + it.antimicrobial + "</td>";
-                    tr += "<td>" + it.dosing_regimen + "</td>";
-                    tr += "<td>" + moment(it.start_date).format("MM/DD/YYYY") + "</td>";
-                    tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
-                    tr += "<td></td>";
-                    tr += "<td></td>";
-                    tr += "</tr>";
+                        let tr = "<tr>";
+                        if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
+                            tr = "<tr class='pointer active'>";
 
-                    $("#concurrent_list").append(tr);
-                });
+                        tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
+                        tr += "<td>" + it.antimicrobial + "</td>";
+                        tr += "<td>" + it.dosing_regimen + "</td>";
+                        tr += "<td>" + moment(it.start_date).format("MM/DD/YYYY") + "</td>";
+                        tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
+                        tr += "<td></td>";
+                        tr += "<td></td>";
+                        tr += "</tr>";
+
+                        $("#concurrent_list").append(tr);
+                    }
+                );
             }).catch(err => {
             console.log(err);
         });

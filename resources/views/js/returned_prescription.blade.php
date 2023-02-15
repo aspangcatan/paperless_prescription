@@ -29,12 +29,14 @@
         });
 
         $("#form_prescription_type").change(function () {
+            $("#intervention_form_container").addClass("d-none");
             $("#indication_use_container").addClass("d-none");
             $("#transaminases_container").addClass("d-none");
+            $("#microbiological_container").removeClass("d-none");
             $("#sgpt_container").removeClass("d-none");
             $("#sgot_container").removeClass("d-none");
             $("#days_requested_container").removeClass("d-none");
-            console.log($(this).val())
+
             switch ($(this).val()) {
                 //REGULAR TEMPORARILY DISABLED
                 case "1":
@@ -46,9 +48,11 @@
                     $("#sgot_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
                     break;
-                case "3":
+                case "4":
                     //INTERVENTION ON GOING
-
+                    $("#intervention_form_container").removeClass("d-none");
+                    $("#microbiological_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
                     break;
             }
         });
@@ -232,7 +236,13 @@
                         stop_date: moment(stop_date).format("YYYY-MM-DD"),
                     });
                 }
+            }
 
+            const clinical_stability = $("input[name='clinical_stability']:checked").next().text().trim();
+            const oral_intake = $("input[name='oral_intake']:checked").next().text().trim();
+            const intervention = {
+                clinical_stability: clinical_stability,
+                oral_intake: oral_intake
             }
 
             const microbiologicals = [];
@@ -320,8 +330,12 @@
 
             params.id = prescription_id;
             params.patient = patient;
+            if (type == "4")
+                params.intervention = intervention;
+            else
+                params.microbiologicals = microbiologicals;
+
             params.medications = medications;
-            params.microbiologicals = microbiologicals;
             params.concurrent_therapy = concurrent_therapy;
 
             updatePrescription(params);
@@ -401,6 +415,8 @@
 
                 data.results.forEach(it => {
                     let tr = "<tr>";
+                    if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
+                        tr = "<tr class='pointer active'>";
                     tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
                     tr += "<td>" + it.antimicrobial + "</td>";
                     tr += "<td>" + it.dosing_regimen + "</td>";
@@ -420,36 +436,37 @@
     function getMedications(id) {
         $("#medication_list").empty();
         $("#medication_list").append("<tr><td colspan='7'>Loading medications...</td></tr>");
+        $("#microbiological_result_list").empty();
         fetch("{{ url('prescription/get') }}/" + id, {
             method: "GET"
         })
             .then(res => res.json())
             .then(data => {
-                $("#microbiological_result_list").empty();
                 $("#medication_list").empty();
-
                 if (data.code == 200) {
-                    if (!jQuery.isEmptyObject(data.ams)) {
-                        const ams = data.ams;
+                    const ams = data.ams;
+                    if (!jQuery.isEmptyObject(ams.indication_use)) {
                         const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
+                    }
+                    if (!jQuery.isEmptyObject(ams.intervention)) {
+                        const clinical_index = CLINICAL_STABILITY.indexOf(ams.intervention.clinical_stability);
+                        const oral_index = ORAL_INTAKE.indexOf(ams.intervention.oral_intake);
 
-                        const microbiologicals = ams.microbiologicals;
-                        for (let i = 0; i < microbiologicals.length; i++) {
+                        $("input[name='clinical_stability']:eq(" + clinical_index + ")").prop("checked", true);
+                        $("input[name='oral_intake']:eq(" + oral_index + ")").prop("checked", true);
+                    }
+
+                    if (!jQuery.isEmptyObject(ams.microbiologicals)) {
+                        ams.microbiologicals.forEach(it => {
                             let tr = "<tr>";
-                            tr += "<td>" + moment(microbiologicals[i].date).format("MM/DD/YYYY") + " </td>";
-                            tr += "<td>" + microbiologicals[i].specimen + "</td>";
-                            tr += "<td>" + microbiologicals[i].pathogen + "</td>";
-                            tr += "<td>";
-                            tr += "<button class='btn btn-sm btn-success' onclick='editMicrobiological(" + i + ")'><i class='bi bi-pencil-fill'></i></button>"
-                            tr += "</td>";
-                            tr += "<td>";
-                            tr += "<button class='btn btn-sm btn-danger' onclick='deleteMicrobiological(" + i + ")'><i class='bi bi-trash-fill'></i></button>"
-                            tr += "</td>";
+                            tr += "<td>" + moment(it.date).format("MM/DD/YYYY") + " </td>";
+                            tr += "<td>" + it.specimen + "</td>";
+                            tr += "<td colspan='3'>" + it.pathogen + "</td>";
                             tr += "</tr>";
 
                             $("#microbiological_result_list").append(tr);
-                        }
+                        });
                     }
 
                     for (let i = 0; i < data.results.length; i++) {
@@ -520,7 +537,7 @@
         $("#medication_list tr:eq(" + id + ")").remove();
     }
 
-    function deleteMicrobiological(id){
+    function deleteMicrobiological(id) {
         $("#microbiological_result_list tr:eq(" + id + ")").remove();
     }
 

@@ -124,7 +124,7 @@
             const remarks = $("#pharmacy_remarks").val().trim();
             $(".is-invalid").removeClass("is-invalid");
             if (remarks == "") {
-                alert("Please fill in remarks");
+                alert("Please specify remarks or instructions for the receiver");
                 $("#pharmacy_remarks").addClass("is-invalid");
                 return;
             }
@@ -231,6 +231,8 @@
 
                 data.results.forEach(it => {
                     let tr = "<tr>";
+                    if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
+                        tr = "<tr class='pointer active'>";
                     tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
                     tr += "<td>" + it.antimicrobial + "</td>";
                     tr += "<td>" + it.dosing_regimen + "</td>";

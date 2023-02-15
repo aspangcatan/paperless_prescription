@@ -7,6 +7,8 @@
     const medicine_modal = new bootstrap.Modal(document.getElementById('medicine_modal'));
     const microbiological_modal = new bootstrap.Modal(document.getElementById('microbiological_modal'));
     const concurrent_modal = new bootstrap.Modal(document.getElementById('concurrent_modal'));
+    const intervention_modal = new bootstrap.Modal(document.getElementById('intervention_modal'));
+
 
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
     const error_modal = new bootstrap.Modal(document.getElementById('error_modal'));
@@ -33,6 +35,13 @@
             }
         });
 
+        $("body").on("click", "#concurrent_list tr", function () {
+            $("#concurrent_list tr.active").removeClass("active");
+            if ($("#form_prescription_type").val() == '4') {
+                $(this).addClass("active");
+            }
+        });
+
         $("#form_prescription_type").change(function () {
             $("#intervention_form_container").addClass("d-none");
             $("#indication_use_container").addClass("d-none");
@@ -41,9 +50,9 @@
             $("#sgpt_container").removeClass("d-none");
             $("#sgot_container").removeClass("d-none");
             $("#days_requested_container").removeClass("d-none");
-
+            $("#concurrent_table tbody tr").removeClass("pointer");
+            $("#concurrent_table tbody tr").removeClass("active");
             switch ($(this).val()) {
-                //REGULAR TEMPORARILY DISABLED
                 case "1":
                     break;
                 case "2":
@@ -58,6 +67,7 @@
                     $("#intervention_form_container").removeClass("d-none");
                     $("#microbiological_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#concurrent_table tbody tr").addClass("pointer");
                     break;
             }
         });
@@ -212,6 +222,9 @@
             if ($(this).val() == "") {
                 const count = $("#concurrent_list tr").length;
                 let tr = "<tr>";
+                if ($("#form_prescription_type").val() == '4')
+                    tr = "<tr class='pointer'>";
+
                 tr += "<td>" + moment(concurrent_date).format("MM/DD/YYYY") + " </td>";
                 tr += "<td>" + antimicrobial + "</td>";
                 tr += "<td>" + dosing_regimen + "</td>";
@@ -223,6 +236,7 @@
                 tr += "<td>";
                 tr += "<button class='btn btn-sm btn-danger' onclick='deleteConcurrent(" + count + ")'><i class='bi bi-trash-fill'></i></button>"
                 tr += "</td>";
+                tr += "<td class='d-none'>0</td>"
                 tr += "</tr>";
 
                 $("#concurrent_list").append(tr);
@@ -315,12 +329,11 @@
             const sgot = $("#form_sgot").val().trim();
             const days_requested = $("#form_days_requested").val().trim();
 
+            let params = {};
             let is_valid = true;
             $("#prescription_modal .is-invalid").removeClass("is-invalid");
             $("#prescription_modal .error_container").addClass("d-none");
             $("#prescription_modal .error_list").empty();
-
-            let params = {};
 
             if (hospital_id == "") {
                 is_valid = false;
@@ -429,7 +442,7 @@
                 const start_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(3)").text();
                 const stop_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(4)").text();
                 const buttons = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(5) button");
-
+                const for_switch = ($("#concurrent_list tr:eq(" + i + ")").hasClass("active")) ? 1 : 0;
                 //CHECK IF NEWLY ADDED
                 if (buttons.length > 0) {
                     concurrent_therapy.push({
@@ -439,15 +452,44 @@
                         dosing_regimen: dosing_regimen,
                         start_date: moment(start_date).format("YYYY-MM-DD"),
                         stop_date: moment(stop_date).format("YYYY-MM-DD"),
+                        //PRESCRIPTION ID
+                        for_switch: for_switch
                     });
                 }
             }
 
-            const clinical_stability = $("input[name='clinical_stability']:checked").next().text().trim();
-            const oral_intake = $("input[name='oral_intake']:checked").next().text().trim();
+            const concurrent_id = $("#concurrent_list tr.active td:last-child").text();
+            let clinical_stability = "";
+            let oral_intake = "";
+
+            for (let i = 0; i < $("input[name='clinical_stability']").length; i++) {
+                if ($("input[name='clinical_stability']:eq(" + i + ")").is(":checked")) {
+                    clinical_stability = CLINICAL_STABILITY[i];
+                    break;
+                }
+            }
+
+            for (let i = 0; i < $("input[name='oral_intake']").length; i++) {
+                if ($("input[name='oral_intake']:eq(" + i + ")").is(":checked")) {
+                    oral_intake = ORAL_INTAKE[i];
+                    break;
+                }
+            }
+
+            if(clinical_stability == "" && type == "4"){
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Clinical stability is required</li>");
+            }
+
+            if(oral_intake == "" && type == "4"){
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Oral intake is required</li>");
+            }
+
             const intervention = {
                 clinical_stability: clinical_stability,
-                oral_intake: oral_intake
+                oral_intake: oral_intake,
+                concurrent_id: concurrent_id
             }
 
             const microbiologicals = [];
@@ -509,6 +551,11 @@
             if (medications.length > 1 && is_valid) {
                 is_valid = false;
                 $("#prescription_modal .error_list").append("<li>Maximum of 1 medication per prescription</li>");
+            }
+
+            if (remarks == "") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Please specify remarks or instructions for the receiver</li>");
             }
 
             if (!is_valid) {
@@ -598,12 +645,19 @@
         });
     }
 
+    function switchToPo(hospital_id) {
+        intervention_modal.toggle();
+        getCurrentAntimicrobials(hospital_id);
+    }
+
     function makePrescription(id) {
         const hospital_id = $("#patient_id_" + id + " td:eq(0)").text();
         const name = $("#patient_id_" + id + " td:eq(1)").text();
         const birthdate = $("#patient_id_" + id + " td:eq(2)").text();
         const sex = $("#patient_id_" + id + " td:eq(3)").text();
 
+        $("#concurrent_table").removeClass("table-hover");
+        $("#concurrent_table tbody tr").removeClass("table-hover");
         $("#form_hospital_id").text(hospital_id);
         $("#form_patient").text(name);
         $("#form_birthdate").text(birthdate);
@@ -638,6 +692,7 @@
     }
 
     function viewPrescription(id) {
+        prescription_id = id;
         $("#btn_view_cart").addClass("d-none");
         $("#btn_add_microbiological").addClass("d-none");
         $("#btn_add_concurrent").addClass("d-none");
@@ -703,6 +758,36 @@
         prescription_modal.toggle();
     }
 
+    function getCurrentAntimicrobials(hospital_id) {
+        $("#current_antimicrobials").empty();
+        fetch("{{ route('getConcurrentTherapy') }}?hospital_id=" + hospital_id, {
+            method: "GET"
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code == 500) {
+                    $("#current_antimicrobials").append("<tr class='text-center'><td colspan='5'>Something went wrong while loading concurrent, please refresh browser</td></tr>");
+                    return;
+                }
+
+                data.results.forEach(it => {
+                    let tr = "<tr>";
+                    if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
+                        tr = "<tr class='pointer active'>";
+                    tr += "<td><input type='radio' name='current_antimicrobials' /></td>";
+                    tr += "<td>" + it.antimicrobial + "</td>";
+                    tr += "<td>" + it.dosing_regimen + "</td>";
+                    tr += "<td>" + moment(it.start_date).format("MM/DD/YYYY") + "</td>";
+                    tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
+                    tr += "</tr>";
+
+                    $("#current_antimicrobials").append(tr);
+                });
+            }).catch(err => {
+            console.log(err);
+        });
+    }
+
     function getConcurrentTherapy(hospital_id) {
         $("#concurrent_list").empty();
         fetch("{{ route('getConcurrentTherapy') }}?hospital_id=" + hospital_id, {
@@ -724,6 +809,7 @@
                     tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td></td>";
                     tr += "<td></td>";
+                    tr += "<td class='d-none'>" + it.prescription_id + "</td>";
                     tr += "</tr>";
 
                     $("#concurrent_list").append(tr);

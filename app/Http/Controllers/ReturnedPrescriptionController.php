@@ -12,6 +12,7 @@ use App\Models\Immunocompromising;
 use App\Models\IndicationUse;
 use App\Models\IndicationUseDetails;
 use App\Models\InfectiousDiagnosis;
+use App\Models\InterventionDetail;
 use App\Models\MicrobiologicalResult;
 use App\Models\NurseReview;
 use App\Models\PatientHistory;
@@ -88,19 +89,32 @@ class ReturnedPrescriptionController extends Controller
             if ($patient['type'] == "2") {
                 $indication_use_param = $request->indication_use;
                 $indication = IndicationUse::where('prescription_id', $prescription_id)->first();
+                if (!$indication) {
+                    $indication = new IndicationUse;
+                    $indication->prescription_id = $prescription_id;
+                }
                 $indication->description = $indication_use_param['description'];
                 $indication->save();
+            } else if ($patient['type'] == "4") {
+                $intervention_param = $request->intervention;
+                $intervention = InterventionDetail::where('prescription_id', $prescription_id)->first();
+                if (!$intervention) {
+                    $intervention = new InterventionDetail;
+                    $intervention->prescription_id = $prescription_id;
+                }
+                $intervention->clinical_stability = $intervention_param['clinical_stability'];
+                $intervention->oral_intake = $intervention_param['oral_intake'];
+                $intervention->save();
             }
 
             #INSERT MICROBIOLOGICAL
-            $microbiological_origin = MicrobiologicalResult::where('prescription_id', $prescription_id);
-            $microbiological_origin->forceDelete();
-
-            $microbiologicals = $request->microbiologicals;
-            for ($i = 0; $i < count($microbiologicals); $i++) {
-                $microbiologicals[$i]['prescription_id'] = $prescription_id;
+            if ($patient['type'] != '4') {
+                $microbiologicals = $request->microbiologicals;
+                for ($i = 0; $i < count($microbiologicals); $i++) {
+                    $microbiologicals[$i]['prescription_id'] = $prescription_id;
+                }
+                MicrobiologicalResult::insert($microbiologicals);
             }
-            MicrobiologicalResult::insert($microbiologicals);
 
             #DONT REMOVE CONCURRENT THERAPY THAT ARE APPROVED BY THE IPCC
             #REQUEST FROM IT TO MANUALLY DELETE THE CONCURRENT THERAPY
