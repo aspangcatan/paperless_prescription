@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Medicine;
+use App\Models\PrescribedMedicine;
 use Illuminate\Http\Request;
 
 class MedicineController extends Controller
@@ -28,7 +29,12 @@ class MedicineController extends Controller
     function getMedicineList(Request $request)
     {
         try {
-            $search_filters = [['status', '=', '1']];
+            $type = $request->type;
+            if ($type == "4") {
+                $type = "2";
+            }
+
+            $search_filters = [['status', '=', '1'], ['type', '=', $type]];
             if (!$request->medicine == "")
                 $search_filters[] = ['description', 'like', "%$request->medicine%"];
 
@@ -48,6 +54,15 @@ class MedicineController extends Controller
         try {
             $message = "Medicine updated";
             $medicine = Medicine::find($request->id);
+
+            #CHECK IF RENAMING DESCRIPTION
+            if ($request->description != $medicine->description) {
+                $prescribed_drugs = PrescribedMedicine::where('description', $medicine->description)->get()->first();
+                if ($prescribed_drugs) {
+                    return response(['code' => 500, 'message' => "Medicine is already used in prescription"]);
+                }
+            }
+
             if (!$medicine) {
                 $message = "New medicine added";
                 $medicine = new Medicine;
@@ -55,7 +70,7 @@ class MedicineController extends Controller
 
             $medicine->description = $request->description;
             $medicine->unit = $request->unit;
-            $medicine->type = 1;
+            $medicine->type = $request->type;
             $medicine->status = $request->status;
             $medicine->save();
             return response(['code' => 200, 'message' => $message]);

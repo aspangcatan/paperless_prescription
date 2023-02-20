@@ -8,7 +8,7 @@
     const remarks_modal = new bootstrap.Modal(document.getElementById('remarks_modal'));
     let button_clicked = "";
     let prescription_id;
-
+    let page = 0;
     let definitive_details = {};
     $(document).ready(function () {
 
@@ -24,6 +24,21 @@
             $(this).attr('type', 'text')
         });
 
+        $("#btn_next").click(function () {
+            page++;
+            getPrescriptions();
+            $("#btn_prev").removeClass("d-none");
+        });
+
+        $("#btn_prev").click(function () {
+            if (page == 0) return;
+            if (page == 1) {
+                $("#btn_prev").addClass("d-none");
+            }
+            page--;
+            getPrescriptions();
+        });
+
         $("#form_prescription_type").change(function () {
             $("#intervention_form_container").addClass("d-none");
             $("#indication_use_container").addClass("d-none");
@@ -32,10 +47,18 @@
             $("#sgpt_container").removeClass("d-none");
             $("#sgot_container").removeClass("d-none");
             $("#days_requested_container").removeClass("d-none");
+            $("#concurrent_table tbody tr").removeClass("pointer");
+            $("#concurrent_table tbody tr").removeClass("active");
+            $(".ams_container").removeClass("d-none");
 
+            $("#medication_list").empty();
+            $("#medicine_list").empty();
             switch ($(this).val()) {
-                //REGULAR TEMPORARILY DISABLED
+                case "":
+                    $(".ams_container").addClass("d-none");
+                    break;
                 case "1":
+                    $(".ams_container").addClass("d-none");
                     break;
                 case "2":
                     $("#indication_use_container").removeClass("d-none");
@@ -49,6 +72,7 @@
                     $("#intervention_form_container").removeClass("d-none");
                     $("#microbiological_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#concurrent_table tbody tr").addClass("pointer");
                     break;
             }
         });
@@ -101,6 +125,13 @@
             remarks_modal.toggle();
             if (button_clicked == "APPROVE") {
                 let days_approved = $("input[name='days_approved']:checked").next().text();
+                let updated_quantity = $("#medication_list tr:eq(0) td:eq(3) input").val();
+
+                if (updated_quantity <= 0) {
+                    alert("Quantity ordered must be greater than 0");
+                    return;
+                }
+
                 if (days_approved == "") {
                     alert("Please specify number of days");
                     return;
@@ -116,6 +147,7 @@
                 }
 
                 params.days_approved = days_approved;
+                params.updated_quantity = updated_quantity;
                 approvePrescription(params);
             } else if (button_clicked == "REJECT") {
                 rejectPrescription(params);
@@ -193,11 +225,13 @@
 
     function getConcurrentTherapy(hospital_id) {
         $("#concurrent_list").empty();
+        $("#concurrent_list").append("<tr class='text-center'><td colspan='5'>Loading concurrents, please wait ...</td></tr>");
         fetch("{{ route('getConcurrentTherapy') }}?hospital_id=" + hospital_id, {
             method: "GET"
         })
             .then(res => res.json())
             .then(data => {
+                $("#concurrent_list").empty();
                 if (data.code == 500) {
                     $("#concurrent_list").append("<tr class='text-center'><td colspan='5'>Something went wrong while loading concurrent, please refresh browser</td></tr>");
                     return;
@@ -205,7 +239,7 @@
 
                 data.results.forEach(it => {
                         let tr = "<tr>";
-                        if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
+                        if (it.for_switch && it.prescription_id == prescription_id && $("#form_prescription_type").val() == "4")
                             tr = "<tr class='pointer active'>";
 
                         tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
@@ -222,6 +256,7 @@
                 );
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         });
     }
 
@@ -266,6 +301,7 @@
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
                                             <td>` + it.unit + `</td>
+                                            <td><input type="number" class="form-control text-center" value="` + it.quantity_ordered + `"/></td>
                                             <td>` + it.frequency + `</td>
                                             <td></td>
                                          </tr>`;
@@ -275,6 +311,7 @@
                 }
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         });
     }
 
@@ -295,6 +332,7 @@
                 }
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         })
     }
 
@@ -302,7 +340,8 @@
         const filter_patient = $("#filter_patient").val().trim();
         const filter_date = $("#filter_date").val().trim();
         const filter_station = "";
-        const page = 0;
+        $("#prescription_list").empty();
+        $("#prescription_list").append("<tr><td colspan='6'>Loading data, please wait ...</td></tr>");
         fetch("{{ url('icc_review/get') }}?filter_patient=" + filter_patient +
             "&filter_date=" + filter_date +
             "&filter_station=" + filter_station +
@@ -311,13 +350,25 @@
         })
             .then(res => res.json())
             .then(data => {
+                $("#pagination_container").addClass("d-none")
                 $("#prescription_list").empty();
+                $("#btn_next").addClass("d-none");
                 if (data.results.length < 1) {
                     $("#prescription_list").append("<tr><td colspan='6'>No record found</td></tr>");
                     return;
                 }
 
-                data.results.forEach(it => {
+                $("#pagination_container").removeClass("d-none")
+                let max_visible = data.results.length;
+                if (max_visible == 11) {
+                    max_visible = 10;
+                    $("#btn_next").removeClass("d-none");
+                }
+
+                $("#page_items_count").text(((page * 10) + 1) + " - " + ((page * 10) + max_visible));
+
+                for (let i = 0; i < max_visible; i++) {
+                    const it = data.results[i];
                     const bg = (it.urgency == "Urgent") ? "bg-danger" : "bg-success";
                     const tr = ` <tr id='prescription_id_` + it.id + `'>
                                 <td><span class="badge ` + bg + `">` + it.urgency + `</span></td>
@@ -347,9 +398,10 @@
                             </tr>`;
 
                     $("#prescription_list").append(tr);
-                });
+                }
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         });
     }
 
@@ -377,8 +429,10 @@
                 success_modal.toggle();
 
                 sendWebsocketServer({
-                    action: "NOTIFY ROLE",
-                    body: {role: "Pharmacist"}
+                    action: "NOTIFY STATION",
+                    body: {
+                        station: $("#form_station").val()
+                    }
                 })
                 getPrescriptions();
             }).catch(err => {

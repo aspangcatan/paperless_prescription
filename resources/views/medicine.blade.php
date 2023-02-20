@@ -26,6 +26,7 @@
                         <tr>
                             <th>Description</th>
                             <th>Unit</th>
+                            <th style="width: 20%">Type</th>
                             <th style="width: 10%">Status</th>
                             <th style="width:4%"></th>
                         </tr>

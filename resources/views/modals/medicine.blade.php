@@ -24,6 +24,18 @@
                         <input type="text" class="form-control" id="medicine_unit">
                     </div>
                 </div>
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Type</label>
+                    <div class="col-sm-9">
+                        <select class="form-control" id="medicine_type">
+                            <option value="" selected>Select type</option>
+                            <option value="1">Regular</option>
+                            <option value="2">Restricted</option>
+                            <option value="3">Seventh Day Auto Stop</option>
+                            <option value="5">Monitored</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="medicine_status">
                     <label class="form-check-label">

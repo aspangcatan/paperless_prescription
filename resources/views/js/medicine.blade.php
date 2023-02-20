@@ -1,5 +1,5 @@
 <script src="js/moment.min.js"></script>
-<script src="js/constant.js"></script>
+<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
 <script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const medicine_modal = new bootstrap.Modal(document.getElementById('medicine_modal'));
@@ -21,6 +21,7 @@
         $("#btn_save_medicine").click(function () {
             const description = $("#medicine_description").val().trim();
             const unit = $("#medicine_unit").val().trim();
+            const type = $("#medicine_type").val();
             const status = ($("input[name='medicine_status']").is(":checked")) ? 1 : 0;
 
             let is_valid = true;
@@ -38,6 +39,11 @@
                 $("#medicine_modal .error_list").append("<li>Unit is required</li>");
             }
 
+            if (type == "") {
+                is_valid = false;
+                $("#medicine_modal .error_list").append("<li>Type is required</li>");
+            }
+
             if (!is_valid) {
                 $("#medicine_modal .error_container").removeClass("d-none");
                 return;
@@ -47,9 +53,11 @@
                 id: $(this).val(),
                 description: description,
                 unit: unit,
+                type: type,
                 status: status
             }
 
+            console.log(params);
             insertMedicine(params);
         });
 
@@ -67,19 +75,19 @@
 
         const description = $("#medicine_id_" + id + " td:eq(0)").text();
         const unit = $("#medicine_id_" + id + " td:eq(1)").text();
-        const status = $("#medicine_id_" + id + " td:eq(2)").text();
-
-        console.log(description);
-        console.log(unit);
-        console.log(status);
+        const type = $("#medicine_id_" + id + " td:last-child").text();
+        const status = $("#medicine_id_" + id + " td:eq(3)").text();
 
         $("#btn_save_medicine").val(id);
         $("#medicine_description").val(description);
         $("#medicine_unit").val(unit);
+        $("#medicine_type").val(type);
+
         if (status == "Active") {
             $("input[name='medicine_status']").prop("checked", true);
+        } else {
+            $("input[name='medicine_status']").prop("checked", false);
         }
-
         medicine_modal.toggle();
     }
 
@@ -100,7 +108,7 @@
                     let status = "Inactive"
                     let bg = "badge bg-danger text-white fw-bold";
 
-                    if (it.status == "1") {
+                    if (it.status == 1) {
                         status = "Active";
                         bg = "badge bg-success text-white fw-bold"
                     }
@@ -109,12 +117,14 @@
                         <tr id="medicine_id_` + it.id + `">
                            <td>` + it.description + `</td>
                            <td>` + it.unit + `</td>
+                           <td>` + PRESCRIPTION_TYPES[it.type] + `</td>
                            <td><span class="` + bg + `">` + status + `</span></td>
                            <td>
                                 <button class="btn btn-sm btn-success" onclick="viewMedicine('` + it.id + `')">
                                     <i class="bi bi-pencil-fill"></i>
                                 </button>
                            </td>
+                           <td class="d-none">` + it.type + `</td>
                         </tr>`;
                     $("#medicine_list").append(tr);
                 }
@@ -123,6 +133,7 @@
                 });
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         });
     }
 
@@ -152,6 +163,7 @@
                 getMedicine("");
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         });
     }
 
@@ -201,7 +213,8 @@
     function clearForms() {
         $("#medicine_description").val("");
         $("#medicine_unit").val("");
-        $("input[name='medicine_status']").prop("checked", false);
+        $("#medicine_type").val("");
+        $("input[name='medicine_status']").prop("checked", true);
     }
 
     function logout() {

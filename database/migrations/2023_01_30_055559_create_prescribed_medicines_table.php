@@ -21,12 +21,10 @@ class CreatePrescribedMedicinesTable extends Migration
             $table->string("dosage_strength", 100);
             $table->string("dosage_unit", 100);
             $table->string("frequency", 100);
-            $table->integer("availability")->nullable();
-
-//            $table->integer("quantity_ordered");
-//            $table->integer("quantity_rendered")->nullable();
-//            $table->integer("quantity_returned")->nullable();
-
+            $table->integer("quantity_ordered")->nullable();
+            $table->integer("quantity_rendered")->nullable();
+            $table->integer("quantity_returned")->nullable();
+            $table->dateTime('date_rendered')->nullable();
             $table->foreign('prescription_id')->references('id')->on('prescriptions')->onDelete('cascade');
         });
     }

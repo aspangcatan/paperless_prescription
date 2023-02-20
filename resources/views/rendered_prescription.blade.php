@@ -44,7 +44,7 @@
         </div>
     </div>
     @include('modals/prescription')
-    @include('modals/common')
+    @include('modals/return')
 @stop
 @section('js')
     @include('js.rendered_prescription')

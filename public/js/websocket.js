@@ -1,4 +1,3 @@
-// const ws = new WebSocket("ws://192.168.137.1:2020");
 // const ws = new WebSocket("ws://192.168.5.178:2020");
 const ws = new WebSocket("ws://localhost:2020");
 
@@ -27,7 +26,6 @@ ws.onopen = function () {
             key: key
         }
     }
-
 
     ws.send(JSON.stringify(data));
 }

@@ -23,6 +23,9 @@ class CreateConcurrentTherapyTable extends Migration
             $table->date('start_date');
             $table->date('stop_date');
             $table->integer('for_switch')->nullable();
+            $table->integer('days_approved')->nullable();
+            $table->integer('approved_by')->nullable();
+            $table->datetime('date_approved')->nullable();
 
             $table->foreign('prescription_id')->references('id')->on('prescriptions')->onDelete('cascade');
         });

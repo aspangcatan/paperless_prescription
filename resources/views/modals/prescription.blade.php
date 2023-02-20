@@ -73,7 +73,7 @@
                                     <select class="form-control fw-bold text-center bg-white"
                                             id="form_prescription_type">
                                         <option value="">Select type</option>
-                                        <option value="1" disabled>Regular</option>
+                                        <option value="1">Regular</option>
                                         <option value="2">Restricted</option>
                                         <option value="3">Seventh Day Auto Stop</option>
                                         <option value="4">Intravenous to Oral</option>
@@ -286,13 +286,13 @@
                         <div class="table-responsive">
                             <table class="table text-center v-center p-1 m-0">
                                 <thead>
-                                <tr>
+                                <tr id="table_header">
                                     <th>Medicine</th>
                                     <th style="width: 20%">Strength</th>
                                     <th style="width: 10%">Unit</th>
-                                    <th class="d-none">Quantity</th>
+                                    <th style="width: 10%">Quantity<br />Ordered</th>
                                     <th style="width: 15%">Frequency</th>
-                                    <th colspan="2" style="width: 15%" id="quantity_render_th"></th>
+                                    <th colspan="2" style="width: 8%" id="quantity_render_th"></th>
                                 </tr>
                                 </thead>
                                 <tbody id="medication_list" style="font-size: 12px">
@@ -458,7 +458,7 @@
 
 <div class="modal fade" id="medicine_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-body">
                 <div class="text-center text-dark mb-5" style="font-size: 30px">Antimicroibals</div>
@@ -575,97 +575,6 @@
                 <div class="text-center mt-5">
                     <button class="btn btn-primary" id="btn_save_concurrent">SAVE</button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">CLOSE</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="intervention_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
-     data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="card-title p-1" style="font-size: 24px">Intravenous to oral (IV-to-PO) Antimicrobial Therapy Switch</div>
-                <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" style="background: rgb(241,244,252)">
-                <div class="card">
-                    <div class="card-body">
-                        <h6 class="card-title">Current Antimicrobials</h6>
-                        <div class="table-responsive">
-                            <table class="table text-center">
-                                <thead>
-                                <tr>
-                                    <th style="width: 4%"></th>
-                                    <th>Antimicrobial</th>
-                                    <th>Dosage</th>
-                                    <th style="width: 10%">Start date</th>
-                                    <th style="width: 10%">Stop date</th>
-                                </tr>
-                                </thead>
-                                <tbody id="current_antimicrobials" style="font-size: 12px"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="card" id="intervention_form_container">
-                    <div class="card-body">
-                        <h6 class="card-title">Your patient fulfills the following criteria to switch to oral (PO)
-                            antimicrobial</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div>Clinical Stability:</div>
-                                <div class="mt-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="clinical_stability">
-                                        <label class="form-check-label">Afebrile</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="clinical_stability">
-                                        <label class="form-check-label">Downward trend or normalization of
-                                            Inflammatory markers</label>
-                                        <small class="d-block">(C-reactive protein, white blood cell count,
-                                            procalcitonin)</small>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="clinical_stability">
-                                        <label class="form-check-label">Stable vital signs</label>
-                                        <small class="d-block">(No unexplained tachycardia, hypotension,
-                                            tachypnea)</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div>Able to tolerate oral intake:</div>
-                                <div class="mt-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="oral_intake">
-                                        <label class="form-check-label">Patient is not nil by mouth</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="oral_intake">
-                                        <label class="form-check-label">Tolerating oral diet, medications and/or
-                                            enteral feeds</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="oral_intake">
-                                        <label class="form-check-label">Oral abosrption is not compromised</label>
-                                        <small class="d-block">(e.g. No vomiting or diarrhea, malabsorptive
-                                            disorder)</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <textarea class="form-control" style="height: 150px" id="intervention_remarks"
-                              placeholder="Remarks"></textarea>
-                </div>
-
-                <div class="text-end mt-5">
-                    <button class="btn btn-primary" id="btn_intervention_submit" style="width: 103.58px">SUBMIT</button>
                 </div>
             </div>
         </div>

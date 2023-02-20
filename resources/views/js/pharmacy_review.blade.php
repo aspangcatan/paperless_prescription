@@ -10,11 +10,12 @@
     let definitive_details = {};
     let button_clicked = "";
     let prescription_id;
-
+    let page = 0;
 
     $(document).ready(function () {
 
-        $("#quantity_render_th").text("Available?");
+        $("#quantity_render_th").text("Quantity Render");
+        $("#btn_reject").addClass("d-none");
 
         STATIONS.forEach(it => {
             $("#form_station").append("<option>" + it + "</option>");
@@ -34,6 +35,21 @@
             $(this).attr('type', 'text')
         });
 
+        $("#btn_next").click(function () {
+            page++;
+            getPrescriptions();
+            $("#btn_prev").removeClass("d-none");
+        });
+
+        $("#btn_prev").click(function () {
+            if (page == 0) return;
+            if (page == 1) {
+                $("#btn_prev").addClass("d-none");
+            }
+            page--;
+            getPrescriptions();
+        });
+
         $("#form_prescription_type").change(function () {
             $("#intervention_form_container").addClass("d-none");
             $("#indication_use_container").addClass("d-none");
@@ -42,10 +58,18 @@
             $("#sgpt_container").removeClass("d-none");
             $("#sgot_container").removeClass("d-none");
             $("#days_requested_container").removeClass("d-none");
+            $("#concurrent_table tbody tr").removeClass("pointer");
+            $("#concurrent_table tbody tr").removeClass("active");
+            $(".ams_container").removeClass("d-none");
 
+            $("#medication_list").empty();
+            $("#medicine_list").empty();
             switch ($(this).val()) {
-                //REGULAR TEMPORARILY DISABLED
+                case "":
+                    $(".ams_container").addClass("d-none");
+                    break;
                 case "1":
+                    $(".ams_container").addClass("d-none");
                     break;
                 case "2":
                     $("#indication_use_container").removeClass("d-none");
@@ -59,6 +83,7 @@
                     $("#intervention_form_container").removeClass("d-none");
                     $("#microbiological_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#concurrent_table tbody tr").addClass("pointer");
                     break;
             }
         });
@@ -86,14 +111,14 @@
             for (let i = 0; i < $("#medication_list tr").length; i++) {
                 const tr = $("#medication_list tr:eq(" + i + ")");
                 const description = tr.find("td:eq(1)").text();
-                const availability = tr.find("td:eq(5) select").val();
-                if (!availability) {
-                    tr.find("td:eq(5) select").addClass("is-invalid");
+                const quantity_rendered = tr.find("td:eq(6) input").val();
+                if (!quantity_rendered) {
+                    tr.find("td:eq(6) input").addClass("is-invalid");
                     is_filled_up = false;
                     continue;
                 }
 
-                if (availability > 0) {
+                if (quantity_rendered > 0) {
                     li += `<li style="font-size: 13px">
                                <span class="me-2">` + description + `</span><i class="bi bi-check-circle-fill text-success"></i>
                            </li>`;
@@ -107,7 +132,7 @@
             $("#rendered_list").html(li);
 
             if (!is_filled_up) {
-                alert("Please specify if it is available");
+                alert("Please specify quantity rendered, put '0' if not available");
                 return;
             }
 
@@ -120,7 +145,7 @@
             remarks_modal.toggle();
         });
 
-        $("#btn_render").click(function () {
+        $("#btn_render,#btn_render_doctor").click(function () {
             const remarks = $("#pharmacy_remarks").val().trim();
             $(".is-invalid").removeClass("is-invalid");
             if (remarks == "") {
@@ -133,18 +158,27 @@
             for (let i = 0; i < $("#medication_list tr").length; i++) {
                 const tr = $("#medication_list tr:eq(" + i + ")");
                 const id = tr.find("td:eq(0)").text();
-                const availability = tr.find("td:eq(5) select").val();
+                const quantity_rendered = tr.find("td:eq(6) input").val();
 
-                medications.push({id: id, availability: availability});
+                if ($(this).text().trim() == "Proceed" && quantity_rendered <= 0 & $("#form_prescription_type").val() != "1") {
+                    alert("Antibiotic medications not allowed to be rendered if not available, must be returned to the doctor");
+                    return;
+                }
+                medications.push({id: id, quantity_rendered: quantity_rendered});
             }
 
             const params = {
-                prescription_id: prescription_id,
+                id: prescription_id,
+                type: $("#form_prescription_type").val(),
                 remarks: remarks,
+                origin: "PHARMACY",
                 medications: medications
             }
 
-            renderPrescription(params);
+            if ($(this).text().trim() == "Proceed") {
+                renderPrescription(params);
+            } else
+                rejectPrescription(params);
         });
 
         getPrescriptions();
@@ -231,7 +265,7 @@
 
                 data.results.forEach(it => {
                     let tr = "<tr>";
-                    if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
+                    if (it.for_switch && it.prescription_id == prescription_id && $("#form_prescription_type").val() == "4")
                         tr = "<tr class='pointer active'>";
                     tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
                     tr += "<td>" + it.antimicrobial + "</td>";
@@ -246,6 +280,7 @@
                 });
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         });
     }
 
@@ -291,13 +326,10 @@
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
                                             <td>` + it.unit + `</td>
+                                            <td>` + it.quantity_ordered + `</td>
                                             <td>` + it.frequency + `</td>
                                             <td colspan="2">
-                                                <select class="form-control text-center">
-                                                    <option value="" selected></option>
-                                                    <option value="1">Available</option>
-                                                    <option value="0">Not available</option>
-                                                </select>
+                                                <input type="number" class="form-control text-center"/>
                                             </td>
                                          </tr>`;
 
@@ -306,6 +338,7 @@
                 }
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         });
     }
 
@@ -326,27 +359,43 @@
                 }
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         })
     }
 
     function getPrescriptions() {
         const filter_patient = $("#filter_patient").val().trim();
         const filter_date = $("#filter_date").val().trim();
-        const page = 0;
+        const filter_station = "";
+        $("#prescription_list").empty();
+        $("#prescription_list").append("<tr><td colspan='7'>Loading data, please wait ...</td></tr>");
         fetch("{{ url('pharmacy_review/get') }}?filter_patient=" + filter_patient +
             "&filter_date=" + filter_date +
+            "&filter_station=" + filter_station +
             "&page=" + page, {
             method: "GET"
         })
             .then(res => res.json())
             .then(data => {
+                $("#pagination_container").addClass("d-none")
                 $("#prescription_list").empty();
+                $("#btn_next").addClass("d-none");
                 if (data.results.length < 1) {
-                    $("#prescription_list").append("<tr><td colspan='6'>No record found</td></tr>");
+                    $("#prescription_list").append("<tr><td colspan='7'>No record found</td></tr>");
                     return;
                 }
 
-                data.results.forEach(it => {
+                $("#pagination_container").removeClass("d-none")
+                let max_visible = data.results.length;
+                if (max_visible == 11) {
+                    max_visible = 10;
+                    $("#btn_next").removeClass("d-none");
+                }
+
+                $("#page_items_count").text(((page * 10) + 1) + " - " + ((page * 10) + max_visible));
+
+                for(let i=0; i<max_visible; i++){
+                    const it = data.results[i];
                     const bg = (it.urgency == "Urgent") ? "bg-danger" : "bg-success";
                     const tr = ` <tr id='prescription_id_` + it.id + `'>
                                 <td><span class="badge ` + bg + `">` + it.urgency + `</span></td>
@@ -377,9 +426,10 @@
                             </tr>`;
 
                     $("#prescription_list").append(tr);
-                });
+                }
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         });
     }
 
@@ -417,6 +467,7 @@
     }
 
     function rejectPrescription(params) {
+        render_modal.toggle();
         prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('reject_prescription') }}', {

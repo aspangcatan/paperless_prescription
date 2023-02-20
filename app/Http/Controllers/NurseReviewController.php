@@ -42,8 +42,8 @@ class NurseReviewController extends Controller
                         }
                     }
                 })
-                ->skip(0)
-                ->take(10)
+                ->skip($request->page)
+                ->take(11)
                 ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex','n.created_at as date_forwarded']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {

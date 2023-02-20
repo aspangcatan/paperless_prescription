@@ -3,11 +3,16 @@
 <script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
+    const return_modal = new bootstrap.Modal(document.getElementById('return_modal'));
+
     let button_clicked = "";
     let prescription_id;
+    let med_id = 0;
     $(document).ready(function () {
-
-        $("#quantity_render_th").text("Status");
+        $("#quantity_render_th").attr("colspan", 1);
+        $("#quantity_render_th").text("Quantity Rendered");
+        $("#table_header").append("<th>Quantity Returned</th>");
+        $("#table_header").append("<th></th>");
         $("#btn_submit").addClass("d-none");
         $("#btn_reject").addClass("d-none");
 
@@ -27,6 +32,61 @@
             getPrescriptions();
         });
 
+        $("#btn_return").click(function () {
+            const amount = $("#return_amount").val();
+            const remarks = $("#return_remarks").val().trim();
+
+            let is_valid = true;
+            $("#return_modal .is-invalid").removeClass("is-invalid");
+            $("#return_modal .error_container").addClass("d-none");
+            $("#return_modal .error_list").empty();
+
+            if (!amount || amount <= 0) {
+                is_valid = false;
+                $("#return_modal .error_list").append("<li>Amount must be  greater than 0</li>");
+            }
+
+            if (remarks == "") {
+                is_valid = false;
+                $("#return_modal .error_list").append("<li>Remarks is required</li>");
+            }
+
+            if (!is_valid) {
+                $("#return_modal .error_container").removeClass("d-none");
+                return;
+            }
+
+            const params = {
+                id: med_id,
+                amount: amount,
+                remarks: remarks
+            }
+
+            return_modal.toggle();
+            prescription_modal.toggle();
+            $("#spinner").removeClass("d-none");
+            fetch("{{route('return_meds')}}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                body: JSON.stringify(params)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    $("#spinner").addClass("d-none");
+                    if (data.code == 500) {
+                        toastr.error(data.message, "Ooops");
+                        return;
+                    }
+                    toastr.success(data.message, "Information");
+                }).catch(err => {
+                console.log(err);
+                toastr.error("Something went wrong, please reload page", "Ooops");
+            })
+        });
+
         $("#form_prescription_type").change(function () {
             $("#intervention_form_container").addClass("d-none");
             $("#indication_use_container").addClass("d-none");
@@ -35,10 +95,18 @@
             $("#sgpt_container").removeClass("d-none");
             $("#sgot_container").removeClass("d-none");
             $("#days_requested_container").removeClass("d-none");
+            $("#concurrent_table tbody tr").removeClass("pointer");
+            $("#concurrent_table tbody tr").removeClass("active");
+            $(".ams_container").removeClass("d-none");
 
+            $("#medication_list").empty();
+            $("#medicine_list").empty();
             switch ($(this).val()) {
-                //REGULAR TEMPORARILY DISABLED
+                case "":
+                    $(".ams_container").addClass("d-none");
+                    break;
                 case "1":
+                    $(".ams_container").addClass("d-none");
                     break;
                 case "2":
                     $("#indication_use_container").removeClass("d-none");
@@ -52,6 +120,7 @@
                     $("#intervention_form_container").removeClass("d-none");
                     $("#microbiological_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#concurrent_table tbody tr").addClass("pointer");
                     break;
             }
         });
@@ -133,7 +202,6 @@
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data);
                 if (data.code == 500) {
                     $("#concurrent_list").append("<tr class='text-center'><td colspan='5'>Something went wrong while loading concurrent, please refresh browser</td></tr>");
                     return;
@@ -156,6 +224,7 @@
                 });
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         });
     }
 
@@ -168,7 +237,6 @@
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data);
                 $("#medication_list").empty();
                 if (data.code == 200) {
                     const ams = data.ams;
@@ -197,14 +265,21 @@
                     }
 
                     data.results.forEach(it => {
-                        const bg = (!it.availability || it.availability == 0) ? "bg-danger text-white" : "";
-                        const availability = (it.availability == "1") ? "Available" : "Not available";
+                        const bg = (!it.quantity_rendered || it.quantity_rendered == 0) ? "bg-danger text-white" : "";
+                        const quantity_returned = (!it.quantity_returned || it.quantity_returned == 0) ? 0 : it.quantity_returned;
                         const tr = `<tr class="` + bg + `">
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
                                             <td>` + it.unit + `</td>
+                                            <td>` + it.quantity_ordered + `</td>
                                             <td>` + it.frequency + `</td>
-                                            <td>` + availability + `</td>
+                                            <td>` + it.quantity_rendered + `</td>
+                                            <td>` + quantity_returned + `</td>
+                                             <td>
+                                                <button class="btn btn-sm bg-success" onclick="returnMeds(` + it.id + `)">
+                                                    <i class="bi bi-arrow-return-left text-white"></i>
+                                                </button>
+                                            </td>
                                          </tr>`;
 
                         $("#medication_list").append(tr);
@@ -212,7 +287,13 @@
                 }
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         });
+    }
+
+    function returnMeds(id) {
+        med_id = id;
+        return_modal.toggle();
     }
 
     function getPrescriptionLogs(id) {
@@ -232,6 +313,7 @@
                 }
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong", "Ooops");
         })
     }
 
@@ -240,6 +322,7 @@
         const filter_station = $("#filter_station").val().trim();
         const filter_date = $("#filter_date").val().trim();
         const page = 0;
+
         fetch("{{ url('rendered_prescription/get') }}?filter_patient=" + filter_patient +
             "&filter_date=" + filter_date +
             "&filter_station=" + filter_station +
@@ -288,6 +371,7 @@
                 });
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong, please reload page", "Ooops");
         });
     }
 

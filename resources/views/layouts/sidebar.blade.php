@@ -15,12 +15,12 @@
                     <span>Nurse Review</span>
                 </a>
             </li>
-                <li class="nav-item">
-                    <a class="nav-link collapsed" href="{{ route('rendered_prescription') }}">
-                        <i class="bi bi-grid"></i>
-                        <span>Rendered Prescription</span>
-                    </a>
-                </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="{{ route('rendered_prescription') }}">
+                    <i class="bi bi-grid"></i>
+                    <span>Rendered Prescription</span>
+                </a>
+            </li>
         @endif
         @if(session('access_rights') == "ICC")
             <li class="nav-item">
@@ -29,12 +29,30 @@
                     <span>AMS Review</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="{{ route('ams_summary') }}">
+                    <i class="bi bi-grid"></i>
+                    <span>AMS Summary</span>
+                </a>
+            </li>
         @endif
         @if(session('access_rights') == "Pharmacist" || session('access_rights') == "Pharmacist Admin")
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{ route('pharmacy_review') }}">
                     <i class="bi bi-grid"></i>
                     <span>Pharmacy Review</span>
+                </a>
+            </li>
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="{{ route('returned_meds') }}">
+                        <i class="bi bi-grid"></i>
+                        <span>Returned Medicines</span>
+                    </a>
+                </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="{{ route('issuances') }}">
+                    <i class="bi bi-grid"></i>
+                    <span>Medicine Issuances</span>
                 </a>
             </li>
         @endif

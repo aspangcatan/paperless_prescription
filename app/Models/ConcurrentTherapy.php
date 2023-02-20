@@ -18,7 +18,8 @@ class ConcurrentTherapy extends Model
         'antimicrobial',
         'dosing_regimen',
         'start_date',
-        'end_date'
+        'end_date',
+        'days_approved'
     ];
 
     public $timestamps = false;

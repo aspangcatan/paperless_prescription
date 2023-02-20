@@ -12,7 +12,10 @@
                 </ul>
                 <h6 class="card-title">Write some remarks</h6>
                 <textarea class="form-control" style="height: 100px" id="pharmacy_remarks"></textarea>
-                <button class="btn btn-primary mt-2 float-end" id="btn_render">Proceed</button>
+                <div class="mt-2 text-end">
+                    <button class="btn btn-danger me-1" id="btn_render_doctor">Return to Doctor</button>
+                    <button class="btn btn-primary ms-1" id="btn_render">Proceed</button>
+                </div>
             </div>
         </div>
     </div>

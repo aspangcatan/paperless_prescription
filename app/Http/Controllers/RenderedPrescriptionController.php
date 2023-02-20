@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ErrorLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class RenderedPrescriptionController extends Controller
@@ -32,7 +34,18 @@ class RenderedPrescriptionController extends Controller
                 ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex','n.created_at as date_forwarded']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
+            self::insertErrorLogs(Auth::id(), 'returnMeds', $request, $exception->getMessage());
             return response(['code' => 500, 'message' => $exception->getMessage()]);
         }
+    }
+
+    public function insertErrorLogs($action_by, $action, $params, $details)
+    {
+        $log = new ErrorLog;
+        $log->action_by = $action_by;
+        $log->action = $action;
+        $log->params = $params;
+        $log->details = $details;
+        $log->save();
     }
 }

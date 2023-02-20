@@ -31,12 +31,8 @@ class CreatePrescriptionsTable extends Migration
             $table->string('transaminases', 50)->nullable();
             $table->string('sgpt', 50)->nullable();
             $table->string('sgot', 50)->nullable();
-            $table->integer('status')->default(1);
             $table->integer('days_requested')->nullable();
-            $table->integer('days_approved')->nullable();
-            $table->integer('approved_by')->nullable();
-            $table->integer('latest_approved_id')->nullable();
-            $table->dateTime('date_approved')->nullable();
+            $table->integer('status')->default(1);
             $table->timestamps();
         });
     }

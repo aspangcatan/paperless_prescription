@@ -85,44 +85,46 @@ class ReturnedPrescriptionController extends Controller
             $prescription->days_requested = $patient['days_requested'];
             $prescription->save();
 
-            #REINSERT AMS
-            if ($patient['type'] == "2") {
-                $indication_use_param = $request->indication_use;
-                $indication = IndicationUse::where('prescription_id', $prescription_id)->first();
-                if (!$indication) {
-                    $indication = new IndicationUse;
-                    $indication->prescription_id = $prescription_id;
+            if ($patient['type'] != "1") {
+                #REINSERT AMS
+                if ($patient['type'] == "2") {
+                    $indication_use_param = $request->indication_use;
+                    $indication = IndicationUse::where('prescription_id', $prescription_id)->first();
+                    if (!$indication) {
+                        $indication = new IndicationUse;
+                        $indication->prescription_id = $prescription_id;
+                    }
+                    $indication->description = $indication_use_param['description'];
+                    $indication->save();
+                } else if ($patient['type'] == "4") {
+                    $intervention_param = $request->intervention;
+                    $intervention = InterventionDetail::where('prescription_id', $prescription_id)->first();
+                    if (!$intervention) {
+                        $intervention = new InterventionDetail;
+                        $intervention->prescription_id = $prescription_id;
+                    }
+                    $intervention->clinical_stability = $intervention_param['clinical_stability'];
+                    $intervention->oral_intake = $intervention_param['oral_intake'];
+                    $intervention->save();
                 }
-                $indication->description = $indication_use_param['description'];
-                $indication->save();
-            } else if ($patient['type'] == "4") {
-                $intervention_param = $request->intervention;
-                $intervention = InterventionDetail::where('prescription_id', $prescription_id)->first();
-                if (!$intervention) {
-                    $intervention = new InterventionDetail;
-                    $intervention->prescription_id = $prescription_id;
-                }
-                $intervention->clinical_stability = $intervention_param['clinical_stability'];
-                $intervention->oral_intake = $intervention_param['oral_intake'];
-                $intervention->save();
-            }
 
-            #INSERT MICROBIOLOGICAL
-            if ($patient['type'] != '4') {
-                $microbiologicals = $request->microbiologicals;
-                for ($i = 0; $i < count($microbiologicals); $i++) {
-                    $microbiologicals[$i]['prescription_id'] = $prescription_id;
+                #INSERT MICROBIOLOGICAL
+                if ($patient['type'] != '4') {
+                    $microbiologicals = $request->microbiologicals;
+                    for ($i = 0; $i < count($microbiologicals); $i++) {
+                        $microbiologicals[$i]['prescription_id'] = $prescription_id;
+                    }
+                    MicrobiologicalResult::insert($microbiologicals);
                 }
-                MicrobiologicalResult::insert($microbiologicals);
-            }
 
-            #DONT REMOVE CONCURRENT THERAPY THAT ARE APPROVED BY THE IPCC
-            #REQUEST FROM IT TO MANUALLY DELETE THE CONCURRENT THERAPY
-            $concurrent_therapy = $request->concurrent_therapy;
-            for ($i = 0; $i < count($concurrent_therapy); $i++) {
-                $concurrent_therapy[$i]['prescription_id'] = $prescription_id;
+                #DONT REMOVE CONCURRENT THERAPY THAT ARE APPROVED BY THE IPCC
+                #REQUEST FROM IT TO MANUALLY DELETE THE CONCURRENT THERAPY
+                $concurrent_therapy = $request->concurrent_therapy;
+                for ($i = 0; $i < count($concurrent_therapy); $i++) {
+                    $concurrent_therapy[$i]['prescription_id'] = $prescription_id;
+                }
+                ConcurrentTherapy::insert($concurrent_therapy);
             }
-            ConcurrentTherapy::insert($concurrent_therapy);
 
             $patient_history = PatientHistory::where('prescription_id', $prescription_id)->first();
             $patient_history->prescription_id = $prescription_id;
@@ -141,14 +143,24 @@ class ReturnedPrescriptionController extends Controller
             for ($i = 0; $i < count($medications); $i++) {
                 $medications[$i]['prescription_id'] = $prescription_id;
             }
-
             PrescribedMedicine::insert($medications);
+
             $released_to = "ICC";
-            $icc = IccReview::where('prescription_id', $prescription_id)->first();
-            if (!$icc) {
-                $icc = new IccReview();
-                $icc->prescription_id = $prescription_id;
-                $icc->save();
+            if ($patient['type'] != "1") {
+                $icc = IccReview::where('prescription_id', $prescription_id)->first();
+                if (!$icc) {
+                    $icc = new IccReview();
+                    $icc->prescription_id = $prescription_id;
+                    $icc->save();
+                }
+            }else{
+                $released_to = "NURSE";
+                $nurse = NurseReview::where('prescription_id', $prescription_id)->first();
+                if (!$nurse) {
+                    $nurse = new NurseReview();
+                    $nurse->prescription_id = $prescription_id;
+                    $nurse->save();
+                }
             }
 
             #INSERT LOGS IF REGULAR PRESCRIPTION
