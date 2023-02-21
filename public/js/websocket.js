@@ -1,5 +1,5 @@
 // const ws = new WebSocket("ws://192.168.5.178:2020");
-const ws = new WebSocket("ws://localhost:2020");
+const ws = new WebSocket("wss://dohcsmc.online:2020");
 
 const station = $("#user_station").text().trim()
 const role = $("#user_role").text().trim();
@@ -54,8 +54,9 @@ ws.onmessage = function (message) {
     }
 }
 
-ws.onclose = function () {
-    logout();
+ws.onclose = function (err) {
+    console.log(err);
+    // logout();
 }
 
 function sendWebsocketServer(data) {
