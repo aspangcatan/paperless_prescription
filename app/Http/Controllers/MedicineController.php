@@ -55,12 +55,9 @@ class MedicineController extends Controller
             $message = "Medicine updated";
             $medicine = Medicine::find($request->id);
 
-            #CHECK IF RENAMING DESCRIPTION
-            if ($request->description != $medicine->description) {
-                $prescribed_drugs = PrescribedMedicine::where('description', $medicine->description)->get()->first();
-                if ($prescribed_drugs) {
-                    return response(['code' => 500, 'message' => "Medicine is already used in prescription"]);
-                }
+            $prescribed_drugs = PrescribedMedicine::where('description', $request->description)->get()->first();
+            if ($prescribed_drugs) {
+                return response(['code' => 500, 'message' => "Medicine is already used in prescription"]);
             }
 
             if (!$medicine) {
