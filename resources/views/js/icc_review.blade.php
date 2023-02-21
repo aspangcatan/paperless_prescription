@@ -12,6 +12,18 @@
     let definitive_details = {};
     $(document).ready(function () {
 
+        observe("ICC", function (snapshot) {
+            if (snapshot.val()) {
+                notification_counter++;
+                toastr.success('New Request')
+                speechSynthesis.speak(speaker);
+                $("#btn_notification").removeClass("btn-secondary");
+                $("#btn_notification").addClass("btn-danger");
+                $("#btn_notification").addClass("blink");
+                $("#btn_notification").find("span").text(notification_counter);
+            }
+        });
+
         STATIONS.forEach(it => {
             $("#form_station").append("<option>" + it + "</option>");
         });
@@ -428,12 +440,10 @@
                 $("#success_message").text(data.message);
                 success_modal.toggle();
 
-                sendWebsocketServer({
-                    action: "NOTIFY STATION",
-                    body: {
-                        station: $("#form_station").val()
-                    }
-                })
+                insert("stations/" + $("#form_station").val(), {id: 1}, function (message) {
+                    deleteChild("stations/" + $("#form_station").val());
+                });
+
                 getPrescriptions();
             }).catch(err => {
             $("#error_message").text(err);
@@ -464,10 +474,10 @@
                 $("#success_message").text(data.message);
                 success_modal.toggle();
 
-                sendWebsocketServer({
-                    action: "NOTIFY ID",
-                    body: {id: data.id}
-                })
+                insert("prescriber/" + data.id, {id: 1}, function (message) {
+                    deleteChild("prescriber/" + data.id);
+                });
+
                 getPrescriptions();
             }).catch(err => {
             $("#error_message").text(err);

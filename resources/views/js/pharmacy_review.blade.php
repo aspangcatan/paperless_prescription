@@ -14,6 +14,19 @@
 
     $(document).ready(function () {
 
+        observe("PHARMACY", function (snapshot) {
+            if (snapshot.val()) {
+                notification_counter++;
+                toastr.success('New Request')
+                speechSynthesis.speak(speaker);
+                $("#btn_notification").removeClass("btn-secondary");
+                $("#btn_notification").addClass("btn-danger");
+                $("#btn_notification").addClass("blink");
+                $("#btn_notification").find("span").text(notification_counter);
+            }
+        });
+
+
         $("#quantity_render_th").text("Quantity Render");
         $("#btn_reject").addClass("d-none");
 
@@ -490,10 +503,10 @@
                 $("#success_message").text(data.message);
                 success_modal.toggle();
 
-                sendWebsocketServer({
-                    action: "NOTIFY ID",
-                    body: {id: data.id}
-                })
+                insert("prescriber/" + data.id, {id: 1}, function (message) {
+                    deleteChild("prescriber/" + data.id);
+                });
+
                 getPrescriptions();
             }).catch(err => {
             $("#error_message").text(err);

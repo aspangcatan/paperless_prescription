@@ -9,7 +9,23 @@
     let button_clicked = "";
     let prescription_id;
     let page = 0;
+    let is_loaded = false;
+
     $(document).ready(function () {
+        observe("stations", function (snapshot) {
+            if (snapshot.val()) {
+                const user_stations = $("#user_station").text().trim().split(",");
+                if(user_stations.indexOf(snapshot.key) > -1){
+                    notification_counter++;
+                    toastr.success('New Request')
+                    speechSynthesis.speak(speaker);
+                    $("#btn_notification").removeClass("btn-secondary");
+                    $("#btn_notification").addClass("btn-danger");
+                    $("#btn_notification").addClass("blink");
+                    $("#btn_notification").find("span").text(notification_counter);
+                }
+            }
+        });
 
         STATIONS.forEach(it => {
             $("#form_station").append("<option>" + it + "</option>");
@@ -334,7 +350,7 @@
                 }
 
                 $("#page_items_count").text(((page * 10) + 1) + " - " + ((page * 10) + max_visible));
-                for(let i=0; i<max_visible; i++){
+                for (let i = 0; i < max_visible; i++) {
                     const it = data.results[i];
                     const bg = (it.urgency == "Urgent") ? "bg-danger" : "bg-success";
                     const tr = ` <tr id='prescription_id_` + it.id + `'>
@@ -396,10 +412,10 @@
                 $("#success_message").text(data.message);
                 success_modal.toggle();
 
-                sendWebsocketServer({
-                    action: "NOTIFY ROLE",
-                    body: {role: "Pharmacist"}
-                })
+                insert("PHARMACY", {id: 1}, function (message) {
+                    deleteChild("PHARMACY");
+                });
+
                 getPrescriptions();
             }).catch(err => {
             $("#error_message").text(err);
@@ -430,10 +446,10 @@
                 $("#success_message").text(data.message);
                 success_modal.toggle();
 
-                sendWebsocketServer({
-                    action: "NOTIFY ID",
-                    body: {id: data.id}
-                })
+                insert("prescriber/" + data.id, {id: 1}, function (message) {
+                    deleteChild("prescriber/" + data.id);
+                });
+
                 getPrescriptions();
             }).catch(err => {
             $("#error_message").text(err);

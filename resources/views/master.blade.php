@@ -95,6 +95,7 @@
 <script src="assets/js/main.js"></script>
 <script src="js/jquery.min.js"></script>
 <script src="js/toastr.min.js"></script>
+@include('js.firebase-config')
 @yield('js')
 </body>
 
