@@ -117,8 +117,6 @@ class ReturnedPrescriptionController extends Controller
                     MicrobiologicalResult::insert($microbiologicals);
                 }
 
-                #DONT REMOVE CONCURRENT THERAPY THAT ARE APPROVED BY THE IPCC
-                #REQUEST FROM IT TO MANUALLY DELETE THE CONCURRENT THERAPY
                 $concurrent_therapy = $request->concurrent_therapy;
                 for ($i = 0; $i < count($concurrent_therapy); $i++) {
                     $concurrent_therapy[$i]['prescription_id'] = $prescription_id;
