@@ -849,10 +849,15 @@
                 $("#success_message").text(data.message);
                 success_modal.toggle();
 
-                sendWebsocketServer({
-                    action: "NOTIFY ROLE",
-                    body: {role: "ICC"}
-                })
+                if ($("#form_prescription_type").val() !== "1") {
+                    insert("ICC", {id: 1}, function (message) {
+                        deleteChild("ICC");
+                    });
+                } else {
+                    insert("stations/" + params.patient.station, {id: 1}, function (message) {
+                        deleteChild("stations/" + params.patient.station);
+                    });
+                }
 
                 getPrescriptions();
             }).catch(err => {

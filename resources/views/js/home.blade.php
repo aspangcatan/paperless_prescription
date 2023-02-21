@@ -12,7 +12,21 @@
     const error_modal = new bootstrap.Modal(document.getElementById('error_modal'));
     let prescription_id = "";
     let page = 0;
+
+    const db_ref = "prescriber/" + $("#code").text().trim();
     $(document).ready(function () {
+
+        observe(db_ref, function (snapshot) {
+            if (snapshot.val()) {
+                notification_counter++;
+                toastr.success('New Request')
+                speechSynthesis.speak(speaker);
+                $("#btn_notification").removeClass("btn-secondary");
+                $("#btn_notification").addClass("btn-danger");
+                $("#btn_notification").addClass("blink");
+                $("#btn_notification").find("span").text(notification_counter);
+            }
+        });
 
         $("#btn_reject").addClass("d-none");
 
@@ -856,6 +870,7 @@
         })
             .then(res => res.json())
             .then(data => {
+                $("#medication_list").empty();
                 $("#microbiological_result_list").empty();
                 if (data.code == 200) {
                     const ams = data.ams;
@@ -1049,17 +1064,13 @@
                 getPrescriptions();
 
                 if ($("#form_prescription_type").val() !== "1") {
-                    sendWebsocketServer({
-                        action: "NOTIFY ROLE",
-                        body: {role: "ICC"}
-                    })
+                    insert("ICC", {id: 1}, function (message) {
+                        deleteChild("ICC");
+                    });
                 } else {
-                    sendWebsocketServer({
-                        action: "NOTIFY STATION",
-                        body: {
-                            station: $("#form_station").val()
-                        }
-                    })
+                    insert("stations/" + params.patient.station, {id: 1}, function (message) {
+                        deleteChild("stations/" + params.patient.station);
+                    });
                 }
             }).catch(err => {
             $("#spinner").addClass("d-none");
