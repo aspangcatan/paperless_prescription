@@ -73,10 +73,11 @@
                                     <select class="form-control fw-bold text-center bg-white"
                                             id="form_prescription_type">
                                         <option value="">Select type</option>
-                                        <option value="1">Regular</option>
+                                        <option value="1">Non-Restricted</option>
                                         <option value="2">Restricted</option>
                                         <option value="3">Seventh Day Auto Stop</option>
                                         <option value="4">Intravenous to Oral</option>
+                                        <option value="5">Monitored</option>
                                     </select>
                                     <small>(AMS Type)</small>
                                 </div>

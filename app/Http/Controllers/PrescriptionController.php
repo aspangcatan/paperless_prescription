@@ -148,8 +148,7 @@ class PrescriptionController extends Controller
             $prescription->save();
             $prescription_id = $prescription->id;
 
-            if ($patient['type'] != "1") {
-
+            if ($patient['type'] != "1" && $patient['type'] != "5") {
                 $intervention_param = $request->intervention;
                 if ($patient['type'] == "2") {
                     #INSERT INDICATION USE
@@ -211,7 +210,7 @@ class PrescriptionController extends Controller
             PrescribedMedicine::insert($medications);
 
             $released_to = "NURSE";
-            if ($patient['type'] == '1') {
+            if ($patient['type'] == '1' || $patient['type'] == '5') {
                 $nurse = new NurseReview();
                 $nurse->prescription_id = $prescription_id;
                 $nurse->save();

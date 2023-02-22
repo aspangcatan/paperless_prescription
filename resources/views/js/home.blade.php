@@ -854,7 +854,7 @@
                     tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td></td>";
                     tr += "<td></td>";
-                    tr += "<td class='d-none'>" + it.prescription_id + "</td>";
+                    tr += "<td class='d-none'>" + it.id + "</td>";
                     tr += "</tr>";
 
                     $("#concurrent_list").append(tr);
@@ -1155,7 +1155,7 @@
     function editMedicine(id) {
         prescribed_med_id = id;
         medicine_modal.toggle();
-        $("#search_medicine").val($("#medication_list tr:eq(" + id + ")").text().trim());
+        $("#search_medicine").val($("#medication_list tr:eq(" + id + ") td:eq(0)").text().trim());
         getMedicine($("#search_medicine").val());
     }
 

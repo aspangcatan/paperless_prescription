@@ -506,6 +506,7 @@
                     tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td></td>";
                     tr += "<td></td>";
+                    tr += "<td class='d-none'>" + it.id + "</td>";
                     tr += "</tr>";
 
                     $("#concurrent_list").append(tr);
