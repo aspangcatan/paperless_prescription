@@ -44,7 +44,7 @@
         <div class="modal-content">
             <div class="modal-body">
                 <div class="text-end">
-                    <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close">X</button>
                 </div>
 
                 <h5 class="card-title">Give remarks</h5>

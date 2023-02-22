@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="card-title p-1" style="font-size: 24px">Make Rx</div>
-                <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <div class="modal-body" style="background: rgb(241,244,252)">
                 <div class="card">
@@ -354,7 +354,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="card-title p-1" style="font-size: 24px">Patient Management</div>
-                <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <div class="modal-body" style="background: rgb(241,244,252)">
                 <div class="row">
