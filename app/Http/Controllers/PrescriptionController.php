@@ -164,6 +164,15 @@ class PrescriptionController extends Controller
                     $intervention->clinical_stability = $intervention_param['clinical_stability'];
                     $intervention->oral_intake = $intervention_param['oral_intake'];
                     $intervention->save();
+
+                    #UPDATE FOR SWITCH ANG PREVIOUS CONCURRENT
+                    if ($intervention_param['concurrent_id'] != "0") {
+                        $selected_concurrent_id = ConcurrentTherapy::find($intervention_param['concurrent_id']);
+                        if ($selected_concurrent_id) {
+                            $selected_concurrent_id->for_switch = $prescription_id;
+                            $selected_concurrent_id->save();
+                        }
+                    }
                 }
 
                 #INSERT MICROBIOLOGICAL
@@ -178,7 +187,7 @@ class PrescriptionController extends Controller
                 $concurrent_therapy = $request->concurrent_therapy;
                 for ($i = 0; $i < count($concurrent_therapy); $i++) {
                     $concurrent_therapy[$i]['prescription_id'] = $prescription_id;
-                    if ($concurrent_therapy[$i]['for_switch'] != "0") {
+                    if ($concurrent_therapy[$i]['for_switch'] == "1") {
                         $concurrent_therapy[$i]['for_switch'] = $prescription_id;
                     }
                 }
