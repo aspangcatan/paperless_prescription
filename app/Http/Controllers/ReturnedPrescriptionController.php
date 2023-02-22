@@ -106,6 +106,15 @@ class ReturnedPrescriptionController extends Controller
                     $intervention->clinical_stability = $intervention_param['clinical_stability'];
                     $intervention->oral_intake = $intervention_param['oral_intake'];
                     $intervention->save();
+
+                    #UPDATE FOR SWITCH ANG PREVIOUS CONCURRENT
+                    if ($intervention_param['concurrent_id'] != "0") {
+                        $selected_concurrent_id = ConcurrentTherapy::find($intervention_param['concurrent_id']);
+                        if ($selected_concurrent_id) {
+                            $selected_concurrent_id->for_switch = $prescription_id;
+                            $selected_concurrent_id->save();
+                        }
+                    }
                 }
 
                 #INSERT MICROBIOLOGICAL

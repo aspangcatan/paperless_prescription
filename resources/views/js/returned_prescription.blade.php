@@ -28,6 +28,19 @@
             $(this).attr('type', 'text')
         });
 
+        $("body").on("click", "#concurrent_list tr", function () {
+            $("#concurrent_list tr.active").removeClass("active");
+            if ($("#form_prescription_type").val() == '4') {
+                //CHECK IF SELECTED CONCURRENT STOP DATE DOES NOT EXCEEDS TODAY'S DATE
+                const selected_stop_date = moment($(this).find("td:eq(4)").text(), "MM/DD/YYYY");
+                if (moment(selected_stop_date).diff(moment(), 'days') < 0) {
+                    alert("Stop date must not below today's date");
+                    return;
+                }
+                $(this).addClass("active");
+            }
+        });
+
         $("#form_prescription_type").change(function () {
             $("#intervention_form_container").addClass("d-none");
             $("#indication_use_container").addClass("d-none");
