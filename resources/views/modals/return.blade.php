@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-body">
                 <div class="text-end">
-                    <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <h5 class="card-title">Return Medication</h5>
                 <div class="text-white bg-danger rounded p-2 error_container d-none">

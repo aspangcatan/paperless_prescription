@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="medicine_status">
+                    <input  type="checkbox" name="medicine_status">
                     <label class="form-check-label">
                         Active
                     </label>

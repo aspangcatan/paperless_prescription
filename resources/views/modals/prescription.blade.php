@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="card-title p-1" style="font-size: 24px">Make Rx</div>
-                <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="background: rgb(241,244,252)">
                 <div class="card">
@@ -185,18 +185,18 @@
                                     <div>Clinical Stability:</div>
                                     <div class="mt-2">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="clinical_stability">
+                                            <input  type="radio" name="clinical_stability">
                                             <label class="form-check-label">Afebrile</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="clinical_stability">
+                                            <input  type="radio" name="clinical_stability">
                                             <label class="form-check-label">Downward trend or normalization of
                                                 Inflammatory markers</label>
                                             <small class="d-block">(C-reactive protein, white blood cell count,
                                                 procalcitonin)</small>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="clinical_stability">
+                                            <input  type="radio" name="clinical_stability">
                                             <label class="form-check-label">Stable vital signs</label>
                                             <small class="d-block">(No unexplained tachycardia, hypotension,
                                                 tachypnea)</small>
@@ -207,16 +207,16 @@
                                     <div>Able to tolerate oral intake:</div>
                                     <div class="mt-2">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="oral_intake">
+                                            <input  type="radio" name="oral_intake">
                                             <label class="form-check-label">Patient is not nil by mouth</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="oral_intake">
+                                            <input  type="radio" name="oral_intake">
                                             <label class="form-check-label">Tolerating oral diet, medications and/or
                                                 enteral feeds</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="oral_intake">
+                                            <input  type="radio" name="oral_intake">
                                             <label class="form-check-label">Oral abosrption is not compromised</label>
                                             <small class="d-block">(e.g. No vomiting or diarrhea, malabsorptive
                                                 disorder)</small>
@@ -230,17 +230,17 @@
                         <div class="card-body">
                             <h6 class="card-title">Indication for use</h6>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio"
+                                <input  type="radio"
                                        name="indication_use">
                                 <label class="form-check-label">Prophylactic</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio"
+                                <input  type="radio"
                                        name="indication_use">
                                 <label class="form-check-label">Empiric</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio"
+                                <input  type="radio"
                                        name="indication_use">
                                 <label class="form-check-label">Definitive</label>
                             </div>
@@ -305,7 +305,7 @@
                             <td colspan="7">
                                 <div class="d-flex justify-content-center">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="checkbox_urgent">
+                                        <input  type="checkbox" id="checkbox_urgent">
                                         <label class="form-check-label fw-bold text-danger">
                                             Set as urgent!
                                         </label>
@@ -354,7 +354,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="card-title p-1" style="font-size: 24px">Patient Management</div>
-                <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="background: rgb(241,244,252)">
                 <div class="row">

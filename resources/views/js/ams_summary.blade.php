@@ -37,7 +37,6 @@
             }
         });
 
-        getAmsSummary();
     });
 
     function getAmsSummary() {
@@ -48,6 +47,7 @@
         let to_date = "";
 
         if (filtered_date == "") {
+            alert("Please specify date range");
             $("#ams_summary").empty();
             $("#ams_summary").append("<tr><td class='text-center fs-5' colspan='11'>No record found</td></tr>");
             return;
