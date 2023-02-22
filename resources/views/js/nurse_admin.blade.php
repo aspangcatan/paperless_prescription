@@ -126,7 +126,7 @@
             $("#stations").append(`
 <div class="col-md-12">
     <div class="form-check">
-      <input class="form-check-input" type="checkbox" name="station">
+      <input  type="checkbox" name="station">
       <label class="form-check-label" for="flexCheckChecked">
         ` + it + `
       </label>
