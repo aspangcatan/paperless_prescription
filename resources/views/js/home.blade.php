@@ -269,8 +269,6 @@
             }
 
             const days_approved = moment(stop_date).diff(moment(start_date), 'days') + 1;
-            console.log(days_approved);
-
             if ($(this).val() == "") {
                 const count = $("#concurrent_list tr").length;
                 let tr = "<tr>";
@@ -514,7 +512,11 @@
                     }
                 }
 
-                const concurrent_id = $("#concurrent_list tr.active td:last-child").text();
+                let concurrent_id = 0;
+                if ($("#concurrent_list tr.active td:last-child button").length < 1) {
+                    //CHECK IF MANUALLY ADDDED CONCURRECT WAS SELECTED
+                    concurrent_id = $("#concurrent_list tr.active td:last-child").text();
+                }
                 let clinical_stability = "";
                 let oral_intake = "";
 
