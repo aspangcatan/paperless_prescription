@@ -251,7 +251,7 @@
 
                 data.results.forEach(it => {
                         let tr = "<tr>";
-                        if (it.for_switch && it.prescription_id == prescription_id && $("#form_prescription_type").val() == "4")
+                        if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
                             tr = "<tr class='pointer active'>";
 
                         tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
