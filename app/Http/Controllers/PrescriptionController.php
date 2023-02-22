@@ -316,24 +316,10 @@ class PrescriptionController extends Controller
     public function rejectPrescription(Request $request)
     {
         try {
+
+
             if ($request->origin == "NURSE") {
                 $prescription = NurseReview::where('prescription_id', $request->id);
-
-                #CHECK IF INTERVENTION FORM
-                if ($request->type == "4") {
-                    $current_concurrent = ConcurrentTherapy::where('prescription_id', $request->id)
-                        ->whereNotNull(['approved_by']);
-                    $current_concurrent->forceDelete();
-
-                    //COMPUTE STOP DATE VIA START DATE AND DAYS APPROVED
-                    $switched_concurrent = ConcurrentTherapy::where('for_switch', $request->id)->first();
-
-                    $date = Carbon::parse($switched_concurrent->start_date);
-                    $date = $date->addDays($switched_concurrent->days_approved - 1);
-                    $stop_date = date('Y-m-d', strtotime($date));
-                    $switched_concurrent->stop_date = $stop_date;
-                    $switched_concurrent->save();
-                }
             } else if ($request->origin == "ICC")
                 $prescription = IccReview::where('prescription_id', $request->id);
             else
@@ -342,6 +328,25 @@ class PrescriptionController extends Controller
             if (!$prescription) {
                 return response(['code' => 500, 'message' => 'Prescription dont exists']);
             }
+
+            #CHECK IF INTERVENTION FORM
+            if ($request->origin != "ICC") {
+
+                $current_concurrent = ConcurrentTherapy::where('prescription_id', $request->id)
+                    ->whereNotNull(['approved_by']);
+                $current_concurrent->forceDelete();
+
+                if ($request->type == "4") {
+                    //COMPUTE STOP DATE VIA START DATE AND DAYS APPROVED
+                    $switched_concurrent = ConcurrentTherapy::where('for_switch', $request->id)->first();
+                    $date = Carbon::parse($switched_concurrent->start_date);
+                    $date = $date->addDays($switched_concurrent->days_approved - 1);
+                    $stop_date = date('Y-m-d', strtotime($date));
+                    $switched_concurrent->stop_date = $stop_date;
+                    $switched_concurrent->save();
+                }
+            }
+
 
             $returned = new ReturnedPrescription;
             $returned->prescription_id = $request->id;
