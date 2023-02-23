@@ -4,7 +4,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="card-title p-1" style="font-size: 24px">Make Rx</div>
-                <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close">X</button>
+                <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal"
+                        aria-label="Close">X
+                </button>
             </div>
             <div class="modal-body" style="background: rgb(241,244,252)">
                 <div class="card">
@@ -56,13 +58,13 @@
                                     <small>(Station)</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2">
+                            <div class="col-md-4 mt-2 d-none">
                                 <div class="text-center">
                                     <input class="form-control bg-white fw-bold text-center" id="form_ward"/>
                                     <small>(Ward)</small>
                                 </div>
                             </div>
-                            <div class="col-md-4 mt-2">
+                            <div class="col-md-4 mt-2 d-none">
                                 <div class="text-center">
                                     <input class="form-control bg-white fw-bold text-center" id="form_bed_no"/>
                                     <small>(Bed No.)</small>
@@ -78,8 +80,9 @@
                                         <option value="3">Seventh Day Auto Stop</option>
                                         <option value="4">Intravenous to Oral</option>
                                         <option value="5">Monitored</option>
+                                        <option value="6">Cancellation</option>
                                     </select>
-                                    <small>(AMS Type)</small>
+                                    <small>(Type)</small>
                                 </div>
                             </div>
 
@@ -184,45 +187,33 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div>Clinical Stability:</div>
-                                    <div class="mt-2">
-                                        <div class="form-check">
-                                            <input  type="radio" name="clinical_stability">
-                                            <label class="form-check-label">Afebrile</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input  type="radio" name="clinical_stability">
-                                            <label class="form-check-label">Downward trend or normalization of
-                                                Inflammatory markers</label>
-                                            <small class="d-block">(C-reactive protein, white blood cell count,
-                                                procalcitonin)</small>
-                                        </div>
-                                        <div class="form-check">
-                                            <input  type="radio" name="clinical_stability">
-                                            <label class="form-check-label">Stable vital signs</label>
-                                            <small class="d-block">(No unexplained tachycardia, hypotension,
-                                                tachypnea)</small>
-                                        </div>
-                                    </div>
+                                    <ul>
+                                        <li>Afebrile</li>
+                                        <li>Downward trend or normalization of
+                                            Inflammatory markers
+                                            <small class="d-block">
+                                                (C-reactive protein, white blood cell count, procalcitonin)
+                                            </small>
+                                        </li>
+                                        <li>
+                                            Stable vital signs
+                                            <small class="d-block">
+                                                (No unexplained tachycardia, hypotension, tachypnea)
+                                            </small>
+                                        </li>
+                                    </ul>
                                 </div>
                                 <div class="col-md-6">
                                     <div>Able to tolerate oral intake:</div>
-                                    <div class="mt-2">
-                                        <div class="form-check">
-                                            <input  type="radio" name="oral_intake">
-                                            <label class="form-check-label">Patient is not nil by mouth</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input  type="radio" name="oral_intake">
-                                            <label class="form-check-label">Tolerating oral diet, medications and/or
-                                                enteral feeds</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input  type="radio" name="oral_intake">
-                                            <label class="form-check-label">Oral abosrption is not compromised</label>
-                                            <small class="d-block">(e.g. No vomiting or diarrhea, malabsorptive
-                                                disorder)</small>
-                                        </div>
-                                    </div>
+                                    <ul class="mt-2">
+                                        <li>Patient is not nil by mouth</li>
+                                        <li>Tolerating oral diet, medications and/or enteral feeds</li>
+                                        <li>Oral abosrption is not compromised
+                                            <small class="d-block">
+                                                (e.g. No vomiting or diarrhea, malabsorptive disorder)
+                                            </small>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -231,17 +222,17 @@
                         <div class="card-body">
                             <h6 class="card-title">Indication for use</h6>
                             <div class="form-check">
-                                <input  type="radio"
+                                <input type="radio"
                                        name="indication_use">
                                 <label class="form-check-label">Prophylactic</label>
                             </div>
                             <div class="form-check">
-                                <input  type="radio"
+                                <input type="radio"
                                        name="indication_use">
                                 <label class="form-check-label">Empiric</label>
                             </div>
                             <div class="form-check">
-                                <input  type="radio"
+                                <input type="radio"
                                        name="indication_use">
                                 <label class="form-check-label">Definitive</label>
                             </div>
@@ -274,7 +265,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card">
+                <div class="card" id="medication_container">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <h6 class="card-title fs-4">Rx</h6>
@@ -291,7 +282,7 @@
                                     <th>Medicine</th>
                                     <th style="width: 20%">Strength</th>
                                     <th style="width: 10%">Unit</th>
-                                    <th style="width: 10%">Quantity<br />Ordered</th>
+                                    <th style="width: 10%">Quantity<br/>Ordered</th>
                                     <th style="width: 15%">Frequency</th>
                                     <th colspan="2" style="width: 8%" id="quantity_render_th"></th>
                                 </tr>
@@ -306,7 +297,7 @@
                             <td colspan="7">
                                 <div class="d-flex justify-content-center">
                                     <div class="form-check">
-                                        <input  type="checkbox" id="checkbox_urgent">
+                                        <input type="checkbox" id="checkbox_urgent">
                                         <label class="form-check-label fw-bold text-danger">
                                             Set as urgent!
                                         </label>
@@ -341,8 +332,8 @@
                 </div>
 
                 <div class="text-end mt-5">
-                    <button class="btn btn-danger" id="btn_reject" style="width: 103.58px">REJECT</button>
-                    <button class="btn btn-primary" id="btn_submit" style="width: 103.58px">SUBMIT</button>
+                    <button class="btn btn-danger" id="btn_reject" style="min-width: 103.58px">REJECT</button>
+                    <button class="btn btn-primary" id="btn_submit" style="min-width: 103.58px">SUBMIT</button>
                 </div>
             </div>
         </div>
@@ -355,7 +346,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="card-title p-1" style="font-size: 24px">Patient Management</div>
-                <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close">X</button>
+                <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal"
+                        aria-label="Close">X
+                </button>
             </div>
             <div class="modal-body" style="background: rgb(241,244,252)">
                 <div class="row">

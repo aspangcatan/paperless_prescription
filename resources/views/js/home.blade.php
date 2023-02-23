@@ -10,6 +10,7 @@
 
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
     const error_modal = new bootstrap.Modal(document.getElementById('error_modal'));
+    const warning_modal = new bootstrap.Modal(document.getElementById('warning_modal'));
     let prescription_id = "";
     let page = 0;
 
@@ -76,6 +77,11 @@
             }
         });
 
+        $("#form_station").change(function () {
+            $("#form_ward").val($(this).val());
+            $("#form_bed_no").val("N/A");
+        });
+
         $("#form_prescription_type").change(function () {
             $("#intervention_form_container").addClass("d-none");
             $("#indication_use_container").addClass("d-none");
@@ -87,7 +93,7 @@
             $("#concurrent_table tbody tr").removeClass("pointer");
             $("#concurrent_table tbody tr").removeClass("active");
             $(".ams_container").removeClass("d-none");
-
+            $("#medication_container").removeClass("d-none")
             $("#medication_list").empty();
             $("#medicine_list").empty();
             switch ($(this).val()) {
@@ -110,6 +116,20 @@
                     $("#microbiological_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
                     $("#concurrent_table tbody tr").addClass("pointer");
+                    break;
+                case "6":
+                    //HIDE ALL EXCEPT REMARKS
+                    $("#intervention_form_container").addClass("d-none");
+                    $("#indication_use_container").addClass("d-none");
+                    $("#transaminases_container").addClass("d-none");
+                    $("#microbiological_container").addClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    $("#concurrent_table tbody tr").addClass("pointer");
+                    $("#concurrent_table tbody tr").addClass("active");
+                    $(".ams_container").addClass("d-none");
+                    $("#medication_container").addClass("d-none")
                     break;
             }
         });
@@ -430,203 +450,178 @@
             const concurrent_therapy = [];
             let intervention = {}
             //CHECK IF PRESCRIPTION TYPE IS AMS
-            if (type !== "1") {
-                if (drug_allergy == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Drug allergy is required, put N/A if not applicable</li>");
-                }
+            const medications = [];
 
-                if (weight == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Weight is required, put '0' if not applicable</li>");
-                }
-
-                if (height == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Height is required, put '0' if not applicable</li>");
-                }
-
-                if (serum_creatinine == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Serum creatinine is required, put '0' if not applicable</li>");
-                }
-
-                if (creatinine_clearance == "") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Creatinine clearance is required, put '0' if not applicable</li>");
-                }
-
-                if (sgpt == "" && type == "3") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>SGPT is required, put '0' if not applicable</li>");
-                }
-
-                if (sgot == "" && type == "3") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>SGOT is required, put '0' if not applicable</li>");
-                }
-
-                if (transaminases == "" && type == "2") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Transaminases is required, put '0' if not applicable</li>");
-                }
-
-                if (days_requested == "" && type == "3") {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Duration requested is required, put '0' if not applicable</li>");
-                }
-
-                if (type == "2") {
-                    const indication_use = $("input[name='indication_use']:checked").next().text().trim();
-                    if (indication_use == "") {
+            if (type != 6) {
+                if (type !== "1") {
+                    if (drug_allergy == "") {
                         is_valid = false;
-                        $("#prescription_modal .error_list").append("<li>Indication for use is required</li>");
+                        $("#prescription_modal .error_list").append("<li>Drug allergy is required, put N/A if not applicable</li>");
                     }
 
-                    params.indication_use = {
-                        description: indication_use
-                    };
-                }
+                    if (weight == "") {
+                        is_valid = false;
+                        $("#prescription_modal .error_list").append("<li>Weight is required, put '0' if not applicable</li>");
+                    }
 
-                for (let i = 0; i < $("#concurrent_list tr").length; i++) {
-                    const concurrent_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(0)").text();
-                    const antimicrobial = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(1)").text();
-                    const dosing_regimen = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(2)").text();
-                    const start_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(3)").text();
-                    const stop_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(4)").text();
-                    const buttons = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(5) button");
-                    const days_approved = $("#concurrent_list tr:eq(" + i + ") td:nth-last-child(2)").text();
-                    const for_switch = ($("#concurrent_list tr:eq(" + i + ")").hasClass("active")) ? 1 : 0;
-                    //CHECK IF NEWLY ADDED
-                    if (buttons.length > 0) {
-                        concurrent_therapy.push({
-                            hospital_id: hospital_id,
-                            concurrent_date: moment(concurrent_date).format("YYYY-MM-DD"),
-                            antimicrobial: antimicrobial,
-                            dosing_regimen: dosing_regimen,
-                            start_date: moment(start_date).format("YYYY-MM-DD"),
-                            stop_date: moment(stop_date).format("YYYY-MM-DD"),
-                            days_approved: days_approved,
-                            for_switch: for_switch
+                    if (height == "") {
+                        is_valid = false;
+                        $("#prescription_modal .error_list").append("<li>Height is required, put '0' if not applicable</li>");
+                    }
+
+                    if (serum_creatinine == "") {
+                        is_valid = false;
+                        $("#prescription_modal .error_list").append("<li>Serum creatinine is required, put '0' if not applicable</li>");
+                    }
+
+                    if (creatinine_clearance == "") {
+                        is_valid = false;
+                        $("#prescription_modal .error_list").append("<li>Creatinine clearance is required, put '0' if not applicable</li>");
+                    }
+
+                    if (sgpt == "" && type == "3") {
+                        is_valid = false;
+                        $("#prescription_modal .error_list").append("<li>SGPT is required, put '0' if not applicable</li>");
+                    }
+
+                    if (sgot == "" && type == "3") {
+                        is_valid = false;
+                        $("#prescription_modal .error_list").append("<li>SGOT is required, put '0' if not applicable</li>");
+                    }
+
+                    if (transaminases == "" && type == "2") {
+                        is_valid = false;
+                        $("#prescription_modal .error_list").append("<li>Transaminases is required, put '0' if not applicable</li>");
+                    }
+
+                    if (days_requested == "" && type == "3") {
+                        is_valid = false;
+                        $("#prescription_modal .error_list").append("<li>Duration requested is required, put '0' if not applicable</li>");
+                    }
+
+                    if (type == "2") {
+                        const indication_use = $("input[name='indication_use']:checked").next().text().trim();
+                        if (indication_use == "") {
+                            is_valid = false;
+                            $("#prescription_modal .error_list").append("<li>Indication for use is required</li>");
+                        }
+
+                        params.indication_use = {
+                            description: indication_use
+                        };
+                    }
+
+                    for (let i = 0; i < $("#concurrent_list tr").length; i++) {
+                        const concurrent_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(0)").text();
+                        const antimicrobial = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(1)").text();
+                        const dosing_regimen = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(2)").text();
+                        const start_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(3)").text();
+                        const stop_date = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(4)").text();
+                        const buttons = $("#concurrent_list tr:eq(" + i + ")").find("td:eq(5) button");
+                        const days_approved = $("#concurrent_list tr:eq(" + i + ") td:nth-last-child(2)").text();
+                        const for_switch = ($("#concurrent_list tr:eq(" + i + ")").hasClass("active")) ? 1 : 0;
+                        //CHECK IF NEWLY ADDED
+                        if (buttons.length > 0) {
+                            concurrent_therapy.push({
+                                hospital_id: hospital_id,
+                                concurrent_date: moment(concurrent_date).format("YYYY-MM-DD"),
+                                antimicrobial: antimicrobial,
+                                dosing_regimen: dosing_regimen,
+                                start_date: moment(start_date).format("YYYY-MM-DD"),
+                                stop_date: moment(stop_date).format("YYYY-MM-DD"),
+                                days_approved: days_approved,
+                                for_switch: for_switch
+                            });
+                        }
+                    }
+
+                    let concurrent_id = 0;
+                    if ($("#concurrent_list tr.active td:last-child button").length < 1) {
+                        concurrent_id = $("#concurrent_list tr.active td:last-child").text();
+                    }
+
+                    intervention = {
+                        concurrent_id: concurrent_id
+                    }
+
+                    for (let i = 0; i < $("#microbiological_result_list tr").length; i++) {
+                        const date = $("#microbiological_result_list tr:eq(" + i + ")").find("td:eq(0)").text();
+                        const specimen = $("#microbiological_result_list tr:eq(" + i + ")").find("td:eq(1)").text();
+                        const pathogen = $("#microbiological_result_list tr:eq(" + i + ")").find("td:eq(2)").text();
+
+                        microbiologicals.push({
+                            date: moment(date).format("YYYY-MM-DD"),
+                            specimen: specimen,
+                            pathogen: pathogen
                         });
                     }
                 }
 
-                let concurrent_id = 0;
-                if ($("#concurrent_list tr.active td:last-child button").length < 1) {
-                    //CHECK IF MANUALLY ADDDED CONCURRECT WAS SELECTED
-                    concurrent_id = $("#concurrent_list tr.active td:last-child").text();
-                }
-                let clinical_stability = "";
-                let oral_intake = "";
 
-                for (let i = 0; i < $("input[name='clinical_stability']").length; i++) {
-                    if ($("input[name='clinical_stability']:eq(" + i + ")").is(":checked")) {
-                        clinical_stability = CLINICAL_STABILITY[i];
-                        break;
+                for (let i = 0; i < $("#medication_list tr").length; i++) {
+                    let medication_flag = true;
+                    const description = $("#medication_list tr:eq(" + i + ")").find("td:eq(0)").text();
+                    const dosage_strength = $("#medication_list tr:eq(" + i + ")").find("td:eq(1) input").val();
+                    const dosage_unit = $("#medication_list tr:eq(" + i + ")").find("td:eq(1) select").val();
+                    const unit = $("#medication_list tr:eq(" + i + ")").find("td:eq(2)").text();
+                    const quantity_ordered = $("#medication_list tr:eq(" + i + ")").find("td:eq(3) input").val();
+                    const frequency = $("#medication_list tr:eq(" + i + ")").find("td:eq(4) select").val();
+
+                    if (dosage_strength == "") {
+                        is_valid = false;
+                        medication_flag = false;
+                        $("#prescription_modal .error_list").append("<li>Dosage strength amount is required</li>");
+                    }
+
+                    if (dosage_unit == "") {
+                        is_valid = false;
+                        medication_flag = false;
+                        $("#prescription_modal .error_list").append("<li>Dosage strength unit is required</li>");
+                    }
+
+                    if (quantity_ordered <= 0) {
+                        is_valid = false;
+                        medication_flag = false;
+                        $("#prescription_modal .error_list").append("<li>Quantity ordered is required</li>");
+                    }
+
+                    if (frequency == "") {
+                        is_valid = false;
+                        medication_flag = false;
+                        $("#prescription_modal .error_list").append("<li>Frequency is required</li>");
+                    }
+
+                    if (medication_flag) {
+                        medications.push({
+                            description: description,
+                            unit: unit,
+                            dosage_strength: dosage_strength,
+                            dosage_unit: dosage_unit,
+                            quantity_ordered: quantity_ordered,
+                            frequency: frequency
+                        });
                     }
                 }
 
-                for (let i = 0; i < $("input[name='oral_intake']").length; i++) {
-                    if ($("input[name='oral_intake']:eq(" + i + ")").is(":checked")) {
-                        oral_intake = ORAL_INTAKE[i];
-                        break;
-                    }
-                }
-
-                if (clinical_stability == "" && type == "4") {
+                if (medications.length < 1 && is_valid) {
                     is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Clinical stability is required</li>");
+                    $("#prescription_modal .error_list").append("<li>There must be a medication</li>");
                 }
 
-                if (oral_intake == "" && type == "4") {
+                if (medications.length > 1 && is_valid && (type != "1" && type != "5")) {
                     is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Oral intake is required</li>");
+                    $("#prescription_modal .error_list").append("<li>Maximum of 1 medication per prescription</li>");
                 }
 
-                intervention = {
-                    clinical_stability: clinical_stability,
-                    oral_intake: oral_intake,
-                    concurrent_id: concurrent_id
-                }
-
-                for (let i = 0; i < $("#microbiological_result_list tr").length; i++) {
-                    const date = $("#microbiological_result_list tr:eq(" + i + ")").find("td:eq(0)").text();
-                    const specimen = $("#microbiological_result_list tr:eq(" + i + ")").find("td:eq(1)").text();
-                    const pathogen = $("#microbiological_result_list tr:eq(" + i + ")").find("td:eq(2)").text();
-
-                    microbiologicals.push({
-                        date: moment(date).format("YYYY-MM-DD"),
-                        specimen: specimen,
-                        pathogen: pathogen
-                    });
-                }
-            }
-
-            const medications = [];
-            for (let i = 0; i < $("#medication_list tr").length; i++) {
-                let medication_flag = true;
-                const description = $("#medication_list tr:eq(" + i + ")").find("td:eq(0)").text();
-                const dosage_strength = $("#medication_list tr:eq(" + i + ")").find("td:eq(1) input").val();
-                const dosage_unit = $("#medication_list tr:eq(" + i + ")").find("td:eq(1) select").val();
-                const unit = $("#medication_list tr:eq(" + i + ")").find("td:eq(2)").text();
-                const quantity_ordered = $("#medication_list tr:eq(" + i + ")").find("td:eq(3) input").val();
-                const frequency = $("#medication_list tr:eq(" + i + ")").find("td:eq(4) select").val();
-
-                if (dosage_strength == "") {
+                if (remarks == "") {
                     is_valid = false;
-                    medication_flag = false;
-                    $("#prescription_modal .error_list").append("<li>Dosage strength amount is required</li>");
+                    $("#prescription_modal .error_list").append("<li>Please specify remarks or instructions for the receiver</li>");
                 }
 
-                if (dosage_unit == "") {
+                if ($("#concurrent_list tr.active").length < 1 && type == "4") {
                     is_valid = false;
-                    medication_flag = false;
-                    $("#prescription_modal .error_list").append("<li>Dosage strength unit is required</li>");
+                    $("#prescription_modal .error_list").append("<li>Please select concurrent AMS therapy to be switched</li>");
                 }
-
-                if (quantity_ordered <= 0) {
-                    is_valid = false;
-                    medication_flag = false;
-                    $("#prescription_modal .error_list").append("<li>Quantity ordered is required</li>");
-                }
-
-                if (frequency == "") {
-                    is_valid = false;
-                    medication_flag = false;
-                    $("#prescription_modal .error_list").append("<li>Frequency is required</li>");
-                }
-
-                if (medication_flag) {
-                    medications.push({
-                        description: description,
-                        unit: unit,
-                        dosage_strength: dosage_strength,
-                        dosage_unit: dosage_unit,
-                        quantity_ordered: quantity_ordered,
-                        frequency: frequency
-                    });
-                }
-            }
-
-            if (medications.length < 1 && is_valid) {
-                is_valid = false;
-                $("#prescription_modal .error_list").append("<li>There must be a medication</li>");
-            }
-
-            if (medications.length > 1 && is_valid && type != "1") {
-                is_valid = false;
-                $("#prescription_modal .error_list").append("<li>Maximum of 1 medication per prescription</li>");
-            }
-
-            if (remarks == "") {
-                is_valid = false;
-                $("#prescription_modal .error_list").append("<li>Please specify remarks or instructions for the receiver</li>");
-            }
-
-            if ($("#concurrent_list tr.active").length < 1 && type == "4") {
-                is_valid = false;
-                $("#prescription_modal .error_list").append("<li>Please select concurrent AMS therapy to be switched</li>");
             }
 
             if (!is_valid) {
@@ -657,17 +652,17 @@
             }
 
             params.patient = patient;
-            params.medications = medications;
-            if (type != "1") {
-                if (type == "4")
-                    params.intervention = intervention;
-                else
-                    params.microbiologicals = microbiologicals;
-
-                params.concurrent_therapy = concurrent_therapy;
+            if (type != "6") {
+                params.medications = medications;
+                if (type != "1") {
+                    params.concurrent_therapy = concurrent_therapy;
+                    if (type == "4")
+                        params.intervention = intervention;
+                    else
+                        params.microbiologicals = microbiologicals;
+                }
             }
 
-            console.log(params);
             insertPrecription(params);
         });
 
@@ -1066,7 +1061,19 @@
                 success_modal.toggle();
                 getPrescriptions();
 
-                if ($("#form_prescription_type").val() !== "1") {
+                //IF TYPE IS 5 SEND TO NURSE,IPCC AND PHARMACY
+                if (params.patient.type === "5") {
+                    insert("ICC", {id: 1}, function (message) {
+                        deleteChild("ICC");
+                    });
+                    insert("stations/" + params.patient.station, {id: 1}, function (message) {
+                        deleteChild("stations/" + params.patient.station);
+                    });
+                    insert("PHARMACY", {id: 1}, function (message) {
+                        deleteChild("PHARMACY");
+                    });
+
+                } else if (params.patient.type !== "1" && params.patient.type !== "5") {
                     insert("ICC", {id: 1}, function (message) {
                         deleteChild("ICC");
                     });
@@ -1216,7 +1223,7 @@
 
         if (prescribed_med_id !== "") {
             $("#medication_list tr:eq(" + prescribed_med_id + ")").remove();
-        } else if (count > 0 && $("#form_prescription_type").val() !== "1") {
+        } else if (count > 0 && ($("#form_prescription_type").val() !== "1" && $("#form_prescription_type").val() !== "5ork")) {
             alert("Maximum of 1 medication per prescription only");
             return;
         }

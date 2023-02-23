@@ -8,7 +8,6 @@
     const remarks_modal = new bootstrap.Modal(document.getElementById('remarks_modal'));
     const render_modal = new bootstrap.Modal(document.getElementById('render_modal'));
     let definitive_details = {};
-    let button_clicked = "";
     let prescription_id;
     let page = 0;
 
@@ -115,7 +114,6 @@
         });
 
         $("#btn_submit").click(function () {
-            button_clicked = $(this).text();
             $("#rendered_list").empty();
             $(".is-invalid").removeClass("is-invalid");
 
@@ -152,8 +150,50 @@
             render_modal.toggle();
         });
 
+        $("#i_agree").change(function () {
+            if ($(this).is(":checked")) {
+                $("#btn_proceed_cancel").prop("disabled", false);
+            } else {
+                $("#btn_proceed_cancel").prop("disabled", true);
+            }
+        });
+
         $("#btn_reject").click(function () {
-            button_clicked = $(this).text();
+            prescription_id = $(this).val();
+
+            //DISPLAY WARNING DIALOG
+            if ($("#form_prescription_type").val() == "6") {
+                warning_modal.toggle();
+                $("#i_agree").prop("checked", false).change();
+                $("#btn_proceed_cancel").prop("disabled", true);
+                return;
+            }
+
+            $("#days_approved_container").addClass("d-none");
+            $("#remarks_message").text("Reason for rejection");
+            remarks_modal.toggle();
+        });
+
+        $("#btn_proceed_cancel").click(function () {
+            const params = {
+                id: prescription_id,
+                type: $("#form_prescription_type").val(),
+                remarks: "Prescriber wishes to cancel pending medications",
+                origin: "PHARMACY"
+            }
+
+            rejectPrescription(params);
+        });
+
+        $("#btn_reject").click(function () {
+            //DISPLAY WARNING DIALOG
+            if ($("#form_prescription_type").val() == "6") {
+                warning_modal.toggle();
+                $("#i_agree").prop("checked", false).change();
+                $("#btn_proceed_cancel").prop("disabled", true);
+                return;
+            }
+
             $("#remarks_message").text("Reason for rejection");
             remarks_modal.toggle();
         });

@@ -41,6 +41,11 @@
             }
         });
 
+        $("#form_station").change(function () {
+            $("#form_ward").val($(this).val());
+            $("#form_bed_no").val("N/A");
+        });
+
         $("#form_prescription_type").change(function () {
             $("#intervention_form_container").addClass("d-none");
             $("#indication_use_container").addClass("d-none");

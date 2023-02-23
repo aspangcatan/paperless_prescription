@@ -5,6 +5,7 @@
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
     const error_modal = new bootstrap.Modal(document.getElementById('error_modal'));
+    const warning_modal = new bootstrap.Modal(document.getElementById('warning_modal'));
     const remarks_modal = new bootstrap.Modal(document.getElementById('remarks_modal'));
     let button_clicked = "";
     let prescription_id;
@@ -62,7 +63,7 @@
             $("#concurrent_table tbody tr").removeClass("pointer");
             $("#concurrent_table tbody tr").removeClass("active");
             $(".ams_container").removeClass("d-none");
-
+            $("#medication_container").removeClass("d-none")
             $("#medication_list").empty();
             $("#medicine_list").empty();
             switch ($(this).val()) {
@@ -85,6 +86,20 @@
                     $("#microbiological_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
                     $("#concurrent_table tbody tr").addClass("pointer");
+                    break;
+                case "6":
+                    //HIDE ALL EXCEPT REMARKS
+                    $("#intervention_form_container").addClass("d-none");
+                    $("#indication_use_container").addClass("d-none");
+                    $("#transaminases_container").addClass("d-none");
+                    $("#microbiological_container").addClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    $("#concurrent_table tbody tr").addClass("pointer");
+                    $("#concurrent_table tbody tr").addClass("active");
+                    $(".ams_container").addClass("d-none");
+                    $("#medication_container").addClass("d-none")
                     break;
             }
         });
@@ -111,13 +126,40 @@
             remarks_modal.toggle();
         });
 
+        $("#i_agree").change(function () {
+            if ($(this).is(":checked")) {
+                $("#btn_proceed_cancel").prop("disabled", false);
+            } else {
+                $("#btn_proceed_cancel").prop("disabled", true);
+            }
+        });
+
         $("#btn_reject").click(function () {
             button_clicked = $(this).text();
             prescription_id = $(this).val();
 
+            //DISPLAY WARNING DIALOG
+            if ($("#form_prescription_type").val() == "6") {
+                warning_modal.toggle();
+                $("#i_agree").prop("checked", false).change();
+                $("#btn_proceed_cancel").prop("disabled", true);
+                return;
+            }
+
             $("#days_approved_container").addClass("d-none");
             $("#remarks_message").text("Reason for rejection");
             remarks_modal.toggle();
+        });
+
+        $("#btn_proceed_cancel").click(function () {
+            const params = {
+                id: prescription_id,
+                hospital_id: $("#form_hospital_id").text().trim(),
+                type: $("#form_prescription_type").val(),
+                origin: "ICC",
+                remarks: "Prescriber wishes to cancel pending medications"
+            }
+            rejectPrescription(params);
         });
 
         $("#btn_proceed").click(function () {
@@ -229,6 +271,13 @@
         $("#prescription_modal textarea").prop("disabled", true);
 
 
+        if (type == 6) {
+            $("#btn_submit").addClass("d-none");
+            $("#btn_reject").text("Cancel pending");
+        } else {
+            $("#btn_submit").removeClass("d-none");
+            $("#btn_reject").text("REJECT");
+        }
         getMedications(id);
         getPrescriptionLogs(id);
         getConcurrentTherapy(hospital_id);

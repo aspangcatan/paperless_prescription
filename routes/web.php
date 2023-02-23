@@ -61,6 +61,10 @@ Route::group(['middleware' => 'auth'], function () {
         return view('ams_summary');
     })->name('ams_summary');
 
+    Route::get('/monitored_summary', function () {
+        return view('monitored_summary');
+    })->name('monitored_summary');
+
     Route::get('/rendered_prescription', function () {
         return view('rendered_prescription');
     })->name('rendered_prescription');
@@ -98,6 +102,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/user/get/doctors', [\App\Http\Controllers\UserController::class, 'getDoctors']);
     Route::get('/user/get/nurses', [\App\Http\Controllers\UserController::class, 'getNurses']);
     Route::get('/ams/summary', [\App\Http\Controllers\PrescriptionController::class, 'getAmsSummary']);
+    Route::get('/monitored/summary', [\App\Http\Controllers\PrescriptionController::class, 'getMonitoredSummary']);
     #DOCTORS ROUTES
     Route::get('/prescription/get', [\App\Http\Controllers\PrescriptionController::class, 'getPrescription']);
     Route::get('/patient/get/concurrent', [\App\Http\Controllers\PrescriptionController::class, 'getConcurrentTherapy'])->name('getConcurrentTherapy');
