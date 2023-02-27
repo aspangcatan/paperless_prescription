@@ -12,10 +12,7 @@ class UserController extends Controller
 {
     public function authenticate(Request $request)
     {
-        $credentials = [
-            'username' => $request->username,
-            'password' => $request->password
-        ];
+        $credentials = ['username' => $request->username, 'password' => $request->password];
 
         if (Auth::attempt($credentials)) {
             $user_priv = UserPrivelege::where([['user_id', Auth::id()], ['syscode', 'paperless']])->get()->first();
@@ -32,7 +29,6 @@ class UserController extends Controller
             }
 
             session(['access_rights' => $user_priv->level]);
-
             switch ($user_priv->level) {
                 case "Doctor":
                     return redirect()->intended('/home');
@@ -45,9 +41,7 @@ class UserController extends Controller
                 case "Pharmacist Admin":
                     return redirect()->intended('/pharmacy_review');
             }
-
         }
-
         return back()->with(['message' => 'The provided credentials do not match our records.']);
     }
 
