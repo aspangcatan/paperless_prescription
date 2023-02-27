@@ -159,6 +159,8 @@
                 origin: "ICC",
                 remarks: "Prescriber wishes to cancel pending medications"
             }
+
+            warning_modal.toggle();
             rejectPrescription(params);
         });
 

@@ -147,7 +147,7 @@
                 id: prescription_id,
                 type: $("#form_prescription_type").val(),
                 remarks: "Prescriber wishes to cancel pending medications",
-                origin: "PHARMACY"
+                origin: "NURSE"
             }
 
             warning_modal.toggle();
@@ -252,6 +252,14 @@
         $("#prescription_modal input[type='radio']").prop("disabled", true);
         $("#prescription_modal select").prop("disabled", true);
         $("#prescription_modal textarea").prop("disabled", true);
+
+        if (type == 6) {
+            $("#btn_submit").addClass("d-none");
+            $("#btn_reject").text("Cancel pending");
+        } else {
+            $("#btn_submit").removeClass("d-none");
+            $("#btn_reject").text("REJECT");
+        }
 
         getMedications(id);
         getPrescriptionLogs(id);
@@ -485,6 +493,7 @@
         })
             .then(res => res.json())
             .then(data => {
+                console.log(data);
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
                     $("#error_message").text(data.message);

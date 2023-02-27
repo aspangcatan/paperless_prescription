@@ -43,7 +43,7 @@ class PrescriptionController extends Controller
     public function getPrescription(Request $request)
     {
         try {
-            $search_filters = [['p.status','=', 1]];
+            $search_filters = [['p.status', '=', 1]];
             if ($request->filter_patient != "") {
                 $search_filters[] = ['h.name', 'LIKE', "%" . $request->filter_patient . "%"];
             }
@@ -394,7 +394,7 @@ class PrescriptionController extends Controller
                     $logs->origin = $request->origin;
                     $logs->released_by = Auth::id();
                     $logs->released_to = "DOCTOR";
-                    $logs->remarks = "<span class='badge bg-danger text-white'>Rejected <i class='bi bi-hand-thumbs-down-fill'></i></span><span class='ms-2'>Doctor cancel all prescriptions</span>";
+                    $logs->remarks = "<span class='badge bg-danger text-white'>Rejected <i class='bi bi-hand-thumbs-down-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
                     $logs->save();
 
                     if ($request->origin == "NURSE") {
@@ -407,6 +407,8 @@ class PrescriptionController extends Controller
 
                     $prescription_index->forceDelete();
                 }
+
+
                 return response(['code' => 200, 'message' => 'All Prescription returned', 'id' => $current_prescrption->physician_id]);
             }
 
