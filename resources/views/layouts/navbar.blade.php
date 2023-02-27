@@ -20,6 +20,9 @@
             <li class="nav-item dropdown pe-3">
 
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+                    {{ Auth::user() }}
+                    {{ Auth::user()->section }}
+                    {{ Auth::user()->picture }}
                     <span class="d-none">{{ Auth::user()->picture }}</span>
                     <img src="{{ (Auth::user()->picture) ? url('/avatar/'.Auth::user()->picture) : "images/ic_user.png"}}?v={{ date('Ymdhis') }}" alt="Profile"
                          class="rounded-circle">
