@@ -5,10 +5,10 @@
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
     const error_modal = new bootstrap.Modal(document.getElementById('error_modal'));
+    const warning_modal = new bootstrap.Modal(document.getElementById('warning_modal'));
     const remarks_modal = new bootstrap.Modal(document.getElementById('remarks_modal'));
     const render_modal = new bootstrap.Modal(document.getElementById('render_modal'));
     let definitive_details = {};
-    let button_clicked = "";
     let prescription_id;
     let page = 0;
 
@@ -28,7 +28,6 @@
 
 
         $("#quantity_render_th").text("Quantity Render");
-        $("#btn_reject").addClass("d-none");
 
         STATIONS.forEach(it => {
             $("#form_station").append("<option>" + it + "</option>");
@@ -74,7 +73,7 @@
             $("#concurrent_table tbody tr").removeClass("pointer");
             $("#concurrent_table tbody tr").removeClass("active");
             $(".ams_container").removeClass("d-none");
-
+            $("#medication_container").removeClass("d-none")
             $("#medication_list").empty();
             $("#medicine_list").empty();
             switch ($(this).val()) {
@@ -98,6 +97,20 @@
                     $("#days_requested_container").addClass("d-none");
                     $("#concurrent_table tbody tr").addClass("pointer");
                     break;
+                case "6":
+                    //HIDE ALL EXCEPT REMARKS
+                    $("#intervention_form_container").addClass("d-none");
+                    $("#indication_use_container").addClass("d-none");
+                    $("#transaminases_container").addClass("d-none");
+                    $("#microbiological_container").addClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    $("#concurrent_table tbody tr").addClass("pointer");
+                    $("#concurrent_table tbody tr").addClass("active");
+                    $(".ams_container").addClass("d-none");
+                    $("#medication_container").addClass("d-none")
+                    break;
             }
         });
 
@@ -115,7 +128,6 @@
         });
 
         $("#btn_submit").click(function () {
-            button_clicked = $(this).text();
             $("#rendered_list").empty();
             $(".is-invalid").removeClass("is-invalid");
 
@@ -152,10 +164,54 @@
             render_modal.toggle();
         });
 
+        $("#i_agree").change(function () {
+            if ($(this).is(":checked")) {
+                $("#btn_proceed_cancel").prop("disabled", false);
+            } else {
+                $("#btn_proceed_cancel").prop("disabled", true);
+            }
+        });
+
         $("#btn_reject").click(function () {
-            button_clicked = $(this).text();
+            prescription_id = $(this).val();
+
+            //DISPLAY WARNING DIALOG
+            if ($("#form_prescription_type").val() == "6") {
+                warning_modal.toggle();
+                $("#i_agree").prop("checked", false).change();
+                $("#btn_proceed_cancel").prop("disabled", true);
+                return;
+            }
+
+            $("#days_approved_container").addClass("d-none");
             $("#remarks_message").text("Reason for rejection");
             remarks_modal.toggle();
+        });
+
+        $("#i_agree").change(function () {
+            if ($(this).is(":checked")) {
+                $("#btn_proceed_cancel").prop("disabled", false);
+            } else {
+                $("#btn_proceed_cancel").prop("disabled", true);
+            }
+        });
+
+        $("#btn_proceed_cancel").click(function () {
+            const params = {
+                id: prescription_id,
+                type: $("#form_prescription_type").val(),
+                remarks: "Prescriber wishes to cancel pending medications",
+                origin: "PHARMACY"
+            }
+
+            warning_modal.toggle();
+            rejectPrescription(params);
+        });
+
+        $("#btn_reject").click(function () {
+            warning_modal.toggle();
+            $("#i_agree").prop("checked", false).change();
+            $("#btn_proceed_cancel").prop("disabled", true);
         });
 
         $("#btn_render,#btn_render_doctor").click(function () {
@@ -191,6 +247,7 @@
             if ($(this).text().trim() == "Proceed") {
                 renderPrescription(params);
             } else
+                render_modal.toggle();
                 rejectPrescription(params);
         });
 
@@ -257,6 +314,13 @@
         $("#prescription_modal select").prop("disabled", true);
         $("#prescription_modal textarea").prop("disabled", true);
 
+        if (type == 6) {
+            $("#btn_submit").addClass("d-none");
+            $("#btn_reject").text("Cancel pending");
+        } else {
+            $("#btn_submit").removeClass("d-none");
+            $("#btn_reject").text("REJECT");
+        }
 
         getMedications(id);
         getPrescriptionLogs(id);
@@ -351,7 +415,8 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#medication_list").empty();
+            $("#medication_list").append("<tr><td colspan='7'>Something went wrong, please reload page</td></tr>");
         });
     }
 
@@ -372,7 +437,8 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#transaction_list").empty();
+            $("#transaction_list").append("<tr><td colspan='4'>Something went wrong, please reload page</td></tr>");
         })
     }
 
@@ -407,7 +473,7 @@
 
                 $("#page_items_count").text(((page * 10) + 1) + " - " + ((page * 10) + max_visible));
 
-                for(let i=0; i<max_visible; i++){
+                for (let i = 0; i < max_visible; i++) {
                     const it = data.results[i];
                     const bg = (it.urgency == "Urgent") ? "bg-danger" : "bg-success";
                     const tr = ` <tr id='prescription_id_` + it.id + `'>
@@ -442,7 +508,8 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#prescription_list").empty();
+            $("#prescription_list").append("<tr><td colspan='7'>Something went wrong, please reload page</td></tr>");
         });
     }
 
@@ -480,7 +547,6 @@
     }
 
     function rejectPrescription(params) {
-        render_modal.toggle();
         prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('reject_prescription') }}', {

@@ -29,7 +29,7 @@
                     <div class="col-sm-9">
                         <select class="form-control" id="medicine_type">
                             <option value="" selected>Select type</option>
-                            <option value="1">Regular</option>
+                            <option value="1">Non-Restricted</option>
                             <option value="2">Restricted</option>
                             <option value="3">Seventh Day Auto Stop</option>
                             <option value="5">Monitored</option>

@@ -35,6 +35,12 @@
                     <span>AMS Summary</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="{{ route('monitored_summary') }}">
+                    <i class="bi bi-grid"></i>
+                    <span>Monitored Prescription</span>
+                </a>
+            </li>
         @endif
         @if(session('access_rights') == "Pharmacist" || session('access_rights') == "Pharmacist Admin")
             <li class="nav-item">
@@ -43,16 +49,22 @@
                     <span>Pharmacy Review</span>
                 </a>
             </li>
-                <li class="nav-item">
-                    <a class="nav-link collapsed" href="{{ route('returned_meds') }}">
-                        <i class="bi bi-grid"></i>
-                        <span>Returned Medicines</span>
-                    </a>
-                </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="{{ route('returned_meds') }}">
+                    <i class="bi bi-grid"></i>
+                    <span>Returned Medicines</span>
+                </a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{ route('issuances') }}">
                     <i class="bi bi-grid"></i>
                     <span>Medicine Issuances</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="{{ route('ams_summary') }}">
+                    <i class="bi bi-grid"></i>
+                    <span>AMS Summary</span>
                 </a>
             </li>
         @endif
@@ -81,5 +93,4 @@
             </li>
         @endif
     </ul>
-
 </aside><!-- End Sidebar-->

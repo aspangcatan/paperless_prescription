@@ -97,17 +97,8 @@ class ReturnedPrescriptionController extends Controller
                     $indication->description = $indication_use_param['description'];
                     $indication->save();
                 } else if ($patient['type'] == "4") {
-                    $intervention_param = $request->intervention;
-                    $intervention = InterventionDetail::where('prescription_id', $prescription_id)->first();
-                    if (!$intervention) {
-                        $intervention = new InterventionDetail;
-                        $intervention->prescription_id = $prescription_id;
-                    }
-                    $intervention->clinical_stability = $intervention_param['clinical_stability'];
-                    $intervention->oral_intake = $intervention_param['oral_intake'];
-                    $intervention->save();
-
                     #UPDATE FOR SWITCH ANG PREVIOUS CONCURRENT
+                    $intervention_param = $request->intervention;
                     if ($intervention_param['concurrent_id'] != "0") {
                         $selected_concurrent_id = ConcurrentTherapy::find($intervention_param['concurrent_id']);
                         if ($selected_concurrent_id) {

@@ -38,6 +38,37 @@
     </div>
 </div>
 
+<div class="modal fade" id="warning_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-center">
+                <div class="p-3 w-100 text-center">
+                    <i class="bi bi-exclamation-triangle-fill text-white" style="font-size: 80px;"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="text-secondary font-weight-bold fs-4 text-center">Warning!</div>
+                <div class="mt-2 text-secondary fs-5">
+                    <div>
+                        By clicking submit, You agree to return all pending medications particular to this patient to the prescriber.
+                    </div>
+                    <div class="mt-3">
+                        <div class="form-check ps-0">
+                            <input type="checkbox" id="i_agree">
+                            <label class="form-check-label">I agree</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button class="btn btn-lg btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
+                    <button class="btn btn-lg btn-success" id="btn_proceed_cancel" disabled>Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="remarks_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
