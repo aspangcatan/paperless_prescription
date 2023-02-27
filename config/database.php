@@ -89,7 +89,7 @@ return [
             'url' => env('DATABASE_URL'),
             'host' => env('USER_HOST', '127.0.0.1'),
             'port' => env('USER_PORT', '3306'),
-            'database' => env('USER_DATABASE', 'forge'),
+            'database' => env('USER_DATABASE', 'tdh_user'),
             'username' => env('USER_USERNAME', 'forge'),
             'password' => env('USER_PASSWORD', ''),
             'unix_socket' => env('USER_SOCKET', ''),
