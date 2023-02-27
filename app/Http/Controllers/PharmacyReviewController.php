@@ -62,22 +62,24 @@ class PharmacyReviewController extends Controller
                 $medication->date_rendered = Carbon::now();
                 $medication->save();
 
-                if ($medications[$i]["quantity_rendered"] < 1) {
-                    $is_available = false;
-                    #CANCEL CONCURRENT THERAPY
-                    $current_concurrent = ConcurrentTherapy::where('prescription_id', $request->id)
-                        ->whereNotNull(['approved_by']);
-                    $current_concurrent->forceDelete();
+                if ($request->type != '1') {
+                    if ($medications[$i]["quantity_rendered"] < 1) {
+                        $is_available = false;
+                        #CANCEL CONCURRENT THERAPY
+                        $current_concurrent = ConcurrentTherapy::where('prescription_id', $request->id)
+                            ->whereNotNull(['approved_by']);
+                        $current_concurrent->forceDelete();
 
-                    if ($request->type == "4") {
-                        //COMPUTE STOP DATE VIA START DATE AND DAYS APPROVED
-                        $switched_concurrent = ConcurrentTherapy::where('for_switch', $request->id)->first();
+                        if ($request->type == "4") {
+                            //COMPUTE STOP DATE VIA START DATE AND DAYS APPROVED
+                            $switched_concurrent = ConcurrentTherapy::where('for_switch', $request->id)->first();
 
-                        $date = Carbon::parse($switched_concurrent->start_date);
-                        $date = $date->addDays($switched_concurrent->days_approved - 1);
-                        $stop_date = date('Y-m-d', strtotime($date));
-                        $switched_concurrent->stop_date = $stop_date;
-                        $switched_concurrent->save();
+                            $date = Carbon::parse($switched_concurrent->start_date);
+                            $date = $date->addDays($switched_concurrent->days_approved - 1);
+                            $stop_date = date('Y-m-d', strtotime($date));
+                            $switched_concurrent->stop_date = $stop_date;
+                            $switched_concurrent->save();
+                        }
                     }
                 }
             }

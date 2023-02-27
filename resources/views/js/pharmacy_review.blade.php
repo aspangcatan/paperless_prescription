@@ -246,9 +246,10 @@
 
             if ($(this).text().trim() == "Proceed") {
                 renderPrescription(params);
-            } else
+            } else{
                 render_modal.toggle();
                 rejectPrescription(params);
+            }
         });
 
         getPrescriptions();
