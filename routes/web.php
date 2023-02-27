@@ -121,6 +121,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/patient/get/details/{id}', [\App\Http\Controllers\PatientController::class, 'getPatientDetails']);
     #RETURNED MEDS ROUTES
     Route::get('/returned_meds/get', [\App\Http\Controllers\ReturnedMedsController::class, 'getReturnedMeds']);
+    Route::delete('/prescription/delete', [\App\Http\Controllers\PrescriptionController::class, 'deletePrescription'])->name('delete_prescription');
 
     //Route::get('/prescription/insert_prescription', [\App\Http\Controllers\PrescriptionController::class, 'insertPrescription']);
 });

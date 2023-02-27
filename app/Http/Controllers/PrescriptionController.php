@@ -43,7 +43,7 @@ class PrescriptionController extends Controller
     public function getPrescription(Request $request)
     {
         try {
-            $search_filters = [];
+            $search_filters = [['p.status','=', 1]];
             if ($request->filter_patient != "") {
                 $search_filters[] = ['h.name', 'LIKE', "%" . $request->filter_patient . "%"];
             }
@@ -353,8 +353,61 @@ class PrescriptionController extends Controller
                 return response(['code' => 500, 'message' => 'Prescription dont exists']);
             }
 
-            if($request->type == "6"){
+            if ($request->type == "6") {
+                #GET ALL NURSE PENDING
+                #GET PRESCRIPTION CREATED AT BY THIS PHYSICIAN
+                $current_prescrption = Prescription::find($request->id);
+                if ($request->origin == "NURSE") {
+                    $pending_prescriptions = DB::table('paperless_prescription.nurse_reviews as n')
+                        ->join('paperless_prescription.prescriptions as p', 'n.prescription_id', '=', 'p.id')
+                        ->where('p.created_at', '<=', $current_prescrption->created_at)
+                        ->where('p.physician_id', '=', $current_prescrption->physician_id)
+                        ->where('p.hospital_id', '=', $current_prescrption->hospital_id)
+                        ->get(['n.id', 'n.prescription_id']);
+                } else if ($request->origin == "ICC") {
+                    $pending_prescriptions = DB::table('paperless_prescription.icc_reviews as n')
+                        ->join('paperless_prescription.prescriptions as p', 'n.prescription_id', '=', 'p.id')
+                        ->where('p.created_at', '<=', $current_prescrption->created_at)
+                        ->where('p.physician_id', '=', $current_prescrption->physician_id)
+                        ->where('p.hospital_id', '=', $current_prescrption->hospital_id)
+                        ->get(['n.id', 'n.prescription_id']);
+                } else {
+                    $pending_prescriptions = DB::table('paperless_prescription.pharmacy_reviews as n')
+                        ->join('paperless_prescription.prescriptions as p', 'n.prescription_id', '=', 'p.id')
+                        ->where('p.created_at', '<=', $current_prescrption->created_at)
+                        ->where('p.physician_id', '=', $current_prescrption->physician_id)
+                        ->where('p.hospital_id', '=', $current_prescrption->hospital_id)
+                        ->get(['n.id', 'n.prescription_id']);
+                }
 
+                for ($i = 0; $i < count($pending_prescriptions); $i++) {
+                    $returned = ReturnedPrescription::where('prescription_id', $pending_prescriptions[$i]->prescription_id)->first();
+                    if (!$returned) {
+                        $returned = new ReturnedPrescription;
+                        $returned->prescription_id = $pending_prescriptions[$i]->prescription_id;
+                        $returned->save();
+                    }
+
+                    #INSERT TO PRESCRIPTION LOGS
+                    $logs = new PrescriptionLog;
+                    $logs->prescription_id = $pending_prescriptions[$i]->prescription_id;
+                    $logs->origin = $request->origin;
+                    $logs->released_by = Auth::id();
+                    $logs->released_to = "DOCTOR";
+                    $logs->remarks = "<span class='badge bg-danger text-white'>Rejected <i class='bi bi-hand-thumbs-down-fill'></i></span><span class='ms-2'>Doctor cancel all prescriptions</span>";
+                    $logs->save();
+
+                    if ($request->origin == "NURSE") {
+                        $prescription_index = NurseReview::find($pending_prescriptions[$i]->id);
+                    } else if ($request->origin == "ICC") {
+                        $prescription_index = IccReview::find($pending_prescriptions[$i]->id);
+                    } else {
+                        $prescription_index = PharmacyReview::find($pending_prescriptions[$i]->id);
+                    }
+
+                    $prescription_index->forceDelete();
+                }
+                return response(['code' => 200, 'message' => 'All Prescription returned', 'id' => $current_prescrption->physician_id]);
             }
 
             #CHECK IF INTERVENTION FORM
@@ -398,6 +451,24 @@ class PrescriptionController extends Controller
             $returned->forceDelete();
             self::insertErrorLogs(Auth::id(), 'rejectPrescription', $request, $exception->getMessage());
             return response(['code' => 500, 'message' => "Something went wrong"]);
+        }
+    }
+
+    public function deletePrescription(Request $request)
+    {
+        try {
+            $returned_prescription = ReturnedPrescription::where('prescription_id', $request->id)->first();
+            if ($returned_prescription)
+                $returned_prescription->forceDelete();
+
+            $prescription = Prescription::find($request->id);
+            $prescription->status = 0;
+            $prescription->save();
+
+            return response(['code' => 200, 'message' => 'Prescription deleted']);
+        } catch (\Exception $exception) {
+            self::insertErrorLogs(Auth::id(), 'deletePrescription', $request, $exception->getMessage());
+            return response(['code' => 500, 'message' => $exception->getMessage()]);
         }
     }
 

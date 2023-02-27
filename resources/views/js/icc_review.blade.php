@@ -278,6 +278,7 @@
             $("#btn_submit").removeClass("d-none");
             $("#btn_reject").text("REJECT");
         }
+
         getMedications(id);
         getPrescriptionLogs(id);
         getConcurrentTherapy(hospital_id);
@@ -372,7 +373,8 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#medication_list").empty();
+            $("#medication_list").append("<tr><td colspan='7'>Something went wrong, please reload page</td></tr>");
         });
     }
 
@@ -393,7 +395,8 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#transaction_list").empty();
+            $("#transaction_list").append("<tr><td colspan='4'>Something went wrong, please reload page</td></tr>");
         })
     }
 
@@ -462,7 +465,8 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#prescription_list").empty();
+            $("#prescription_list").append("<tr><td colspan='6'>Something went wrong, please reload page</td></tr>");
         });
     }
 

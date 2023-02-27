@@ -18,8 +18,6 @@
             $("#form_station").append("<option>" + it + "</option>");
         });
 
-        $("#btn_reject").addClass("d-none");
-
         $("#filter_date").focusin(function () {
             $(this).attr('type', 'date')
         });
@@ -57,7 +55,7 @@
             $("#concurrent_table tbody tr").removeClass("pointer");
             $("#concurrent_table tbody tr").removeClass("active");
             $(".ams_container").removeClass("d-none");
-
+            $("#medication_container").removeClass("d-none")
             $("#medication_list").empty();
             $("#medicine_list").empty();
             switch ($(this).val()) {
@@ -80,6 +78,20 @@
                     $("#microbiological_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
                     $("#concurrent_table tbody tr").addClass("pointer");
+                    break;
+                case "6":
+                    //HIDE ALL EXCEPT REMARKS
+                    $("#intervention_form_container").addClass("d-none");
+                    $("#indication_use_container").addClass("d-none");
+                    $("#transaminases_container").addClass("d-none");
+                    $("#microbiological_container").addClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    $("#concurrent_table tbody tr").addClass("pointer");
+                    $("#concurrent_table tbody tr").addClass("active");
+                    $(".ams_container").addClass("d-none");
+                    $("#medication_container").addClass("d-none")
                     break;
             }
         });
@@ -113,6 +125,12 @@
         $("#search_medicine").keypress(function (e) {
             if (e.which == 13) {
                 getMedicine($(this).val().trim());
+            }
+        });
+
+        $("#btn_reject").click(function () {
+            if (confirm("Are you sure you want to delete this prescription?")) {
+                deletePrescription(prescription_id);
             }
         });
 
@@ -437,6 +455,7 @@
         $("#btn_submit").val(id);
         $("#btn_reject").val(id);
         $("#btn_add_concurrent").addClass("d-none");
+        $("#btn_reject").text("DELETE RX");
         $("#btn_submit").text("UPDATE");
 
         const urgency = $("#prescription_id_" + id + " td:eq(0)").text();
@@ -843,6 +862,35 @@
 
                     $("#prescription_list").append(tr);
                 });
+            }).catch(err => {
+            console.log(err);
+            toastr.error("Something went wrong", "Ooops");
+        });
+    }
+
+    function deletePrescription(id) {
+        prescription_modal.toggle();
+        fetch('{{ route('delete_prescription') }}', {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            body: JSON.stringify({id: id})
+        })
+            .then(res => res.json())
+            .then(data => {
+                $("#spinner").addClass("d-none");
+                if (data.code == 500) {
+                    $("#error_message").text(data.message);
+                    error_modal.toggle();
+                    return;
+                }
+
+                $("#success_message").text(data.message);
+                success_modal.toggle();
+
+                getPrescriptions();
             }).catch(err => {
             console.log(err);
             toastr.error("Something went wrong", "Ooops");

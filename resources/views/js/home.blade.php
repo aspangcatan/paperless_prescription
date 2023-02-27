@@ -911,14 +911,16 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#medication_list").empty();
+            $("#medication_list").append("<tr><td colspan='6'>Something went wrong, please reload page</td></tr>");
+            $("#microbiological_result_list").empty();
+            $("#microbiological_result_list").append("<tr><td colspan='5'>Something went wrong, please reload page</td></tr>");
         });
     }
 
     function getPrescriptionLogs(id) {
         $("#transaction_list").empty();
         $("#transaction_list").append("<tr><td colspan='4'>Loading transactions...</td></tr>");
-
         fetch("{{ url('prescription/get/logs') }}/" + id, {
             method: "GET"
         })
@@ -932,7 +934,8 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#transaction_list").empty();
+            $("#transaction_list").append("<tr><td colspan='4'>Something went wrong</td></tr>");
         })
     }
 
@@ -970,7 +973,8 @@
 
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#patient_list").empty();
+            $("#patient_list").append("<tr><td colspan='5'>Something went wrong</td></tr>");
         });
     }
 
@@ -999,7 +1003,8 @@
                 });
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#medicine_list").empty();
+            $("#medicine_list").append("<tr><td colspan='3' hing went wrong, please search again</td></tr>");
         });
     }
 
@@ -1062,7 +1067,7 @@
                 getPrescriptions();
 
                 //IF TYPE IS 5 SEND TO NURSE,IPCC AND PHARMACY
-                if (params.patient.type === "5") {
+                if (params.patient.type === "6") {
                     insert("ICC", {id: 1}, function (message) {
                         deleteChild("ICC");
                     });
@@ -1155,7 +1160,6 @@
             $("#prescription_list").empty();
             $("#prescription_list").append("<tr><td colspan='6'>Something went wrong, please refresh browser</td></tr>");
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
         });
     }
 

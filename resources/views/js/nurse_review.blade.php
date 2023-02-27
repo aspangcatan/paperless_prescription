@@ -55,6 +55,14 @@
             getPrescriptions();
         });
 
+        $("#i_agree").change(function () {
+            if ($(this).is(":checked")) {
+                $("#btn_proceed_cancel").prop("disabled", false);
+            } else {
+                $("#btn_proceed_cancel").prop("disabled", true);
+            }
+        });
+
         $("#form_prescription_type").change(function () {
             $("#intervention_form_container").addClass("d-none");
             $("#indication_use_container").addClass("d-none");
@@ -66,7 +74,7 @@
             $("#concurrent_table tbody tr").removeClass("pointer");
             $("#concurrent_table tbody tr").removeClass("active");
             $(".ams_container").removeClass("d-none");
-
+            $("#medication_container").removeClass("d-none")
             $("#medication_list").empty();
             $("#medicine_list").empty();
             switch ($(this).val()) {
@@ -90,6 +98,20 @@
                     $("#days_requested_container").addClass("d-none");
                     $("#concurrent_table tbody tr").addClass("pointer");
                     break;
+                case "6":
+                    //HIDE ALL EXCEPT REMARKS
+                    $("#intervention_form_container").addClass("d-none");
+                    $("#indication_use_container").addClass("d-none");
+                    $("#transaminases_container").addClass("d-none");
+                    $("#microbiological_container").addClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    $("#concurrent_table tbody tr").addClass("pointer");
+                    $("#concurrent_table tbody tr").addClass("active");
+                    $(".ams_container").addClass("d-none");
+                    $("#medication_container").addClass("d-none")
+                    break;
             }
         });
 
@@ -112,6 +134,14 @@
             remarks_modal.toggle();
         });
 
+        $("#i_agree").change(function () {
+            if ($(this).is(":checked")) {
+                $("#btn_proceed_cancel").prop("disabled", false);
+            } else {
+                $("#btn_proceed_cancel").prop("disabled", true);
+            }
+        });
+
         $("#btn_proceed_cancel").click(function () {
             const params = {
                 id: prescription_id,
@@ -120,6 +150,7 @@
                 origin: "PHARMACY"
             }
 
+            warning_modal.toggle();
             rejectPrescription(params);
         });
 
@@ -313,14 +344,14 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#medication_list").empty();
+            $("#medication_list").append("<tr><td colspan='7'>Something went wrong, please reload page</td></tr>");
         });
     }
 
     function getPrescriptionLogs(id) {
         $("#transaction_list").empty();
         $("#transaction_list").append("<tr><td colspan='4'>Loading transactions...</td></tr>");
-
         fetch("{{ url('prescription/get/logs') }}/" + id, {
             method: "GET"
         })
@@ -334,7 +365,8 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#transaction_list").empty();
+            $("#transaction_list").append("<tr><td colspan='4'>Something went wrong, please reload page</td></tr>");
         })
     }
 
@@ -401,7 +433,8 @@
                 }
             }).catch(err => {
             console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#prescription_list").empty();
+            $("#prescription_list").append("<tr><td colspan='7'>No record found</td></tr>");
         });
     }
 
