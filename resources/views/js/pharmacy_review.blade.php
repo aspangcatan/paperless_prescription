@@ -317,11 +317,11 @@
         if (type == 6) {
             $("#btn_submit").addClass("d-none");
             $("#btn_reject").text("Cancel pending");
-            $("#btn_reject").removeClass("REJECT");
+            $("#btn_reject").removeClass("d-none");
         } else {
             $("#btn_submit").removeClass("d-none");
             $("#btn_reject").text("REJECT");
-            $("#btn_reject").addClass("REJECT");
+            $("#btn_reject").addClass("d-none");
         }
 
         getMedications(id);
