@@ -129,8 +129,25 @@
         });
 
         $("#btn_reject").click(function () {
+            let is_valid = true;
+            $("#prescription_modal .is-invalid").removeClass("is-invalid");
+            $("#prescription_modal .error_container").addClass("d-none");
+            $("#prescription_modal .error_list").empty();
+
+
+            const remarks = $("#form_remarks").val().trim();
+            if (remarks == "") {
+                is_valid = false;
+                $("#prescription_modal .error_list").append("<li>Please specify reason for the deletion of Rx</li>");
+            }
+
+            if (!is_valid) {
+                $("#prescription_modal .error_container").removeClass("d-none");
+                return;
+            }
+
             if (confirm("Are you sure you want to delete this prescription?")) {
-                deletePrescription(prescription_id);
+                deletePrescription({id: prescription_id, remarks: remarks});
             }
         });
 
@@ -474,6 +491,9 @@
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
         $("#form_days_requested").val(days_requested);
+
+
+        $("#btn_reject").text("Delete RX");
 
         getMedications(id);
         getPrescriptionLogs(id);
@@ -842,7 +862,7 @@
         });
     }
 
-    function deletePrescription(id) {
+    function deletePrescription(params) {
         prescription_modal.toggle();
         fetch('{{ route('delete_prescription') }}', {
             method: "DELETE",
@@ -850,7 +870,7 @@
                 "Content-Type": "application/json",
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            body: JSON.stringify({id: id})
+            body: JSON.stringify(params)
         })
             .then(res => res.json())
             .then(data => {

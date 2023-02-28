@@ -81,6 +81,10 @@ Route::group(['middleware' => 'auth'], function () {
         return view('medicine');
     })->name('medicine');
 
+    Route::get('/track_prescription', function () {
+        return view('track_prescription');
+    })->name('track_prescription');
+
     #APIS
     Route::post('/insert_patient', [\App\Http\Controllers\PatientController::class, 'store'])->name('insert_patient');
     Route::post('/insert_medicine', [\App\Http\Controllers\MedicineController::class, 'store'])->name('insert_medicine');
@@ -105,6 +109,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/monitored/summary', [\App\Http\Controllers\PrescriptionController::class, 'getMonitoredSummary']);
     #DOCTORS ROUTES
     Route::get('/prescription/get', [\App\Http\Controllers\PrescriptionController::class, 'getPrescription']);
+    Route::get('/track_prescription/get', [\App\Http\Controllers\PrescriptionController::class, 'trackPrescription']);
     Route::get('/patient/get/concurrent', [\App\Http\Controllers\PrescriptionController::class, 'getConcurrentTherapy'])->name('getConcurrentTherapy');
     Route::get('/prescription/get/{id}', [\App\Http\Controllers\PrescriptionController::class, 'getPrescriptionDetails']);
     Route::get('/prescription/get/logs/{id}', [\App\Http\Controllers\PrescriptionController::class, 'getPrescriptionLogs']);
