@@ -98,7 +98,7 @@
             $("#concurrent_table tbody tr").removeClass("pointer");
             $("#concurrent_table tbody tr").removeClass("active");
             $(".ams_container").removeClass("d-none");
-
+            $("#medication_container").removeClass("d-none")
             $("#medication_list").empty();
             $("#medicine_list").empty();
             switch ($(this).val()) {
@@ -121,6 +121,20 @@
                     $("#microbiological_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
                     $("#concurrent_table tbody tr").addClass("pointer");
+                    break;
+                case "6":
+                    //HIDE ALL EXCEPT REMARKS
+                    $("#intervention_form_container").addClass("d-none");
+                    $("#indication_use_container").addClass("d-none");
+                    $("#transaminases_container").addClass("d-none");
+                    $("#microbiological_container").addClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    $("#concurrent_table tbody tr").addClass("pointer");
+                    $("#concurrent_table tbody tr").addClass("active");
+                    $(".ams_container").addClass("d-none");
+                    $("#medication_container").addClass("d-none")
                     break;
             }
         });

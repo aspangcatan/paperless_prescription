@@ -92,5 +92,11 @@
                 </a>
             </li>
         @endif
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ route('track_prescription') }}">
+                <i class="bi bi-search"></i>
+                <span>Track Prescription</span>
+            </a>
+        </li>
     </ul>
 </aside><!-- End Sidebar-->

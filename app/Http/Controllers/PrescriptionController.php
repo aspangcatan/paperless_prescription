@@ -68,6 +68,34 @@ class PrescriptionController extends Controller
         }
     }
 
+    public function trackPrescription(Request $request)
+    {
+        try {
+            $search_filters = [];
+            if ($request->filter_patient != "") {
+                $search_filters[] = ['h.name', 'LIKE', "%" . $request->filter_patient . "%"];
+            }
+
+            if ($request->filter_station != "") {
+                $search_filters[] = ['p.station', 'LIKE', "%" . $request->filter_station . "%"];
+            }
+
+            if ($request->filter_date != "") {
+                $search_filters[] = ['p.created_at', 'LIKE', "%" . $request->filter_date . "%"];
+            }
+
+            $prescriptions = DB::table('paperless_prescription.prescriptions as p')
+                ->join('paperless_prescription.patient_history as h', 'p.id', '=', 'h.prescription_id')
+                ->where($search_filters)
+                ->skip($request->page * 3)
+                ->take(11)
+                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
+            return response(['code' => 200, 'results' => $prescriptions]);
+        } catch (\Exception $exception) {
+            return response(['code' => 500, 'message' => $exception->getMessage()]);
+        }
+    }
+
     public function getPrescriptionDetails($id)
     {
         $ams = [];
@@ -380,6 +408,22 @@ class PrescriptionController extends Controller
                         ->get(['n.id', 'n.prescription_id']);
                 }
 
+
+                #GET ALL ANTIBIOTIC AND UPDATE STOP DATE INTO DATE PRESCRIBED
+                $stop_date = date('Y-m-d', strtotime($current_prescrption->created_at));
+                $concurrent_therapies = DB::table('paperless_prescription.concurrent_therapy as c')
+                    ->join('paperless_prescription.prescriptions as p', 'c.prescription_id', '=', 'p.id')
+                    ->where('p.hospital_id', '=', $current_prescrption->hospital_id)
+                    ->where('p.physician_id', '=', $current_prescrption->physician_id)
+                    ->where('c.stop_date', '>', $stop_date)
+                    ->get(['c.id']);
+
+                for ($i = 0; $i < count($concurrent_therapies); $i++) {
+                    $current_therapy = ConcurrentTherapy::find($concurrent_therapies[$i]->id);
+                    $current_therapy->stop_date = $stop_date;
+                    $current_therapy->save();
+                }
+
                 for ($i = 0; $i < count($pending_prescriptions); $i++) {
                     $returned = ReturnedPrescription::where('prescription_id', $pending_prescriptions[$i]->prescription_id)->first();
                     if (!$returned) {
@@ -466,6 +510,15 @@ class PrescriptionController extends Controller
             $prescription = Prescription::find($request->id);
             $prescription->status = 0;
             $prescription->save();
+
+            #INSERT TO PRESCRIPTION LOGS
+            $logs = new PrescriptionLog;
+            $logs->prescription_id = $request->id;
+            $logs->origin = "Doctor";
+            $logs->released_by = Auth::id();
+            $logs->released_to = "Cycle End";
+            $logs->remarks = "<span class='badge bg-success text-white'>Cycle End <i class='bi bi-hand-thumbs-up-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
+            $logs->save();
 
             return response(['code' => 200, 'message' => 'Prescription deleted']);
         } catch (\Exception $exception) {
