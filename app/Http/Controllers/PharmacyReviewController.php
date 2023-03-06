@@ -36,7 +36,7 @@ class PharmacyReviewController extends Controller
                 ->join('paperless_prescription.prescriptions as p', 'n.prescription_id', '=', 'p.id')
                 ->join('paperless_prescription.patient_history as h', 'n.prescription_id', '=', 'h.prescription_id')
                 ->where($search_filters)
-                ->skip($request->page)
+                ->skip($request->page * 10)
                 ->take(11)
                 ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex', 'n.created_at as date_forwarded']);
             return response(['code' => 200, 'results' => $prescriptions]);

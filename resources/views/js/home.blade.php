@@ -2,7 +2,7 @@
 <script src="js/constant.js?v={{ date('ymdhis') }}"></script>
 <script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
-    const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
+        const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
     const patient_modal = new bootstrap.Modal(document.getElementById('patient_modal'));
     const medicine_modal = new bootstrap.Modal(document.getElementById('medicine_modal'));
     const microbiological_modal = new bootstrap.Modal(document.getElementById('microbiological_modal'));
