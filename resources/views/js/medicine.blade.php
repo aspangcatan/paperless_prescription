@@ -9,7 +9,7 @@
     $(document).ready(function () {
 
         $("#btn_search_medicine").click(function () {
-            getMedicine($("#search_medicine").val().trim());
+            getMedicine();
         });
 
         $("#btn_add_medicine").click(function () {
@@ -63,11 +63,11 @@
 
         $("#search_medicine").keypress(function (e) {
             if (e.which == 13) {
-                getMedicine($(this).val().trim());
+                getMedicine();
             }
         });
 
-        getMedicine("");
+        getMedicine();
     });
 
     function viewMedicine(id) {
@@ -91,7 +91,8 @@
         medicine_modal.toggle();
     }
 
-    function getMedicine(key) {
+    function getMedicine() {
+        const key = $("#search_medicine").val().trim();
         $("#medicine_list").empty();
         fetch("{{ url('medicine/get/master') }}?medicine=" + key, {
             method: "GET"
@@ -160,7 +161,7 @@
                 $("#success_message").text(data.message);
                 success_modal.toggle();
 
-                getMedicine("");
+                getMedicine();
             }).catch(err => {
             console.log(err);
             toastr.error("Something went wrong", "Ooops");
