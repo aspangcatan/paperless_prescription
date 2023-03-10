@@ -12,7 +12,6 @@ use App\Models\Immunocompromising;
 use App\Models\IndicationUse;
 use App\Models\IndicationUseDetails;
 use App\Models\InfectiousDiagnosis;
-use App\Models\InterventionDetail;
 use App\Models\MicrobiologicalResult;
 use App\Models\NurseReview;
 use App\Models\PatientHistory;
@@ -24,7 +23,6 @@ use App\Models\ReturnedMeds;
 use App\Models\ReturnedPrescription;
 use App\Models\SepsisCriteria;
 use Carbon\Carbon;
-use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +36,6 @@ class PrescriptionController extends Controller
         $date = $date->addDays($daysToAdd);
         return date('Y-m-d', strtotime($date));
     }
-
 
     public function getPrescription(Request $request)
     {
@@ -158,6 +155,7 @@ class PrescriptionController extends Controller
             $prescription->station = $patient['station'];
             $prescription->ward = $patient['ward'];
             $prescription->bed_no = $patient['bed_no'];
+            $prescription->attending_physician = $patient['attending_physician'];
             $prescription->urgency = $patient['urgency'];
             $prescription->type = $patient['type'];
             $prescription->drug_allergy = $patient['drug_allergy'];
@@ -247,13 +245,29 @@ class PrescriptionController extends Controller
                 ConcurrentTherapy::insert($concurrent_therapy);
             }
 
-
             #INSERT ALL MEDICATIONS AS BULK
             $medications = $request->medications;
             for ($i = 0; $i < count($medications); $i++) {
                 $medications[$i]['prescription_id'] = $prescription_id;
             }
             PrescribedMedicine::insert($medications);
+
+            #IF MONITORED PRESCRIPTION, INSERT DATA IN CONCURRENT SET AS 1 DAY APPROVED
+            if ($patient['type'] == '5') {
+                for ($i = 0; $i < count($medications); $i++) {
+                    $concurrent = new ConcurrentTherapy;
+                    $concurrent->prescription_id = $prescription_id;
+                    $concurrent->hospital_id = $patient['hospital_id'];
+                    $concurrent->concurrent_date = Carbon::now();
+                    $concurrent->antimicrobial = $medications[$i]['description'];
+                    $concurrent->dosing_regimen = $medications[$i]['dosage_strength'] . '' . $medications[$i]['dosage_unit'] . ' ' . $medications[$i]['frequency'];
+                    $concurrent->start_date = Carbon::now();
+                    $concurrent->stop_date = Carbon::now();
+                    $concurrent->days_approved = 1;
+                    $concurrent->date_approved = Carbon::now();
+                    $concurrent->save();
+                }
+            }
 
             $released_to = "NURSE";
             if ($patient['type'] == '1' || $patient['type'] == '5') {
@@ -458,7 +472,7 @@ class PrescriptionController extends Controller
 
             #CHECK IF INTERVENTION FORM
             if ($request->origin != "ICC") {
-                $current_concurrent = ConcurrentTherapy::where('prescription_id', $request->id)->whereNotNull(['approved_by']);
+                $current_concurrent = ConcurrentTherapy::where('prescription_id', $request->id)->whereNotNull(['date_approved']);
                 $current_concurrent->forceDelete();
 
                 if ($request->type == "4") {
@@ -565,27 +579,40 @@ class PrescriptionController extends Controller
             $description = $request->filter_description;
             $from_date = $request->from_date;
             $to_date = $request->to_date;
+            $type = $request->filter_type;
 
             $ams_summary = DB::table('paperless_prescription.concurrent_therapy as c')
                 ->select(DB::raw('ph.name,TIMESTAMPDIFF(YEAR, ph.birthdate, CURDATE()) as age,ph.birthdate,ph.sex,p.station,p.created_at,CONCAT(u.fname," ",u.mname," ",u.lname) as physician,
-                c.antimicrobial,CONCAT(a.fname," ",a.mname," ",a.lname) as approved_by,c.days_approved,c.start_date,c.stop_date,c.date_approved'))
+                c.antimicrobial,CONCAT(a.fname," ",a.mname," ",a.lname) as approved_by,c.days_approved,c.start_date,c.stop_date,c.date_approved,p.attending_physician'))
                 ->join('paperless_prescription.patient_history as ph', 'c.prescription_id', '=', 'ph.prescription_id')
                 ->join('paperless_prescription.prescriptions as p', 'c.prescription_id', '=', 'p.id')
                 ->join('tdh_user.users as u', 'p.physician_id', '=', 'u.id')
                 ->leftJoin('tdh_user.users as a', 'c.approved_by', '=', 'a.id')
-                ->where(function ($query) use ($patient, $description, $from_date, $to_date) {
-                    if ($patient) {
+                ->where(function ($query) use ($patient, $description, $from_date, $to_date, $type) {
+                    #COMMENT THIS IF YOU WANT TO INCLUDED MANUALLY ADDED CONCURRENT ANTIBIOTIC THERAPY
+                    $query->whereNotNull('c.date_approved');
+                    #SHOW ONLY MONITORED
+                    #ELSE SHOW ALL EXCEPT MONITORED
+                    if ($type == "1")
+                        $query->where('p.type', '=', '5');
+                    else if ($type == "0")
+                        $query->where('p.type', '<>', '5');
+
+                    if ($patient != "") {
                         $query->where('ph.name', 'LIKE', '%' . $patient . '%');
                     }
-                    if ($description) {
+
+                    if ($description != "") {
                         $query->where('antimicrobial', 'LIKE', '%' . $description . '%');
                     }
-                    if ($from_date) {
-                        $query->whereRaw("STR_TO_DATE(date_approved,'%Y-%m-%d') BETWEEN STR_TO_DATE('" . $from_date . "','%Y-%m-%d') AND STR_TO_DATE('" . $to_date . "','%Y-%m-%d')");
+
+                    if ($from_date != "") {
+                        $query->whereRaw("STR_TO_DATE(c.start_date,'%Y-%m-%d') >= STR_TO_DATE('" . $from_date . "','%Y-%m-%d') AND STR_TO_DATE(c.stop_date,'%Y-%m-%d') <= STR_TO_DATE('" . $to_date . "','%Y-%m-%d')");
                     }
                 })
                 ->get();
 
+            self::insertErrorLogs(Auth::id(), 'getAmsSummary', $request, "N/A");
             return response(['code' => 200, 'results' => $ams_summary]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
@@ -608,7 +635,11 @@ class PrescriptionController extends Controller
                 ->join('paperless_prescription.prescribed_medicines as c', 'c.prescription_id', '=', 'p.id')
                 ->join('tdh_user.users as u', 'p.physician_id', '=', 'u.id')
                 ->where(function ($query) use ($patient, $description, $from_date, $to_date) {
-                    $query->where('p.type', '=', '5');
+                    #COMMENT THIS IF YOU WANT TO INCLUDED MANUALLY ADDED CONCURRENT ANTIBIOTIC THERAPY
+                    $query->whereNotNull('c.date_approved');
+                    #UNCOMMENT THIS IF YOU DONT WANT TO INCLUDE MONITORED AMS
+
+                    $query->where('p.type', '<>', '5');
                     if ($patient) {
                         $query->where('ph.name', 'LIKE', '%' . $patient . '%');
                     }

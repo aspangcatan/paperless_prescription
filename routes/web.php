@@ -124,6 +124,9 @@ Route::group(['middleware' => 'auth'], function () {
     #RETURNED PRESCRIPTIONS ROUTES
     Route::get('/returned_prescription/get', [\App\Http\Controllers\ReturnedPrescriptionController::class, 'getPrescriptions']);
     Route::get('/patient/get/details/{id}', [\App\Http\Controllers\PatientController::class, 'getPatientDetails']);
+    Route::get('/returned_prescription/get/total', [\App\Http\Controllers\ReturnedPrescriptionController::class, 'getTotalReturned']);
+
+
     #RETURNED MEDS ROUTES
     Route::get('/returned_meds/get', [\App\Http\Controllers\ReturnedMedsController::class, 'getReturnedMeds']);
     Route::delete('/prescription/delete', [\App\Http\Controllers\PrescriptionController::class, 'deletePrescription'])->name('delete_prescription');

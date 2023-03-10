@@ -72,8 +72,13 @@
                             </div>
                             <div class="col-md-4 mt-2">
                                 <div class="text-center">
-                                    <select class="form-control fw-bold text-center bg-white"
-                                            id="form_prescription_type">
+                                    <input class="form-control bg-white fw-bold text-center" id="form_attending_physician"/>
+                                    <small>(Attending Physician)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mt-2">
+                                <div class="text-center">
+                                    <select class="form-control fw-bold text-center bg-white" id="form_prescription_type">
                                         <option value="">Select type</option>
                                         <option value="1">Non-Restricted</option>
                                         <option value="2">Restricted</option>
@@ -101,8 +106,7 @@
                             </div>
                             <div class="col-md-4 mt-2 ams_container">
                                 <div class="text-center">
-                                    <input type="number" class="form-control bg-white fw-bold text-center"
-                                           id="form_height"/>
+                                    <input type="number" class="form-control bg-white fw-bold text-center" id="form_height"/>
                                     <small>(Height (cm))</small>
                                 </div>
                             </div>
@@ -282,9 +286,9 @@
                                     <th>Medicine</th>
                                     <th style="width: 20%">Strength</th>
                                     <th style="width: 10%">Unit</th>
-                                    <th style="width: 10%">Quantity<br/>Ordered</th>
+                                    <th style="width: 2%" class="d-none">Quantity<br/>Ordered</th>
                                     <th style="width: 15%">Frequency</th>
-                                    <th colspan="2" style="width: 8%" id="quantity_render_th"></th>
+                                    <th colspan="2" style="width: 16%" id="quantity_render_th"></th>
                                 </tr>
                                 </thead>
                                 <tbody id="medication_list" style="font-size: 12px">

@@ -3,6 +3,13 @@
     <div class="col-12">
         <div class="d-flex justify-content-end mb-2">
             <div class="me-1">
+                <select class="form-control" id="filter_type">
+                    <option value="">Filter type</option>
+                    <option value="1">Monitored</option>
+                    <option value="0">Non-monitored</option>
+                </select>
+            </div>
+            <div class="ms-1 me-1">
                 <input class="form-control" placeholder="Search patient" id="filter_patient"/>
             </div>
             <div class="ms-1 me-1">
@@ -33,8 +40,9 @@
                             <th style="width: 4%">Age</th>
                             <th style="width: 4%">Gender</th>
                             <th style="width: 7%">Ward</th>
+                            <th style="width: 10%">Prescribed by</th>
                             <th style="width: 10%">Date prescribed</th>
-                            <th style="width: 10%">Physician</th>
+                            <th style="width: 10%">Attending Physician</th>
                             <th>Antibiotic</th>
                             <th style="width: 10%">Approved by</th>
                             <th style="width: 5%">Days<br />approved</th>

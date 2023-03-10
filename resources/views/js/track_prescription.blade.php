@@ -7,10 +7,8 @@
     let page = 0;
 
     $(document).ready(function () {
-        $("#quantity_render_th").attr("colspan", 1);
-        $("#quantity_render_th").text("Quantity Rendered");
-        $("#table_header").append("<th>Quantity Returned</th>");
-        $("#table_header").append("<th></th>");
+        $("#quantity_render_th").text("Availability");
+
         $("#btn_reject").addClass("d-none");
         $("#btn_submit").addClass("d-none");
 
@@ -64,6 +62,7 @@
                     $(".ams_container").addClass("d-none");
                     break;
                 case "2":
+                case "5":
                     $("#indication_use_container").removeClass("d-none");
                     $("#transaminases_container").removeClass("d-none");
                     $("#sgpt_container").addClass("d-none");
@@ -241,16 +240,14 @@
 
                     data.results.forEach(it => {
                         const bg = (!it.quantity_rendered || it.quantity_rendered == 0) ? "bg-danger text-white" : "";
-                        const quantity_rendered = (!it.quantity_rendered || it.quantity_rendered == 0) ? 0 : it.quantity_rendered;
-                        const quantity_returned = (!it.quantity_returned || it.quantity_returned == 0) ? 0 : it.quantity_returned;
+                        const quantity_rendered = (!it.quantity_rendered || it.quantity_rendered == 0) ? "Not Available" : "Available";
                         const tr = `<tr class="` + bg + `">
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
                                             <td>` + it.unit + `</td>
-                                            <td>` + it.quantity_ordered + `</td>
+                                            <td class="d-none">` + it.quantity_ordered + `</td>
                                             <td>` + it.frequency + `</td>
                                             <td>` + quantity_rendered + `</td>
-                                            <td>` + quantity_returned + `</td>
                                          </tr>`;
 
                         $("#medication_list").append(tr);

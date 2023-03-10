@@ -16,7 +16,7 @@
         observe("stations", function (snapshot) {
             if (snapshot.val()) {
                 const user_stations = $("#user_station").text().trim().split(",");
-                if(user_stations.indexOf(snapshot.key) > -1){
+                if (user_stations.indexOf(snapshot.key) > -1) {
                     notification_counter++;
                     toastr.success('New Request')
                     speechSynthesis.speak(speaker);
@@ -91,6 +91,12 @@
                     $("#sgot_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
                     break;
+                case "5":
+                    $("#transaminases_container").removeClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    break
                 case "4":
                     //INTERVENTION ON GOING
                     $("#intervention_form_container").removeClass("d-none");
@@ -223,6 +229,7 @@
         const sgpt = $("#prescription_id_" + id + " td:eq(17)").text();
         const sgot = $("#prescription_id_" + id + " td:eq(18)").text();
         const days_requested = $("#prescription_id_" + id + " td:eq(19)").text();
+        const attending_physician = $("#prescription_id_" + id + " td:eq(20)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -235,6 +242,7 @@
         $("#form_station").val(station);
         $("#form_ward").val(ward);
         $("#form_bed_no").val(bed_no);
+        $("#form_attending_physician").val(attending_physician);
         $("#checkbox_urgent").prop("checked", (urgency == "Urgent"));
         $("#form_prescription_type").val(type).change();
         $("#form_drug_allergy").val(drug_allergy);
@@ -342,7 +350,7 @@
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
                                             <td>` + it.unit + `</td>
-                                            <td>` + it.quantity_ordered + `</td>
+                                            <td class="d-none">` + it.quantity_ordered + `</td>
                                             <td>` + it.frequency + `</td>
                                             <td></td>
                                          </tr>`;
@@ -430,6 +438,7 @@
                                 <td class="d-none">` + it.sgpt + `</td>
                                 <td class="d-none">` + it.sgot + `</td>
                                 <td class="d-none">` + it.days_requested + `</td>
+                                <td class="d-none">` + it.attending_physician + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>

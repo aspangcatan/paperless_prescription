@@ -21,12 +21,27 @@ use App\Models\Prescription;
 use App\Models\PrescriptionLog;
 use App\Models\ReturnedPrescription;
 use App\Models\SepsisCriteria;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ReturnedPrescriptionController extends Controller
 {
+    public function getTotalReturned(Request $request)
+    {
+        try {
+            $search_filters = [['p.physician_id', '=', Auth::id()]];
+            $prescriptions = DB::table('paperless_prescription.returned_prescriptions as n')
+                ->join('paperless_prescription.prescriptions as p', 'n.prescription_id', '=', 'p.id')
+                ->where($search_filters)
+                ->count();
+            return response(['code' => 200, 'results' => $prescriptions]);
+        } catch (\Exception $exception) {
+            return response(['code' => 500, 'message' => $exception->getMessage()]);
+        }
+    }
+
     public function getPrescriptions(Request $request)
     {
         try {
@@ -72,6 +87,7 @@ class ReturnedPrescriptionController extends Controller
             $prescription->station = $patient['station'];
             $prescription->ward = $patient['ward'];
             $prescription->bed_no = $patient['bed_no'];
+            $prescription->attending_physician = $patient['attending_physician'];
             $prescription->urgency = $patient['urgency'];
             $prescription->type = $patient['type'];
             $prescription->drug_allergy = $patient['drug_allergy'];
@@ -110,6 +126,7 @@ class ReturnedPrescriptionController extends Controller
 
                 #INSERT MICROBIOLOGICAL
                 if ($patient['type'] != '4') {
+                    MicrobiologicalResult::where('prescription_id',$prescription_id)->delete();
                     $microbiologicals = $request->microbiologicals;
                     for ($i = 0; $i < count($microbiologicals); $i++) {
                         $microbiologicals[$i]['prescription_id'] = $prescription_id;
@@ -143,8 +160,24 @@ class ReturnedPrescriptionController extends Controller
             }
             PrescribedMedicine::insert($medications);
 
+            if ($patient['type'] == '5') {
+                for ($i = 0; $i < count($medications); $i++) {
+                    $concurrent = new ConcurrentTherapy;
+                    $concurrent->prescription_id = $prescription_id;
+                    $concurrent->hospital_id = $patient['hospital_id'];
+                    $concurrent->concurrent_date = Carbon::now();
+                    $concurrent->antimicrobial = $medications[$i]['description'];
+                    $concurrent->dosing_regimen = $medications[$i]['dosage_strength'] . '' . $medications[$i]['dosage_unit'] . ' ' . $medications[$i]['frequency'];
+                    $concurrent->start_date = Carbon::now();
+                    $concurrent->stop_date = Carbon::now();
+                    $concurrent->days_approved = 1;
+                    $concurrent->date_approved = Carbon::now();
+                    $concurrent->save();
+                }
+            }
+
             $released_to = "ICC";
-            if ($patient['type'] != "1") {
+            if ($patient['type'] != "1" && $patient['type'] != "5") {
                 $icc = IccReview::where('prescription_id', $prescription_id)->first();
                 if (!$icc) {
                     $icc = new IccReview();
