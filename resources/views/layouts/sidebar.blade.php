@@ -15,7 +15,7 @@
                     <span>Nurse Review</span>
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item d-none">
                 <a class="nav-link collapsed" href="{{ route('rendered_prescription') }}">
                     <i class="bi bi-grid"></i>
                     <span>Rendered Prescription</span>
@@ -35,7 +35,7 @@
                     <span>AMS Summary</span>
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item d-none">
                 <a class="nav-link collapsed" href="{{ route('monitored_summary') }}">
                     <i class="bi bi-grid"></i>
                     <span>Monitored Prescription</span>
@@ -49,13 +49,13 @@
                     <span>Pharmacy Review</span>
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item d-none">
                 <a class="nav-link collapsed" href="{{ route('returned_meds') }}">
                     <i class="bi bi-grid"></i>
                     <span>Returned Medicines</span>
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item d-none">
                 <a class="nav-link collapsed" href="{{ route('issuances') }}">
                     <i class="bi bi-grid"></i>
                     <span>Medicine Issuances</span>

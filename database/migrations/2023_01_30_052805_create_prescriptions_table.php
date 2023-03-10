@@ -18,6 +18,7 @@ class CreatePrescriptionsTable extends Migration
             $table->string('hospital_id');
             $table->integer('physician_id');
             $table->integer('pgi_id')->nullable();
+            $table->string('attending_physician');
             $table->string('station', 255);
             $table->string('ward', 255);
             $table->string('bed_no', 255);

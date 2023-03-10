@@ -27,7 +27,7 @@
         });
 
 
-        $("#quantity_render_th").text("Quantity Render");
+        $("#quantity_render_th").text("Availability");
 
         STATIONS.forEach(it => {
             $("#form_station").append("<option>" + it + "</option>");
@@ -90,6 +90,12 @@
                     $("#sgot_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
                     break;
+                case "5":
+                    $("#transaminases_container").removeClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    break
                 case "4":
                     //INTERVENTION ON GOING
                     $("#intervention_form_container").removeClass("d-none");
@@ -136,9 +142,10 @@
             for (let i = 0; i < $("#medication_list tr").length; i++) {
                 const tr = $("#medication_list tr:eq(" + i + ")");
                 const description = tr.find("td:eq(1)").text();
-                const quantity_rendered = tr.find("td:eq(6) input").val();
+                const quantity_rendered = tr.find("td:eq(6) select").val();
+                console.log(quantity_rendered);
                 if (!quantity_rendered) {
-                    tr.find("td:eq(6) input").addClass("is-invalid");
+                    tr.find("td:eq(6) select").addClass("is-invalid");
                     is_filled_up = false;
                     continue;
                 }
@@ -227,7 +234,7 @@
             for (let i = 0; i < $("#medication_list tr").length; i++) {
                 const tr = $("#medication_list tr:eq(" + i + ")");
                 const id = tr.find("td:eq(0)").text();
-                const quantity_rendered = tr.find("td:eq(6) input").val();
+                const quantity_rendered = tr.find("td:eq(6) select").val();
 
                 if ($(this).text().trim() == "Proceed" && quantity_rendered <= 0 & $("#form_prescription_type").val() != "1") {
                     alert("Antibiotic medications not allowed to be rendered if not available, must be returned to the doctor");
@@ -246,7 +253,7 @@
 
             if ($(this).text().trim() == "Proceed") {
                 renderPrescription(params);
-            } else{
+            } else {
                 render_modal.toggle();
                 rejectPrescription(params);
             }
@@ -285,6 +292,7 @@
         const sgpt = $("#prescription_id_" + id + " td:eq(17)").text();
         const sgot = $("#prescription_id_" + id + " td:eq(18)").text();
         const days_requested = $("#prescription_id_" + id + " td:eq(19)").text();
+        const attending_physician = $("#prescription_id_" + id + " td:eq(20)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -297,6 +305,7 @@
         $("#form_station").val(station);
         $("#form_ward").val(ward);
         $("#form_bed_no").val(bed_no);
+        $("#form_attending_physician").val(attending_physician);
         $("#checkbox_urgent").prop("checked", (urgency == "Urgent"));
         $("#form_prescription_type").val(type).change();
         $("#form_drug_allergy").val(drug_allergy);
@@ -406,13 +415,16 @@
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
                                             <td>` + it.unit + `</td>
-                                            <td>` + it.quantity_ordered + `</td>
+                                            <td class="d-none">` + it.quantity_ordered + `</td>
                                             <td>` + it.frequency + `</td>
                                             <td colspan="2">
-                                                <input type="number" class="form-control text-center"/>
+                                                <select class="form-control text-center">
+                                                    <option value=""></option>
+                                                    <option value="1">Available</option>
+                                                    <option value="0">Not Available</option>
+                                                </select>
                                             </td>
                                          </tr>`;
-
                         $("#medication_list").append(tr);
                     });
                 }
@@ -500,6 +512,7 @@
                                 <td class="d-none">` + it.sgpt + `</td>
                                 <td class="d-none">` + it.sgot + `</td>
                                 <td class="d-none">` + it.days_requested + `</td>
+                                <td class="d-none">` + it.attending_physician + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
