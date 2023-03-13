@@ -80,7 +80,7 @@
                                 <div class="text-center">
                                     <select class="form-control fw-bold text-center bg-white" id="form_prescription_type">
                                         <option value="">Select type</option>
-                                        <option value="1">Non-Restricted</option>
+                                        <option value="1" disabled>Non-Restricted</option>
                                         <option value="2">Restricted</option>
                                         <option value="3">Seventh Day Auto Stop</option>
                                         <option value="4">Intravenous to Oral</option>
@@ -285,7 +285,7 @@
                                 <tr id="table_header">
                                     <th>Medicine</th>
                                     <th style="width: 20%">Strength</th>
-                                    <th style="width: 10%">Unit</th>
+                                    <th class="d-none" style="width: 10%">Unit</th>
                                     <th style="width: 2%" class="d-none">Quantity<br/>Ordered</th>
                                     <th style="width: 15%">Frequency</th>
                                     <th colspan="2" style="width: 16%" id="quantity_render_th"></th>

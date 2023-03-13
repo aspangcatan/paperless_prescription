@@ -414,7 +414,7 @@
                                             <td class="d-none">` + it.id + `</td>
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
-                                            <td>` + it.unit + `</td>
+                                            <td class="d-none">` + it.unit + `</td>
                                             <td class="d-none">` + it.quantity_ordered + `</td>
                                             <td>` + it.frequency + `</td>
                                             <td colspan="2">

@@ -18,7 +18,7 @@
                         <input type="text" class="form-control" id="medicine_description">
                     </div>
                 </div>
-                <div class="row mb-3">
+                <div class="row mb-3 d-none">
                     <label class="col-sm-3 col-form-label">Unit</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control" id="medicine_unit">
@@ -29,7 +29,7 @@
                     <div class="col-sm-9">
                         <select class="form-control" id="medicine_type">
                             <option value="" selected>Select type</option>
-                            <option value="1">Non-Restricted</option>
+                            <option value="1" disabled>Non-Restricted</option>
                             <option value="2">Restricted</option>
                             <option value="3">Seventh Day Auto Stop</option>
                             <option value="5">Monitored</option>
@@ -43,8 +43,8 @@
                     </label>
                 </div>
                 <div class="text-center mt-5">
-                    <button class="btn btn-primary" id="btn_save_medicine">SAVE</button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">CLOSE</button>
+                    <button class="btn btn-primary" id="btn_save_medicine">SAVE</button>
                 </div>
             </div>
         </div>
