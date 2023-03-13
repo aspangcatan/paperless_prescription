@@ -80,6 +80,7 @@
                     break
                 case "4":
                     //INTERVENTION ON GOING
+                    console.log("SHEESH")
                     $("#intervention_form_container").removeClass("d-none");
                     $("#microbiological_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
@@ -372,7 +373,7 @@
                     if (medication_flag) {
                         medications.push({
                             description: description,
-                            unit: unit,
+                            unit: "N/A",
                             dosage_strength: dosage_strength,
                             dosage_unit: dosage_unit,
                             quantity_ordered: 0,
@@ -524,8 +525,11 @@
 
                 data.results.forEach(it => {
                     let tr = "<tr>";
-                    if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
-                        tr = "<tr class='pointer active'>";
+                    if ($("#form_prescription_type").val() == "4") {
+                        tr = "<tr class='pointer'>";
+                        if (it.for_switch == prescription_id)
+                            tr = "<tr class='pointer active'>";
+                    }
                     tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
                     tr += "<td>" + it.antimicrobial + "</td>";
                     tr += "<td>" + it.dosing_regimen + "</td>";

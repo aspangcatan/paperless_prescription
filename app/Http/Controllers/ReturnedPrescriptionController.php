@@ -101,6 +101,13 @@ class ReturnedPrescriptionController extends Controller
             $prescription->days_requested = $patient['days_requested'];
             $prescription->save();
 
+            #FOR SWTICH BACK TO ZERO
+            $previous_concurrent = ConcurrentTherapy::where('for_switch',$prescription_id)->first();
+            if($previous_concurrent){
+                $previous_concurrent->for_switch = null;
+                $previous_concurrent->save();
+            }
+
             if ($patient['type'] != "1") {
                 #REINSERT AMS
                 if ($patient['type'] == "2") {
