@@ -597,7 +597,7 @@
                         tr += "</select>";
                         tr += "</div>";
                         tr += "</td>";
-                        tr += "<td>" + it.unit + "</td>";
+                        tr += "<td class='d-none'>" + it.unit + "</td>";
                         tr += "<td class='d-none'><input class='form-control text-center' type='number' value='" + it.quantity_ordered + "'/></td>"
                         tr += "<td>";
                         tr += "<select class='form-control text-center'>";
@@ -736,7 +736,7 @@
             tr += "</select>";
             tr += "</div>";
             tr += "</td>";
-            tr += "<td>" + unit + "</td>";
+            tr += "<td class='d-none'>" + unit + "</td>";
             tr += "<td class='d-none'><input class='form-control text-center' type='number' value='1' min='1'/></td>";
             tr += "<td>";
             tr += "<select class='form-control text-center'>";

@@ -20,7 +20,7 @@
 
         $("#btn_save_medicine").click(function () {
             const description = $("#medicine_description").val().trim();
-            const unit = $("#medicine_unit").val().trim();
+            // const unit = $("#medicine_unit").val().trim();
             const type = $("#medicine_type").val();
             const status = ($("input[name='medicine_status']").is(":checked")) ? 1 : 0;
 
@@ -34,10 +34,10 @@
                 $("#medicine_modal .error_list").append("<li>Description is required</li>");
             }
 
-            if (unit == "") {
-                is_valid = false;
-                $("#medicine_modal .error_list").append("<li>Unit is required</li>");
-            }
+            // if (unit == "") {
+            //     is_valid = false;
+            //     $("#medicine_modal .error_list").append("<li>Unit is required</li>");
+            // }
 
             if (type == "") {
                 is_valid = false;
@@ -52,7 +52,7 @@
             const params = {
                 id: $(this).val(),
                 description: description,
-                unit: unit,
+                unit: "N/A",
                 type: type,
                 status: status
             }
@@ -117,7 +117,7 @@
                     const tr = `
                         <tr id="medicine_id_` + it.id + `">
                            <td>` + it.description + `</td>
-                           <td>` + it.unit + `</td>
+                           <td class="d-none">` + it.unit + `</td>
                            <td>` + PRESCRIPTION_TYPES[it.type] + `</td>
                            <td><span class="` + bg + `">` + status + `</span></td>
                            <td>
