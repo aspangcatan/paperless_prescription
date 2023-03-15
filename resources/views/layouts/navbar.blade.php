@@ -19,8 +19,11 @@
 
             <li class="nav-item dropdown pe-3">
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                    <img src="{{ (Auth::user()->picture) ? url('/avatar/'.Auth::user()->picture) : "assets/img/logo.png"}}?v={{ date('Ymdhis') }}" alt="Profile" class="rounded-circle">
-                    <span class="d-none d-md-block dropdown-toggle ps-2">{{ \Illuminate\Support\Facades\Auth::user()->lname[0].'. '.\Illuminate\Support\Facades\Auth::user()->fname }}</span>
+                    <img
+                        src="{{ (Auth::user()->picture) ? url('/avatar/'.Auth::user()->picture) : "assets/img/logo.png"}}?v={{ date('Ymdhis') }}"
+                        alt="Profile" class="rounded-circle">
+                    <span
+                        class="d-none d-md-block dropdown-toggle ps-2">{{ \Illuminate\Support\Facades\Auth::user()->lname[0].'. '.\Illuminate\Support\Facades\Auth::user()->fname }}</span>
                 </a><!-- End Profile Iamge Icon -->
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                     <li class="dropdown-header">
@@ -38,15 +41,15 @@
                     <li>
                         <hr class="dropdown-divider">
                     </li>
-                    {{--                    <li>--}}
-                    {{--                        <a class="dropdown-item d-flex align-items-center" href="users-profile.html">--}}
-                    {{--                            <i class="bi bi-gear"></i>--}}
-                    {{--                            <span>Change password</span>--}}
-                    {{--                        </a>--}}
-                    {{--                    </li>--}}
-                    {{--                    <li>--}}
-                    {{--                        <hr class="dropdown-divider">--}}
-                    {{--                    </li>--}}
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center" href="#" id="change_password">
+                            <i class="bi bi-gear"></i>
+                            <span>Change password</span>
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
                     <li>
                         <a class="dropdown-item d-flex align-items-center" href="{{ route('logout') }}">
                             <i class="bi bi-box-arrow-right"></i>
