@@ -32,7 +32,7 @@
     <!-- Template Main CSS File -->
     <link href="assets/css/style.css?v={{ date('ymdhis') }}" rel="stylesheet">
     <link href="css/toastr.min.css?v={{ date('ymdhis') }}" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
     <!-- =======================================================
     * Template Name: NiceAdmin - v2.5.0
     * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
@@ -52,7 +52,7 @@
 @include('layouts.navbar')
 <!-- ======= Sidebar ======= -->
 @include('layouts.sidebar')
-
+@include('modals.settings')
 <main id="main" class="main">
     <div class="pagetitle">
         <h1>@yield('Title')</h1>
@@ -95,6 +95,92 @@
 <script src="assets/js/main.js"></script>
 <script src="js/jquery.min.js"></script>
 <script src="js/toastr.min.js"></script>
+<script>
+    const settings_modal = new bootstrap.Modal(document.getElementById('settings_modal'));
+
+    $(document).ready(function () {
+        $("#change_password").click(function (e) {
+            e.preventDefault();
+            settings_modal.toggle();
+        });
+
+        $("#btn_change_password").click(function () {
+            let is_valid = true;
+            $("#settings_modal .is-invalid").removeClass("is-invalid");
+            $("#settings_modal .error_container").addClass("d-none");
+            $("#settings_modal .error_list").empty();
+
+            const old_password = $("#old_password").val().trim();
+            const new_password = $("#new_password").val().trim();
+            const confirm_password = $("#confirm_password").val().trim();
+
+            if (old_password == "") {
+                is_valid = false;
+                $("#settings_modal .error_list").append("<li>Old password is required</li>");
+                $("#old_password").addClass("is-invalid");
+            }
+
+            if (new_password == "") {
+                is_valid = false;
+                $("#settings_modal .error_list").append("<li>New password is required</li>");
+                $("#old_password").addClass("is-invalid");
+            }
+
+            if (confirm_password == "") {
+                is_valid = false;
+                $("#settings_modal .error_list").append("<li>Confirm password is required</li>");
+                $("#old_password").addClass("is-invalid");
+            }
+
+            if(new_password.length < 4){
+                is_valid = false;
+                $("#settings_modal .error_list").append("<li>New password must at least 4 characters</li>");
+                $("#new_password").addClass("is-invalid");
+            }
+
+            if(new_password != confirm_password){
+                is_valid = false;
+                $("#settings_modal .error_list").append("<li>Password mismatch</li>");
+                $("#new_password").addClass("is-invalid");
+            }
+
+            if (!is_valid) {
+                $("#settings_modal .error_container").removeClass("d-none");
+                return;
+            }
+
+            const params = {
+                old_password: old_password,
+                new_password: new_password,
+                confirm_password: confirm_password
+            }
+
+            fetch('{{route('changePassword')}}', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                body: JSON.stringify(params)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.code == 500) {
+                        toastr.error(data.message, "Something went wrong")
+                        return;
+                    }
+
+                    settings_modal.toggle();
+                    toastr.success(data.message, "Information");
+                    $("#old_password").val("");
+                    $("#new_password").val("");
+                    $("#confirm_password").val("");
+                }).catch(err => {
+                alert(err);
+            });
+        });
+    });
+</script>
 @include('js.firebase-config')
 @yield('js')
 </body>
