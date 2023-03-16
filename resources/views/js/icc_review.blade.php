@@ -371,7 +371,7 @@
                         const tr = `<tr>
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
-                                            <td class="d-none">` + it.unit + `</td>
+                                            <td>` + it.unit + `</td>
                                             <td class="d-none"><input type="number" class="form-control text-center" value="` + it.quantity_ordered + `"/></td>
                                             <td>` + it.frequency + `</td>
                                             <td></td>

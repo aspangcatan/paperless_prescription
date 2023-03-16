@@ -285,7 +285,7 @@
                                 <tr id="table_header">
                                     <th>Medicine</th>
                                     <th style="width: 20%">Strength</th>
-                                    <th class="d-none" style="width: 10%">Unit</th>
+                                    <th style="width: 10%">Unit</th>
                                     <th style="width: 2%" class="d-none">Quantity<br/>Ordered</th>
                                     <th style="width: 15%">Frequency</th>
                                     <th colspan="2" style="width: 16%" id="quantity_render_th"></th>

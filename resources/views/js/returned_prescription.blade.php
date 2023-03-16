@@ -373,7 +373,7 @@
                     if (medication_flag) {
                         medications.push({
                             description: description,
-                            unit: "N/A",
+                            unit: unit,
                             dosage_strength: dosage_strength,
                             dosage_unit: dosage_unit,
                             quantity_ordered: 0,
@@ -601,7 +601,7 @@
                         tr += "</select>";
                         tr += "</div>";
                         tr += "</td>";
-                        tr += "<td class='d-none'>" + it.unit + "</td>";
+                        tr += "<td>" + it.unit + "</td>";
                         tr += "<td class='d-none'><input class='form-control text-center' type='number' value='" + it.quantity_ordered + "'/></td>"
                         tr += "<td>";
                         tr += "<select class='form-control text-center'>";

@@ -18,7 +18,7 @@
                         <input type="text" class="form-control" id="medicine_description">
                     </div>
                 </div>
-                <div class="row mb-3 d-none">
+                <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Unit</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control" id="medicine_unit">

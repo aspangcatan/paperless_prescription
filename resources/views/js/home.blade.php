@@ -601,7 +601,7 @@
                     if (medication_flag) {
                         medications.push({
                             description: description,
-                            unit: "N/A",
+                            unit: unit,
                             dosage_strength: dosage_strength,
                             dosage_unit: dosage_unit,
                             quantity_ordered: 0,
@@ -911,7 +911,7 @@
                         const tr = `<tr>
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
-                                            <td class="d-none">` + it.unit + `</td>
+                                            <td>` + it.unit + `</td>
                                             <td class="d-none">` + it.quantity_ordered + `</td>
                                             <td>` + it.frequency + `</td>
                                             <td></td>
@@ -1259,7 +1259,7 @@
         tr += "</select>";
         tr += "</div>";
         tr += "</td>";
-        tr += "<td class='d-none'>" + unit + "</td>";
+        tr += "<td>" + unit + "</td>";
         tr += "<td class='d-none'><input class='form-control text-center' type='number' value='1' min='1'/></td>";
         tr += "<td>";
         tr += "<select class='form-control text-center'>";
