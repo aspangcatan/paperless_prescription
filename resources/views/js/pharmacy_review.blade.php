@@ -164,7 +164,7 @@
             $("#rendered_list").html(li);
 
             if (!is_filled_up) {
-                alert("Please specify quantity rendered, put '0' if not available");
+                alert("Please specify availability status");
                 return;
             }
 
