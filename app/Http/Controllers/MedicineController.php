@@ -30,9 +30,6 @@ class MedicineController extends Controller
     {
         try {
             $type = $request->type;
-            if ($type == "4") {
-                $type = "2";
-            }
 
             $search_filters = [['status', '=', '1'], ['type', '=', $type]];
             if (!$request->medicine == "")
