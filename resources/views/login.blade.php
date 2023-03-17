@@ -38,7 +38,7 @@ $template = "http://" . $_SERVER['SERVER_NAME'] . "/template";
                     </div>
 
                     <h5 class="card-title text-center">
-                        <span class="font-weight-bold">E-Prescription</span>
+                        <span class="font-weight-bold">E-AMSP</span>
                         <br>
                         <small class="text-muted" style="font-size: 0.7em;">
                             Sign in to start your session
