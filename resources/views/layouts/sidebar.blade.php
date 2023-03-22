@@ -1,6 +1,6 @@
 <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
-        @if(session('access_rights') == "Doctor")
+        @if(session('access_rights') == "Doctor" || session('access_rights') == "ICC")
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{ route('prescription') }}">
                     <i class="bi bi-grid"></i>
@@ -68,7 +68,7 @@
                 </a>
             </li>
         @endif
-        @if(session('access_rights') == "Doctor")
+            @if(session('access_rights') == "Doctor" || session('access_rights') == "ICC")
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{ route('returned_prescription') }}">
                     <i class="bi bi-grid"></i>

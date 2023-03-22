@@ -33,9 +33,8 @@ class UserController extends Controller
             session(['access_rights' => $user_priv->level]);
             switch ($user_priv->level) {
                 case "Doctor":
-                    return redirect()->intended('/home');
                 case "ICC":
-                    return redirect()->intended('/icc_review');
+                    return redirect()->intended('/home');
                 case "Nurse":
                 case "Nurse Admin":
                     return redirect()->intended('/nurse_review');
