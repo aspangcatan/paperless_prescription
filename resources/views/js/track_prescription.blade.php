@@ -239,8 +239,15 @@
                     }
 
                     data.results.forEach(it => {
-                        const bg = (!it.quantity_rendered || it.quantity_rendered == 0) ? "bg-danger text-white" : "";
-                        const quantity_rendered = (!it.quantity_rendered || it.quantity_rendered == 0) ? "Not Available" : "Available";
+                        let bg = "";
+                        let quantity_rendered = "";
+                        if(it.quantity_rendered == 1){
+                            quantity_rendered = "Available";
+                            bg = "bg-success"
+                        }else if(it.quantity_rendered == 0){
+                            quantity_rendered = "Not Available";
+                            bg = "bg-danger";
+                        }
                         const tr = `<tr class="` + bg + `">
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
