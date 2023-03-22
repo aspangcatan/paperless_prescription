@@ -429,22 +429,24 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Patient List</h5>
-                                <table class="table table-hover text-center">
-                                    <thead>
-                                    <tr>
-                                        <th scope="col">Hospital ID</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Birthdate</th>
-                                        <th scope="col">Sex</th>
-                                        <th scope="col" style="width: 4%"></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="patient_list">
-                                    <tr>
-                                        <td colspan="5">No record found</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                                <div class="table-responsive">
+                                    <table class="table table-hover text-center">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">Hospital ID</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Birthdate</th>
+                                            <th scope="col">Sex</th>
+                                            <th scope="col" style="width: 4%"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="patient_list">
+                                        <tr>
+                                            <td colspan="5">No record found</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
