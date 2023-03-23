@@ -16,7 +16,7 @@
     let is_loaded = false;
     const db_ref = "prescriber/" + $("#code").text().trim();
     $(document).ready(function () {
-
+        $("#btn_download").removeClass("d-none");
         observe(db_ref, function (snapshot) {
             if (snapshot.val()) {
                 notification_counter++;
@@ -41,6 +41,40 @@
 
         $("#filter_date").focusout(function () {
             $(this).attr('type', 'text')
+        });
+
+        $("#btn_download").click(function () {
+            const button = $(this);
+            const hospital_id = $("#form_hospital_id").text().trim();
+            button.prop("disabled", true);
+            fetch('{{ route('getLatestPrescription') }}?hospital_id=' + hospital_id, {
+                method: "GET"
+            })
+                .then(res => res.json())
+                .then(data => {
+                    button.prop("disabled", false);
+                    if (data.code == 500) {
+                        toastr.error(data.message, "Ooops");
+                        return;
+                    }
+
+                    const info = data.result;
+                    $("#form_station").val(info.station);
+                    $("#form_ward").val(info.ward);
+                    $("#form_prescription_type").val(info.type).change();
+                    $("#form_attending_physician").val(info.attending_physician);
+                    $("#form_drug_allergy").val(info.drug_allergy);
+                    $("#form_weight").val(info.weight);
+                    $("#form_height").val(info.height);
+                    $("#form_serum_creatinine").val(info.serum_creatinine);
+                    $("#form_creatinine_clearance").val(info.creatinine_clearance);
+                    $("#form_transaminases").val(info.transaminases);
+                    $("#form_sgpt").val(info.sgpt);
+                    $("#form_sgot").val(info.sgot);
+
+                }).catch(err => {
+                toastr.error(err, "Ooops");
+            })
         });
 
         $("#btn_notification").click(function () {
@@ -762,6 +796,7 @@
 
         patient_modal.toggle();
         prescription_modal.toggle();
+        $("#btn_download").prop("disabled", false);
         getConcurrentTherapy(hospital_id);
     }
 

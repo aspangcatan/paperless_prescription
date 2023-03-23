@@ -37,6 +37,20 @@ class PrescriptionController extends Controller
         return date('Y-m-d', strtotime($date));
     }
 
+    public function getLatestPrescription(Request $request)
+    {
+        try {
+            $results = Prescription::where('hospital_id', $request->hospital_id)->orderBy('id', 'DESC')->first();
+            if ($results) {
+                return response(['code' => 200, 'result' => $results]);
+            } else {
+                return response(['code' => 500, 'message' => 'No previous information']);
+            }
+        } catch (\Exception $exception) {
+            return response(['code' => 500, 'message' => $exception->getMessage()]);
+        }
+    }
+
     public function getPrescription(Request $request)
     {
         try {

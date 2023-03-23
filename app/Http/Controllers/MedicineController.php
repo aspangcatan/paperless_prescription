@@ -29,10 +29,10 @@ class MedicineController extends Controller
     function getMedicineList(Request $request)
     {
         try {
-            $type = $request->type;
-
-            #$search_filters = [['status', '=', '1'], ['type', '=', $type]];
-            $search_filters = [['status', '=', '1']];
+//            $type = $request->type;
+//            $search_filters = [['status', '=', '1'], ['type', '=', $type]];
+//            if ($type == 4)
+                $search_filters = [['status', '=', '1']];
             if (!$request->medicine == "")
                 $search_filters[] = ['description', 'like', "%$request->medicine%"];
 

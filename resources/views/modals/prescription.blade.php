@@ -11,7 +11,15 @@
             <div class="modal-body" style="background: rgb(241,244,252)">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">Patient Information</h6>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h6 class="card-title">Patient Information</h6>
+                            <div>
+                                <button class="btn btn-sm btn-success d-none" id="btn_download">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="text-white bg-danger rounded p-2 error_container d-none">
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
@@ -72,13 +80,15 @@
                             </div>
                             <div class="col-md-4 mt-2">
                                 <div class="text-center">
-                                    <input class="form-control bg-white fw-bold text-center" id="form_attending_physician"/>
+                                    <input class="form-control bg-white fw-bold text-center"
+                                           id="form_attending_physician"/>
                                     <small>(Attending Physician)</small>
                                 </div>
                             </div>
                             <div class="col-md-4 mt-2">
                                 <div class="text-center">
-                                    <select class="form-control fw-bold text-center bg-white" id="form_prescription_type">
+                                    <select class="form-control fw-bold text-center bg-white"
+                                            id="form_prescription_type">
                                         <option value="">Select type</option>
                                         <option value="1" disabled>Non-Restricted</option>
                                         <option value="2">Restricted</option>
@@ -106,7 +116,8 @@
                             </div>
                             <div class="col-md-4 mt-2 ams_container">
                                 <div class="text-center">
-                                    <input type="number" class="form-control bg-white fw-bold text-center" id="form_height"/>
+                                    <input type="number" class="form-control bg-white fw-bold text-center"
+                                           id="form_height"/>
                                     <small>(Height (cm))</small>
                                 </div>
                             </div>

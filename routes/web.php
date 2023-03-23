@@ -130,5 +130,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::delete('/prescription/delete', [\App\Http\Controllers\PrescriptionController::class, 'deletePrescription'])->name('delete_prescription');
     #SETTINGS
     Route::post('/password/update', [\App\Http\Controllers\UserController::class, 'changePassword'])->name('changePassword');
+    Route::get('/patient/get/recent', [\App\Http\Controllers\PrescriptionController::class, 'getLatestPrescription'])->name('getLatestPrescription');
 
 });
