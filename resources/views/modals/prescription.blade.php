@@ -279,6 +279,14 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card" id="additional_labs_container">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="card-title">Additional Laboratory Information</h6>
+                            </div>
+                            <textarea class="form-control" rows="10" id="additional_labs" placeholder="(e.g. UTZ, CT Scan)"></textarea>
+                        </div>
+                    </div>
                 </div>
                 <div class="card" id="medication_container">
                     <div class="card-body">

@@ -77,6 +77,7 @@
             $("#medication_container").removeClass("d-none")
             $("#medication_list").empty();
             $("#medicine_list").empty();
+            $("#additional_labs_container").addClass("d-none");
             switch ($(this).val()) {
                 case "":
                     $(".ams_container").addClass("d-none");
@@ -90,6 +91,7 @@
                     $("#sgpt_container").addClass("d-none");
                     $("#sgot_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#additional_labs_container").removeClass("d-none");
                     break;
                 case "5":
                     $("#transaminases_container").removeClass("d-none");
@@ -230,6 +232,7 @@
         const sgot = $("#prescription_id_" + id + " td:eq(18)").text();
         const days_requested = $("#prescription_id_" + id + " td:eq(19)").text();
         const attending_physician = $("#prescription_id_" + id + " td:eq(20)").text();
+        const additional_labs = $("#prescription_id_" + id + " td:eq(21)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -254,6 +257,7 @@
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
         $("#form_days_requested").val(days_requested);
+        $("#additional_labs").val(additional_labs);
 
         $("#prescription_modal input").prop("disabled", true);
         $("#prescription_modal input[type='checkbox']").prop("disabled", true);
@@ -439,6 +443,7 @@
                                 <td class="d-none">` + it.sgot + `</td>
                                 <td class="d-none">` + it.days_requested + `</td>
                                 <td class="d-none">` + it.attending_physician + `</td>
+                                <td class="d-none">` + it.additional_labs + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>

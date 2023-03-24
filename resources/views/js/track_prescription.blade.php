@@ -54,6 +54,7 @@
             $("#medication_container").removeClass("d-none")
             $("#medication_list").empty();
             $("#medicine_list").empty();
+            $("#additional_labs_container").addClass("d-none");
             switch ($(this).val()) {
                 case "":
                     $(".ams_container").addClass("d-none");
@@ -62,13 +63,19 @@
                     $(".ams_container").addClass("d-none");
                     break;
                 case "2":
-                case "5":
                     $("#indication_use_container").removeClass("d-none");
                     $("#transaminases_container").removeClass("d-none");
                     $("#sgpt_container").addClass("d-none");
                     $("#sgot_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#additional_labs_container").removeClass("d-none");
                     break;
+                case "5":
+                    $("#transaminases_container").removeClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    break
                 case "4":
                     //INTERVENTION ON GOING
                     $("#intervention_form_container").removeClass("d-none");
@@ -128,6 +135,8 @@
         const sgpt = $("#prescription_id_" + id + " td:eq(16)").text();
         const sgot = $("#prescription_id_" + id + " td:eq(17)").text();
         const days_requested = $("#prescription_id_" + id + " td:eq(18)").text();
+        const attending_physician = $("#prescription_id_" + id + " td:eq(19)").text();
+        const additional_labs = $("#prescription_id_" + id + " td:eq(20)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -140,6 +149,7 @@
         $("#form_station").val(station);
         $("#form_ward").val(ward);
         $("#form_bed_no").val(bed_no);
+        $("#form_attending_physician").val(attending_physician);
         $("#checkbox_urgent").prop("checked", (urgency == "Urgent"));
         $("#form_prescription_type").val(type).change();
         $("#form_drug_allergy").val(drug_allergy);
@@ -151,6 +161,7 @@
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
         $("#form_days_requested").val(days_requested);
+        $("#additional_labs").val(additional_labs);
 
         $("#form_prescription_type").prop("disabled", true);
 
@@ -345,6 +356,8 @@
                                 <td class="d-none">` + it.sgpt + `</td>
                                 <td class="d-none">` + it.sgot + `</td>
                                 <td class="d-none">` + it.days_requested + `</td>
+                                <td class="d-none">` + it.attending_physician + `</td>
+                                <td class="d-none">` + it.additional_labs + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>

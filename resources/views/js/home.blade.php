@@ -71,6 +71,7 @@
                     $("#form_transaminases").val(info.transaminases);
                     $("#form_sgpt").val(info.sgpt);
                     $("#form_sgot").val(info.sgot);
+                    $("#additional_labs").val(info.additional_labs);
 
                 }).catch(err => {
                 toastr.error(err, "Ooops");
@@ -130,6 +131,7 @@
             $("#medication_container").removeClass("d-none")
             $("#medication_list").empty();
             $("#medicine_list").empty();
+            $("#additional_labs_container").addClass("d-none");
             switch ($(this).val()) {
                 case "":
                     $(".ams_container").addClass("d-none");
@@ -143,6 +145,7 @@
                     $("#sgpt_container").addClass("d-none");
                     $("#sgot_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#additional_labs_container").removeClass("d-none");
                     break;
                 case "5":
                     $("#transaminases_container").removeClass("d-none");
@@ -440,6 +443,7 @@
             const sgpt = $("#form_sgpt").val().trim();
             const sgot = $("#form_sgot").val().trim();
             const days_requested = $("#form_days_requested").val().trim();
+            const additional_labs = $("#additional_labs").val().trim();
 
             let params = {};
             let is_valid = true;
@@ -538,6 +542,11 @@
                     if (transaminases == "" && type == "2") {
                         is_valid = false;
                         $("#prescription_modal .error_list").append("<li>Transaminases is required, put '0' if not applicable</li>");
+                    }
+
+                    if (additional_labs == "" && type == "2") {
+                        is_valid = false;
+                        $("#prescription_modal .error_list").append("<li>Please specify Additional Labs, put 'N/A' if not applicable</li>");
                     }
 
                     if (days_requested == "" && type == "3") {
@@ -690,7 +699,8 @@
                 transaminases: transaminases,
                 sgpt: sgpt,
                 sgot: sgot,
-                days_requested: days_requested
+                days_requested: days_requested,
+                additional_labs:additional_labs
             }
 
             params.patient = patient;
@@ -829,6 +839,7 @@
         const sgot = $("#prescription_id_" + id + " td:eq(17)").text();
         const days_requested = $("#prescription_id_" + id + " td:eq(18)").text();
         const attending_physician = $("#prescription_id_" + id + " td:eq(19)").text();
+        const additional_labs = $("#prescription_id_" + id + " td:eq(20)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -853,9 +864,9 @@
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
         $("#form_days_requested").val(days_requested);
+        $("#additional_labs").val(additional_labs);
 
         $("#form_prescription_type").prop("disabled", true);
-
         $("#prescription_modal input").prop("disabled", true);
         $("#prescription_modal input[type='checkbox']").prop("disabled", true);
         $("#prescription_modal input[type='radio']").prop("disabled", true);
@@ -1194,6 +1205,7 @@
                                 <td class="d-none">` + it.sgot + `</td>
                                 <td class="d-none">` + it.days_requested + `</td>
                                 <td class="d-none">` + it.attending_physician + `</td>
+                                <td class="d-none">` + it.additional_labs + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
