@@ -100,6 +100,7 @@ class PrescriptionController extends Controller
                 ->where($search_filters)
                 ->skip($request->page * 10)
                 ->take(11)
+                ->orderBy('p.id','DESC')
                 ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
