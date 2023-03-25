@@ -724,6 +724,15 @@
             }
         });
 
+        $("#btn_search_local").click(function (){
+            const firstname = $("#search_firstname").val().trim();
+            const lastname = $("#search_lastname").val().trim();
+
+            if (firstname == "" && lastname == "") return;
+
+            getPatients(firstname, lastname);
+        });
+
         $("#search_firstname,#search_lastname").keypress(function (e) {
             if (e.which == 13) {
                 const firstname = $("#search_firstname").val().trim();
@@ -1084,6 +1093,10 @@
                     return;
                 }
 
+                $("#search_firstname").val($("#fname").val().trim());
+                $("#search_lastname").val($("#lname").val().trim());
+                $("#btn_search_local").click();
+
                 $("#hospital_id").val("")
                 $("#fname").val("")
                 $("#mname").val("")
@@ -1092,6 +1105,8 @@
                 $("#birthdate").val("");
                 $("#sex").val("");
                 toastr.success(data.message, "Information");
+
+
 
             }).catch(err => {
             console.log(err);

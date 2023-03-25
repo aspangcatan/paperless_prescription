@@ -429,19 +429,24 @@
                     </div>
                     <div class="col-md-8">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <div class="form-floating">
                                     <input class="form-control mb-3" placeholder="Search patient &#xF52A"
                                            id="search_firstname"/>
-                                    <label>Search first</label>
+                                    <label>Search firstname</label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <div class="form-floating">
                                     <input class="form-control mb-3" placeholder="Search patient &#xF52A"
                                            id="search_lastname"/>
                                     <label>Search lastname</label>
                                 </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-lg btn-success" id="btn_search_local">
+                                    <i class="bi bi-search"></i>
+                                </button>
                             </div>
                         </div>
 
