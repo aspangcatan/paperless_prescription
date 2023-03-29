@@ -28,7 +28,7 @@
 
         $("body").on("click", "#concurrent_list tr", function () {
             $("#concurrent_list tr.active").removeClass("active");
-            if ($("#form_prescription_type").val() == '4') {
+            if ($("#form_prescription_type").val() == '4' || $("#form_prescription_type").val() == '7') {
                 //CHECK IF SELECTED CONCURRENT STOP DATE DOES NOT EXCEEDS TODAY'S DATE
                 const selected_stop_date = moment($(this).find("td:eq(4)").text(), "MM/DD/YYYY");
                 if (moment(selected_stop_date).diff(moment(), 'days') < 0) {
@@ -100,6 +100,9 @@
                     $("#concurrent_table tbody tr").addClass("active");
                     $(".ams_container").addClass("d-none");
                     $("#medication_container").addClass("d-none")
+                    break;
+                case "7":
+                    $("#concurrent_table tbody tr").addClass("pointer");
                     break;
             }
         });
@@ -404,7 +407,7 @@
                     $("#prescription_modal .error_list").append("<li>Please specify remarks or instructions for the receiver</li>");
                 }
 
-                if ($("#concurrent_list tr.active").length < 1 && type == "4") {
+                if ($("#concurrent_list tr.active").length < 1 && (type == "4" || type == "7")) {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Please select concurrent AMS therapy to be switched</li>");
                 }
@@ -445,9 +448,10 @@
             if (type != "1") {
                 if (type == "4")
                     params.intervention = intervention;
-                else
-                    params.microbiologicals = microbiologicals;
+                else if (type == "7")
+                    params.intervention = intervention;
 
+                params.microbiologicals = microbiologicals;
                 params.concurrent_therapy = concurrent_therapy;
             }
 
@@ -481,8 +485,8 @@
         const serum_creatinine = $("#prescription_id_" + id + " td:eq(14)").text();
         const creatinine_clearance = $("#prescription_id_" + id + " td:eq(15)").text();
         const transaminases = $("#prescription_id_" + id + " td:eq(16)").text();
-        const sgpt = $("#prescription_id_" + id + " td:eq(17)").text();
-        const sgot = $("#prescription_id_" + id + " td:eq(18)").text();
+        const sgpt = ($("#prescription_id_" + id + " td:eq(17)").text().trim() == "null") ? "" : $("#prescription_id_" + id + " td:eq(17)").text();
+        const sgot = ($("#prescription_id_" + id + " td:eq(18)").text().trim() == "null") ? "" : $("#prescription_id_" + id + " td:eq(18)").text();
         const days_requested = $("#prescription_id_" + id + " td:eq(19)").text();
         const attending_physician = $("#prescription_id_" + id + " td:eq(20)").text();
         const additional_labs = $("#prescription_id_" + id + " td:eq(21)").text();
@@ -534,7 +538,7 @@
 
                 data.results.forEach(it => {
                     let tr = "<tr>";
-                    if ($("#form_prescription_type").val() == "4") {
+                    if ($("#form_prescription_type").val() == "4" || $("#form_prescription_type").val() == "7") {
                         tr = "<tr class='pointer'>";
                         if (it.for_switch == prescription_id)
                             tr = "<tr class='pointer active'>";

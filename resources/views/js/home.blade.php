@@ -101,7 +101,7 @@
 
         $("body").on("click", "#concurrent_list tr", function () {
             $("#concurrent_list tr.active").removeClass("active");
-            if ($("#form_prescription_type").val() == '4') {
+            if ($("#form_prescription_type").val() == '4' || $("#form_prescription_type").val() == '7') {
                 //CHECK IF SELECTED CONCURRENT STOP DATE DOES NOT EXCEEDS TODAY'S DATE
                 const selected_stop_date = moment($(this).find("td:eq(4)").text(), "MM/DD/YYYY");
                 if (moment(selected_stop_date).diff(moment(), 'days') < 0) {
@@ -173,6 +173,9 @@
                     $("#concurrent_table tbody tr").addClass("active");
                     $(".ams_container").addClass("d-none");
                     $("#medication_container").addClass("d-none")
+                    break;
+                case "7":
+                    $("#concurrent_table tbody tr").addClass("pointer");
                     break;
             }
         });
@@ -335,7 +338,7 @@
             if ($(this).val() == "") {
                 const count = $("#concurrent_list tr").length;
                 let tr = "<tr>";
-                if ($("#form_prescription_type").val() == '4')
+                if ($("#form_prescription_type").val() == '4' || $("#form_prescription_type").val() == '7')
                     tr = "<tr class='pointer'>";
 
                 tr += "<td>" + moment(concurrent_date).format("MM/DD/YYYY") + " </td>";
@@ -398,7 +401,7 @@
 
             const count = $("#microbiological_result_list tr").length;
             if ($(this).val() == "") {
-                let tr = "<tr>";
+                let tr = "<tr id='micro_id_" + count + "'>";
                 tr += "<td>" + moment(date).format("MM/DD/YYYY") + " </td>";
                 tr += "<td>" + specimen + "</td>";
                 tr += "<td>" + pathogen + "</td>";
@@ -700,7 +703,7 @@
                 sgpt: sgpt,
                 sgot: sgot,
                 days_requested: days_requested,
-                additional_labs:additional_labs
+                additional_labs: additional_labs
             }
 
             params.patient = patient;
@@ -710,8 +713,12 @@
                     params.concurrent_therapy = concurrent_therapy;
                     if (type == "4")
                         params.intervention = intervention;
-                    else
+                    else {
+                        if (type == "7")
+                            params.intervention = intervention;
                         params.microbiologicals = microbiologicals;
+                    }
+
                 }
             }
 
@@ -724,7 +731,7 @@
             }
         });
 
-        $("#btn_search_local").click(function (){
+        $("#btn_search_local").click(function () {
             const firstname = $("#search_firstname").val().trim();
             const lastname = $("#search_lastname").val().trim();
 
@@ -821,12 +828,12 @@
 
     function viewPrescription(id) {
         prescription_id = id;
-        $("#btn_view_cart").addClass("d-none");
-        $("#btn_add_microbiological").addClass("d-none");
-        $("#btn_add_concurrent").addClass("d-none");
-        $("#btn_submit").addClass("d-none");
-        $("#form_remarks").addClass("d-none");
-        $("#transaction_container").removeClass("d-none");
+        // $("#btn_view_cart").addClass("d-none");
+        // $("#btn_add_microbiological").addClass("d-none");
+        // $("#btn_add_concurrent").addClass("d-none");
+        // $("#btn_submit").addClass("d-none");
+        // $("#form_remarks").addClass("d-none");
+        // $("#transaction_container").removeClass("d-none");
 
         const urgency = $("#prescription_id_" + id + " td:eq(0)").text();
         const hospital_id = $("#prescription_id_" + id + " td:eq(1)").text();
@@ -844,8 +851,8 @@
         const serum_creatinine = $("#prescription_id_" + id + " td:eq(13)").text();
         const creatinine_clearance = $("#prescription_id_" + id + " td:eq(14)").text();
         const transaminases = $("#prescription_id_" + id + " td:eq(15)").text();
-        const sgpt = $("#prescription_id_" + id + " td:eq(16)").text();
-        const sgot = $("#prescription_id_" + id + " td:eq(17)").text();
+        const sgpt = ($("#prescription_id_" + id + " td:eq(16)").text().trim() == "null") ? "" : $("#prescription_id_" + id + " td:eq(16)").text();
+        const sgot = ($("#prescription_id_" + id + " td:eq(17)").text().trim() == "null") ? "" : $("#prescription_id_" + id + " td:eq(17)").text();
         const days_requested = $("#prescription_id_" + id + " td:eq(18)").text();
         const attending_physician = $("#prescription_id_" + id + " td:eq(19)").text();
         const additional_labs = $("#prescription_id_" + id + " td:eq(20)").text();
@@ -875,13 +882,12 @@
         $("#form_days_requested").val(days_requested);
         $("#additional_labs").val(additional_labs);
 
-        $("#form_prescription_type").prop("disabled", true);
-        $("#prescription_modal input").prop("disabled", true);
-        $("#prescription_modal input[type='checkbox']").prop("disabled", true);
-        $("#prescription_modal input[type='radio']").prop("disabled", true);
-        $("#prescription_modal select").prop("disabled", true);
-        $("#prescription_modal textarea").prop("disabled", true);
-
+        // $("#form_prescription_type").prop("disabled", true);
+        // $("#prescription_modal input").prop("disabled", true);
+        // $("#prescription_modal input[type='checkbox']").prop("disabled", true);
+        // $("#prescription_modal input[type='radio']").prop("disabled", true);
+        // $("#prescription_modal select").prop("disabled", true);
+        // $("#prescription_modal textarea").prop("disabled", true);
 
         getMedications(id);
         getPrescriptionLogs(id);
@@ -905,7 +911,7 @@
 
                 data.results.forEach(it => {
                     let tr = "<tr>";
-                    if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
+                    if (it.for_switch == prescription_id && ($("#form_prescription_type").val() == "4" || $("#form_prescription_type").val() == "7"))
                         tr = "<tr class='pointer active'>";
                     tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
                     tr += "<td>" + it.antimicrobial + "</td>";
@@ -937,7 +943,6 @@
                 $("#microbiological_result_list").empty();
                 if (data.code == 200) {
                     const ams = data.ams;
-                    console.log(ams);
                     if (!jQuery.isEmptyObject(ams.indication_use)) {
                         const indication_index = INDICATION_USE_ARRAY.indexOf(ams.indication_use.description);
                         $("input[name='indication_use']:eq(" + indication_index + ")").prop("checked", true);
@@ -951,29 +956,71 @@
                     }
 
                     if (!jQuery.isEmptyObject(ams.microbiologicals)) {
-                        ams.microbiologicals.forEach(it => {
-                            let tr = "<tr>";
+                        for (let i = 0; i < ams.microbiologicals.length; i++) {
+                            const it = ams.microbiologicals[i];
+                            let tr = "<tr id='micro_id_" + i + "'>";
                             tr += "<td>" + moment(it.date).format("MM/DD/YYYY") + " </td>";
                             tr += "<td>" + it.specimen + "</td>";
-                            tr += "<td colspan='3'>" + it.pathogen + "</td>";
+                            tr += "<td>" + it.pathogen + "</td>";
+                            tr += "<td>";
+                            tr += "<button class='btn btn-sm btn-success' onclick='editMicrobiological(" + i + ")'><i class='bi bi-pencil-fill'></i></button>"
+                            tr += "</td>";
+                            tr += "<td>";
+                            tr += "<button class='btn btn-sm btn-danger' onclick='deleteMicrobiological(" + i + ")'><i class='bi bi-trash-fill'></i></button>"
+                            tr += "</td>";
                             tr += "</tr>";
 
                             $("#microbiological_result_list").append(tr);
-                        });
+                        }
+
                     }
 
-                    data.results.forEach(it => {
-                        const tr = `<tr>
-                                            <td>` + it.description + `</td>
-                                            <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
-                                            <td>` + it.unit + `</td>
-                                            <td class="d-none">` + it.quantity_ordered + `</td>
-                                            <td>` + it.frequency + `</td>
-                                            <td></td>
-                                         </tr>`;
+                    for (let i = 0; i < data.results.length; i++) {
+                        const it = data.results[i];
+                        let tr = "<tr id='medicine_id_" + i + "'>";
+                        tr += "<td>" + it.description + "</td>";
+                        tr += "<td>";
+                        tr += "<div class='d-flex'>";
+                        tr += "<input class='form-control text-center w-50' type='number' value='" + it.dosage_strength + "'/>"
+                        tr += "<select class='form-control text-center w-50'>";
+                        for (let i = 0; i < STRENGTH_UNIT.length; i++) {
+                            tr += "<option>" + STRENGTH_UNIT[i] + "</option>"
+                        }
+                        tr += "</select>";
+                        tr += "</div>";
+                        tr += "</td>";
+                        tr += "<td>" + it.unit + "</td>";
+                        tr += "<td class='d-none'><input class='form-control text-center' type='number' value='1' min='1'/></td>";
+                        tr += "<td>";
+                        tr += "<select class='form-control text-center'>";
+                        for (let i = 0; i < FREQUENCIES.length; i++) {
+                            tr += "<option>" + FREQUENCIES[i] + "</option>"
+                        }
+                        tr += "</select>";
+                        tr += "</td>";
+                        tr += "<td>";
+                        tr += "<button class='btn btn-sm btn-success' onclick='editMedicine(" + i + ")'><i class='bi bi-pencil-fill'></i></button>"
+                        tr += "</td>";
+                        tr += "<td>";
+                        tr += "<button class='btn btn-sm btn-danger' onclick='deleteMedicine(" + i + ")'><i class='bi bi-trash-fill'></i></button>"
+                        tr += "</td>";
+                        tr += "</tr>";
+                        // const tr = `<tr>
+                        //                     <td>` + it.description + `</td>
+                        //                     <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
+                        //                     <td>` + it.unit + `</td>
+                        //                     <td class="d-none">` + it.quantity_ordered + `</td>
+                        //                     <td>` + it.frequency + `</td>
+                        //                     <td></td>
+                        //                  </tr>`;
+                        //
+
 
                         $("#medication_list").append(tr);
-                    });
+                        $("#medicine_id_" + i + " td:eq(1) select").val(it.dosage_unit);
+                        $("#medicine_id_" + i + " td:eq(4) select").val(it.frequency);
+                    }
+
                 }
             }).catch(err => {
             console.log(err);
@@ -1105,7 +1152,6 @@
                 $("#birthdate").val("");
                 $("#sex").val("");
                 toastr.success(data.message, "Information");
-
 
 
             }).catch(err => {
@@ -1288,7 +1334,7 @@
     }
 
     function deleteMicrobiological(id) {
-        $("#microbiological_result_list tr:eq(" + id + ")").remove();
+        $("#micro_id_" + id).remove();
     }
 
     function appendMedicine(id) {

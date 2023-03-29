@@ -120,7 +120,7 @@ class ReturnedPrescriptionController extends Controller
                     }
                     $indication->description = $indication_use_param['description'];
                     $indication->save();
-                } else if ($patient['type'] == "4") {
+                } else if ($patient['type'] == "4" || $patient['type'] == "7") {
                     #UPDATE FOR SWITCH ANG PREVIOUS CONCURRENT
                     $intervention_param = $request->intervention;
                     if ($intervention_param['concurrent_id'] != "0") {

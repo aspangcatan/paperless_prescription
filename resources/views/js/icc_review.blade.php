@@ -248,8 +248,8 @@
         const serum_creatinine = $("#prescription_id_" + id + " td:eq(13)").text();
         const creatinine_clearance = $("#prescription_id_" + id + " td:eq(14)").text();
         const transaminases = $("#prescription_id_" + id + " td:eq(15)").text();
-        const sgpt = $("#prescription_id_" + id + " td:eq(16)").text();
-        const sgot = $("#prescription_id_" + id + " td:eq(17)").text();
+        const sgpt = ($("#prescription_id_" + id + " td:eq(16)").text().trim() == "null") ? "" : $("#prescription_id_" + id + " td:eq(16)").text();
+        const sgot = ($("#prescription_id_" + id + " td:eq(17)").text().trim() == "null") ? "" : $("#prescription_id_" + id + " td:eq(17)").text();
         const days_requested = $("#prescription_id_" + id + " td:eq(18)").text();
         const attending_physician = $("#prescription_id_" + id + " td:eq(19)").text();
         const additional_labs = $("#prescription_id_" + id + " td:eq(20)").text();
@@ -314,7 +314,7 @@
 
                 data.results.forEach(it => {
                         let tr = "<tr>";
-                        if (it.for_switch == prescription_id && $("#form_prescription_type").val() == "4")
+                        if (it.for_switch == prescription_id && ($("#form_prescription_type").val() == "4" || $("#form_prescription_type").val() == "7"))
                             tr = "<tr class='pointer active'>";
 
                         tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";

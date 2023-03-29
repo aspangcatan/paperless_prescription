@@ -35,6 +35,10 @@ class MedicineController extends Controller
             }
 
             $search_filters = [['status', '=', '1'], ['type', '=', $type]];
+            if ($type == 7) {
+                $search_filters = [['status', '=', '1']];
+            }
+
             if (!$request->medicine == "")
                 $search_filters[] = ['description', 'like', "%$request->medicine%"];
 

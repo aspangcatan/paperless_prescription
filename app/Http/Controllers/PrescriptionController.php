@@ -230,7 +230,7 @@ class PrescriptionController extends Controller
                     $indication->prescription_id = $prescription_id;
                     $indication->description = $indication_use_param['description'];
                     $indication->save();
-                } else if ($patient['type'] == "4") {
+                } else if ($patient['type'] == "4" || $patient['type'] == "7") {
                     #UPDATE FOR SWITCH ANG PREVIOUS CONCURRENT
                     $intervention_param = $request->intervention;
                     if ($intervention_param['concurrent_id'] != "0") {
@@ -342,7 +342,7 @@ class PrescriptionController extends Controller
 
                 #CHECK IF TYPE IS INTERVENTION FORM
                 #UPDATE SELECTED AMS STOP DATE INTO TODAYS DATE
-                if ($request->type == "4") {
+                if ($request->type == "4" || $request->type == "7") {
                     $get_selected_concurrent = ConcurrentTherapy::where("for_switch", $request->id)->first();
                     $get_selected_concurrent->stop_date = $date_approved;
                     $get_selected_concurrent->save();
@@ -491,7 +491,7 @@ class PrescriptionController extends Controller
                 $current_concurrent = ConcurrentTherapy::where('prescription_id', $request->id)->whereNotNull(['date_approved']);
                 $current_concurrent->forceDelete();
 
-                if ($request->type == "4") {
+                if ($request->type == "4" || $request->type == "7") {
                     //COMPUTE STOP DATE VIA START DATE AND DAYS APPROVED
                     $switched_concurrent = ConcurrentTherapy::where('for_switch', $request->id)->first();
                     $date = Carbon::parse($switched_concurrent->start_date);
@@ -607,8 +607,6 @@ class PrescriptionController extends Controller
                 ->where(function ($query) use ($patient, $description, $from_date, $to_date, $type) {
                     #COMMENT THIS IF YOU WANT TO INCLUDED MANUALLY ADDED CONCURRENT ANTIBIOTIC THERAPY
                     $query->whereNotNull('c.date_approved');
-                    #SHOW ONLY MONITORED
-                    #ELSE SHOW ALL EXCEPT MONITORED
                     if ($type == "1")
                         $query->where('p.type', '=', '5');
                     else if ($type == "0")

@@ -95,6 +95,7 @@
                                         <option value="3">Seventh Day Auto Stop</option>
                                         <option value="4">Intravenous to Oral</option>
                                         <option value="5">Monitored</option>
+                                        <option value="7">Switch Medication</option>
                                         <option value="6">Cancellation</option>
                                     </select>
                                     <small>(Type)</small>
