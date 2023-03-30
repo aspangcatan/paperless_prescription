@@ -9,6 +9,26 @@
 
     $(document).ready(function () {
 
+        $("#btn_search_nurse").click(function () {
+            page = 0;
+            getNurses();
+        });
+
+        $("#btn_next").click(function () {
+            page++;
+            getNurses();
+            $("#btn_prev").removeClass("d-none");
+        });
+
+        $("#btn_prev").click(function () {
+            if (page == 0) return;
+            if (page == 1) {
+                $("#btn_prev").addClass("d-none");
+            }
+            page--;
+            getNurses();
+        });
+
         $("#btn_save").click(function () {
             let stations = "";
             for (let i = 0; i < STATIONS.length; i++) {
@@ -28,7 +48,7 @@
         getNurses();
     });
 
-    function updateNurseStation(params){
+    function updateNurseStation(params) {
         nurses_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('update_nurse_station') }}', {
@@ -58,21 +78,37 @@
     }
 
     function getNurses() {
-        const filter_name = "";
-        fetch("{{ url('user/get/nurses') }}?name=" + filter_name +
-            "&page=" + page, {
+        const filter_fname = $("#filter_fname").val().trim();
+        const filter_lname = $("#filter_lname").val().trim();
+        $("#nurse_list").empty();
+        $("#nurse_list").append("<tr><td colspan='6'>Loading data, please wait ...</td></tr>");
+        fetch('{{ route('getNurses')  }}?filter_fname=' + filter_fname +
+            '&filter_lname=' + filter_lname +
+            '&page=' + page, {
             method: "GET"
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data)
+                $("#pagination_container").addClass("d-none")
                 $("#nurse_list").empty();
+                $("#btn_next").addClass("d-none");
                 if (data.results.length < 1) {
-                    $("#nurse_list").append("<tr><td colspan='5'>No record found</td></tr>");
+                    $("#nurse_list").append("<tr><td colspan='6'>No record found</td></tr>");
                     return;
                 }
 
-                data.results.forEach(it => {
+                $("#pagination_container").removeClass("d-none")
+
+                let max_visible = data.results.length;
+                if (max_visible == 11) {
+                    max_visible = 10;
+                    $("#btn_next").removeClass("d-none");
+                }
+
+                $("#page_items_count").text(((page * 10) + 1) + " - " + ((page * 10) + max_visible));
+
+                for (let i = 0; i < max_visible; i++) {
+                    const it = data.results[i];
                     const stations = (it.stations) ? it.stations : "";
                     const tr = `<tr id='user_id_` + it.id + `'>
                                 <td>` + it.fname + `</td>
@@ -88,7 +124,8 @@
                             </tr>`;
 
                     $("#nurse_list").append(tr);
-                });
+                }
+
             }).catch(err => {
             console.log(err);
             toastr.error("Something went wrong", "Ooops");

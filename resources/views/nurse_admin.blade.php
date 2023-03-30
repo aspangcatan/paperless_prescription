@@ -3,13 +3,13 @@
     <div class="col-12">
         <div class="d-flex justify-content-end mb-2">
             <div>
-                <input class="form-control" placeholder="Filter patient" id="filter_patient"/>
+                <input class="form-control" placeholder="Search by firstname" id="filter_fname"/>
             </div>
             <div class="ms-2 me-1">
-                <input type="text" class="form-control" placeholder="Filter date" id="filter_date"/>
+                <input class="form-control" placeholder="Search by lastname" id="filter_lname"/>
             </div>
             <div class="ms-1">
-                <button class="btn btn-success" id="btn_search_prescription">
+                <button class="btn btn-success" id="btn_search_nurse">
                     <i class="bi bi-search"></i>
                 </button>
             </div>
@@ -36,6 +36,17 @@
 
                         </tbody>
                     </table>
+                </div>
+            </div>
+            <div class="card-footer text-dark" id="pagination_container">
+                <div class="d-flex align-items-center justify-content-center">
+                    <button class="btn btn-sm d-none" style="background: transparent !important;" id="btn_prev">
+                        <i class="bi bi-caret-left"></i>
+                    </button>
+                    <div id="page_items_count"></div>
+                    <button class="btn btn-sm" style="background: transparent !important;" id="btn_next">
+                        <i class="bi bi-caret-right"></i>
+                    </button>
                 </div>
             </div>
         </div>

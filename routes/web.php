@@ -104,7 +104,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/medicine/get', [\App\Http\Controllers\MedicineController::class, 'getMedicineList']);
     Route::get('/medicine/get/issuance', [\App\Http\Controllers\PrescribedMedicineController::class, 'getIssuancesSummary']);
     Route::get('/user/get/doctors', [\App\Http\Controllers\UserController::class, 'getDoctors']);
-    Route::get('/user/get/nurses', [\App\Http\Controllers\UserController::class, 'getNurses']);
+    Route::get('/user/get/nurses', [\App\Http\Controllers\UserController::class, 'getNurses'])->name('getNurses');
     Route::get('/ams/summary', [\App\Http\Controllers\PrescriptionController::class, 'getAmsSummary']);
     Route::get('/monitored/summary', [\App\Http\Controllers\PrescriptionController::class, 'getMonitoredSummary']);
     #DOCTORS ROUTES

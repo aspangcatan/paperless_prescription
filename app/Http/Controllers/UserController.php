@@ -79,11 +79,21 @@ class UserController extends Controller
     public function getNurses(Request $request)
     {
         try {
+            $search_filters = [['p.syscode', '=', 'paperless'], ['p.level', '=', 'Nurse']];
+            if ($request->filter_fname != "") {
+                $search_filters[] = ['u.fname', 'LIKE', "%" . $request->filter_fname . "%"];
+            }
+
+            if ($request->filter_lname != "") {
+                $search_filters[] = ['u.lname', 'LIKE', "%" . $request->filter_lname . "%"];
+            }
+
             $nurses = DB::table('tdh_user.users as u')
                 ->join('tdh_user.user_priv as p', 'u.id', '=', 'p.user_id')
                 ->leftJoin('paperless_prescription.nurse_stations as n', 'u.id', '=', 'n.userid')
-                ->where('p.syscode', '=', 'paperless')
-                ->where('p.level', '=', 'Nurse')
+                ->where($search_filters)
+                ->skip($request->page * 10)
+                ->take(11)
                 ->get(['u.id', 'u.fname', 'u.mname', 'u.lname', 'u.suffix', 'n.stations']);
             return response(['code' => 200, 'results' => $nurses]);
         } catch (\Exception $exception) {
