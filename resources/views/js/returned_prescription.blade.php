@@ -169,7 +169,7 @@
             const sex = $("#form_sex").text().trim();
             const station = $("#form_station").val();
             const ward = $("#form_ward").val();
-            const bed_no = $("#form_bed_no").val();
+            const bed_no = "N/A";
             const attending_physician = $("#form_attending_physician").val();
             const remarks = $("#form_remarks").val();
             const urgency = ($("#checkbox_urgent").is(":checked")) ? "Urgent" : "Normal";
