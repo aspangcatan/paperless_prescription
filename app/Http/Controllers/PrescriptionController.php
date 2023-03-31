@@ -318,9 +318,9 @@ class PrescriptionController extends Controller
     {
         try {
             if ($request->origin == "NURSE")
-                $prescription = NurseReview::where('prescription_id', $request->id);
+                $prescription = NurseReview::where('prescription_id', $request->id)->first();
             else {
-                $prescription = IccReview::where('prescription_id', $request->id);
+                $prescription = IccReview::where('prescription_id', $request->id)->first();
             }
 
             if (!$prescription) {
@@ -404,11 +404,11 @@ class PrescriptionController extends Controller
     {
         try {
             if ($request->origin == "NURSE") {
-                $prescription = NurseReview::where('prescription_id', $request->id);
+                $prescription = NurseReview::where('prescription_id', $request->id)->first();
             } else if ($request->origin == "ICC")
-                $prescription = IccReview::where('prescription_id', $request->id);
+                $prescription = IccReview::where('prescription_id', $request->id)->first();
             else
-                $prescription = PharmacyReview::where('prescription_id', $request->id);
+                $prescription = PharmacyReview::where('prescription_id', $request->id)->first();
 
             if (!$prescription) {
                 return response(['code' => 500, 'message' => 'Prescription dont exists']);
