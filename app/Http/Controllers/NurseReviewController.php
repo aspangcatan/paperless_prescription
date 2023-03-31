@@ -27,24 +27,20 @@ class NurseReviewController extends Controller
                 ->join('paperless_prescription.prescriptions as p', 'n.prescription_id', '=', 'p.id')
                 ->join('paperless_prescription.patient_history as h', 'n.prescription_id', '=', 'h.prescription_id')
                 ->where($search_filters)
-                ->orWhere(function ($query) {
+                ->Where(function ($query) {
                     $station = session("station");
                     $station = explode(',', $station);
-                    if (count($station) < 1) {
-                        $query->where('p.station', '=', 'asdadsad');
-                    } else {
-                        for ($i = 0; $i < count($station); $i++) {
-                            if ($i == 0) {
-                                $query->where('p.station', '=', $station[$i]);
-                                continue;
-                            }
-                            $query->orWhere('p.station', '=', $station[$i]);
+                    for ($i = 0; $i < count($station); $i++) {
+                        if ($i == 0) {
+                            $query->where('p.station', '=', $station[$i]);
+                            continue;
                         }
+                        $query->orWhere('p.station', '=', $station[$i]);
                     }
                 })
                 ->skip($request->page * 10)
                 ->take(11)
-                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex','n.created_at as date_forwarded']);
+                ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex', 'n.created_at as date_forwarded']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);

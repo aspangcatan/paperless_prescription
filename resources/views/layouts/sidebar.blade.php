@@ -18,7 +18,7 @@
             <li class="nav-item d-none">
                 <a class="nav-link collapsed" href="{{ route('rendered_prescription') }}">
                     <i class="bi bi-grid"></i>
-                    <span>Rendered Prescription</span>
+                    <span>Tagged Prescriptions</span>
                 </a>
             </li>
         @endif

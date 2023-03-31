@@ -8,13 +8,12 @@
     let button_clicked = "";
     let prescription_id;
     let med_id = 0;
+    let page = 0;
     $(document).ready(function () {
-        $("#quantity_render_th").attr("colspan", 1);
-        $("#quantity_render_th").text("Quantity Rendered");
-        $("#table_header").append("<th>Quantity Returned</th>");
-        $("#table_header").append("<th></th>");
-        $("#btn_submit").addClass("d-none");
+        $("#quantity_render_th").text("Availability");
+
         $("#btn_reject").addClass("d-none");
+        $("#btn_submit").addClass("d-none");
 
         STATIONS.forEach(it => {
             $("#form_station").append("<option>" + it + "</option>");
@@ -28,7 +27,23 @@
             $(this).attr('type', 'text')
         });
 
+        $("#btn_next").click(function () {
+            page++;
+            getPrescriptions();
+            $("#btn_prev").removeClass("d-none");
+        });
+
+        $("#btn_prev").click(function () {
+            if (page == 0) return;
+            if (page == 1) {
+                $("#btn_prev").addClass("d-none");
+            }
+            page--;
+            getPrescriptions();
+        });
+
         $("#btn_search_prescription").click(function () {
+            page = 0;
             getPrescriptions();
         });
 
@@ -101,6 +116,7 @@
             $("#medication_container").removeClass("d-none")
             $("#medication_list").empty();
             $("#medicine_list").empty();
+            $("#additional_labs_container").addClass("d-none");
             switch ($(this).val()) {
                 case "":
                     $(".ams_container").addClass("d-none");
@@ -114,7 +130,14 @@
                     $("#sgpt_container").addClass("d-none");
                     $("#sgot_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#additional_labs_container").removeClass("d-none");
                     break;
+                case "5":
+                    $("#transaminases_container").removeClass("d-none");
+                    $("#sgpt_container").addClass("d-none");
+                    $("#sgot_container").addClass("d-none");
+                    $("#days_requested_container").addClass("d-none");
+                    break
                 case "4":
                     //INTERVENTION ON GOING
                     $("#intervention_form_container").removeClass("d-none");
@@ -135,6 +158,9 @@
                     $("#concurrent_table tbody tr").addClass("active");
                     $(".ams_container").addClass("d-none");
                     $("#medication_container").addClass("d-none")
+                    break;
+                case "7":
+                    $("#concurrent_table tbody tr").addClass("pointer");
                     break;
             }
         });
@@ -172,6 +198,8 @@
         const sgpt = $("#prescription_id_" + id + " td:eq(17)").text();
         const sgot = $("#prescription_id_" + id + " td:eq(18)").text();
         const days_requested = $("#prescription_id_" + id + " td:eq(19)").text();
+        const attending_physician = $("#prescription_id_" + id + " td:eq(20)").text();
+        const additional_labs = $("#prescription_id_" + id + " td:eq(21)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -184,6 +212,7 @@
         $("#form_station").val(station);
         $("#form_ward").val(ward);
         $("#form_bed_no").val(bed_no);
+        $("#form_attending_physician").val(attending_physician);
         $("#checkbox_urgent").prop("checked", (urgency == "Urgent"));
         $("#form_prescription_type").val(type).change();
         $("#form_drug_allergy").val(drug_allergy);
@@ -195,6 +224,7 @@
         $("#form_sgpt").val(sgpt);
         $("#form_sgot").val(sgot);
         $("#form_days_requested").val(days_requested);
+        $("#additional_labs").val(additional_labs);
 
         $("#prescription_modal input").prop("disabled", true);
         $("#prescription_modal input[type='checkbox']").prop("disabled", true);
@@ -279,21 +309,22 @@
                     }
 
                     data.results.forEach(it => {
-                        const bg = (!it.quantity_rendered || it.quantity_rendered == 0) ? "bg-danger text-white" : "";
-                        const quantity_returned = (!it.quantity_returned || it.quantity_returned == 0) ? 0 : it.quantity_returned;
+                        let bg = "";
+                        let quantity_rendered = "";
+                        if (it.quantity_rendered == 1) {
+                            quantity_rendered = "Available";
+                            bg = "bg-success text-white"
+                        } else if (it.quantity_rendered == 0) {
+                            quantity_rendered = "Not Available";
+                            bg = "bg-danger text-white";
+                        }
                         const tr = `<tr class="` + bg + `">
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
                                             <td>` + it.unit + `</td>
-                                            <td>` + it.quantity_ordered + `</td>
+                                            <td class="d-none">` + it.quantity_ordered + `</td>
                                             <td>` + it.frequency + `</td>
-                                            <td>` + it.quantity_rendered + `</td>
-                                            <td>` + quantity_returned + `</td>
-                                             <td>
-                                                <button class="btn btn-sm bg-success" onclick="returnMeds(` + it.id + `)">
-                                                    <i class="bi bi-arrow-return-left text-white"></i>
-                                                </button>
-                                            </td>
+                                            <td>` + quantity_rendered + `</td>
                                          </tr>`;
 
                         $("#medication_list").append(tr);
@@ -333,25 +364,37 @@
 
     function getPrescriptions() {
         const filter_patient = $("#filter_patient").val().trim();
-        const filter_station = $("#filter_station").val().trim();
         const filter_date = $("#filter_date").val().trim();
         const page = 0;
-
+        $("#prescription_list").empty();
+        $("#prescription_list").append("<tr><td colspan='6'>Loading data, please wait ...</td></tr>");
         fetch("{{ url('rendered_prescription/get') }}?filter_patient=" + filter_patient +
             "&filter_date=" + filter_date +
-            "&filter_station=" + filter_station +
             "&page=" + page, {
             method: "GET"
         })
             .then(res => res.json())
             .then(data => {
+                $("#pagination_container").addClass("d-none")
                 $("#prescription_list").empty();
+                $("#btn_next").addClass("d-none");
                 if (data.results.length < 1) {
                     $("#prescription_list").append("<tr><td colspan='6'>No record found</td></tr>");
                     return;
                 }
 
-                data.results.forEach(it => {
+                $("#pagination_container").removeClass("d-none")
+
+                let max_visible = data.results.length;
+                if (max_visible == 11) {
+                    max_visible = 10;
+                    $("#btn_next").removeClass("d-none");
+                }
+
+                $("#page_items_count").text(((page * 10) + 1) + " - " + ((page * 10) + max_visible));
+
+                for (let i = 0; i < max_visible; i++) {
+                    const it = data.results[i];
                     const bg = (it.urgency == "Urgent") ? "bg-danger" : "bg-success";
                     const tr = ` <tr id='prescription_id_` + it.id + `'>
                                 <td><span class="badge ` + bg + `">` + it.urgency + `</span></td>
@@ -374,6 +417,8 @@
                                 <td class="d-none">` + it.sgpt + `</td>
                                 <td class="d-none">` + it.sgot + `</td>
                                 <td class="d-none">` + it.days_requested + `</td>
+                                <td class="d-none">` + it.attending_physician + `</td>
+                                <td class="d-none">` + it.additional_labs + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
@@ -382,7 +427,7 @@
                             </tr>`;
 
                     $("#prescription_list").append(tr);
-                });
+                }
             }).catch(err => {
             console.log(err);
             toastr.error("Something went wrong, please reload page", "Ooops");

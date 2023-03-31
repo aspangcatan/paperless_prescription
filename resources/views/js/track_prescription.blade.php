@@ -97,6 +97,9 @@
                     $(".ams_container").addClass("d-none");
                     $("#medication_container").addClass("d-none")
                     break;
+                case "7":
+                    $("#concurrent_table tbody tr").addClass("pointer");
+                    break;
             }
         });
 
