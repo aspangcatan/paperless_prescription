@@ -257,10 +257,10 @@
                         let quantity_rendered = "";
                         if(it.quantity_rendered == 1){
                             quantity_rendered = "Available";
-                            bg = "bg-success"
+                            bg = "bg-success text-white"
                         }else if(it.quantity_rendered == 0){
                             quantity_rendered = "Not Available";
-                            bg = "bg-danger";
+                            bg = "bg-danger text-white";
                         }
                         const tr = `<tr class="` + bg + `">
                                             <td>` + it.description + `</td>
