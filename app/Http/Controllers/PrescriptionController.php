@@ -100,7 +100,7 @@ class PrescriptionController extends Controller
                 ->where($search_filters)
                 ->skip($request->page * 10)
                 ->take(11)
-                ->orderBy('p.id','DESC')
+                ->orderBy('p.id', 'DESC')
                 ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
@@ -338,12 +338,15 @@ class PrescriptionController extends Controller
                 $stop_date = date('Y-m-d', strtotime($date));
 
                 $medications = PrescribedMedicine::where('prescription_id', $request->id)
-                    ->get(['description', 'dosage_strength', 'dosage_unit', 'frequency']);
+                    ->get();
 
                 #CHECK IF TYPE IS INTERVENTION FORM
                 #UPDATE SELECTED AMS STOP DATE INTO TODAYS DATE
                 if ($request->type == "4" || $request->type == "7") {
                     $get_selected_concurrent = ConcurrentTherapy::where("for_switch", $request->id)->first();
+                    if (!$get_selected_concurrent) {
+                        return response(['code' => 500, 'message' => 'You did not specify the antibiotic you wish to be switched']);
+                    }
                     $get_selected_concurrent->stop_date = $date_approved;
                     $get_selected_concurrent->save();
                 }
@@ -363,10 +366,10 @@ class PrescriptionController extends Controller
                     $concurrent->save();
                 }
 
-                #SET QUANTITY ORDERED
-                $prescribed_meds = PrescribedMedicine::where('prescription_id', $request->id)->first();
-                $prescribed_meds->quantity_ordered = $request->updated_quantity;
-                $prescribed_meds->save();
+//                #SET QUANTITY ORDERED
+//                $prescribed_meds = PrescribedMedicine::where('prescription_id', $request->id)->first();
+//                $prescribed_meds->quantity_ordered = $request->updated_quantity;
+//                $prescribed_meds->save();
 
                 #FORWARD TO PHARMACY
                 $nurse = new NurseReview();

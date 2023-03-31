@@ -671,7 +671,7 @@
                     $("#prescription_modal .error_list").append("<li>Please specify remarks or instructions for the receiver</li>");
                 }
 
-                if ($("#concurrent_list tr.active").length < 1 && type == "4") {
+                if ($("#concurrent_list tr.active").length < 1 && (type == "4" || type == "7")) {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Please select concurrent AMS therapy to be switched</li>");
                 }
