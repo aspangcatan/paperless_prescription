@@ -61,10 +61,10 @@ class PharmacyReviewController extends Controller
                     $is_available = false;
                 }
                 #IF UNAVAILABLE PROMPT ERROR
-//                $medication = PrescribedMedicine::find($medications[$i]["id"]);
-//                $medication->quantity_rendered = $medications[$i]["quantity_rendered"];
-//                $medication->date_rendered = Carbon::now();
-//                $medication->save();
+                $medication = PrescribedMedicine::find($medications[$i]["id"]);
+                $medication->quantity_rendered = $medications[$i]["quantity_rendered"];
+                $medication->date_rendered = Carbon::now();
+                $medication->save();
 //
 //                if ($request->type != '1') {
 //                    if ($medications[$i]["quantity_rendered"] < 1) {

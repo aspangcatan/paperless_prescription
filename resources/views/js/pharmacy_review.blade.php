@@ -145,7 +145,7 @@
                 const tr = $("#medication_list tr:eq(" + i + ")");
                 const description = tr.find("td:eq(1)").text();
                 const quantity_rendered = tr.find("td:eq(6) select").val();
-                console.log(quantity_rendered);
+
                 if (!quantity_rendered) {
                     tr.find("td:eq(6) select").addClass("is-invalid");
                     is_filled_up = false;
