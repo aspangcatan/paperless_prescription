@@ -18,7 +18,17 @@ use Illuminate\Support\Facades\Session;
 
 
 Route::get('/', function () {
-    if (Auth::check()) return redirect()->route('prescription');
+    if (Auth::check()) {
+        switch (session('access_rights')) {
+            case "ICC":
+            case "Doctor":
+            return redirect()->route('prescription');
+            case "Nurse":
+                return redirect()->route('nurse_review');
+            case "Pharmacist":
+                return redirect()->route('pharmacy_review');
+        }
+    }
     return view('login');
 })->name('login');
 
@@ -33,7 +43,7 @@ Route::post('/authenticate', [\App\Http\Controllers\UserController::class, 'auth
 
 Route::group(['middleware' => 'auth'], function () {
 
-    Route::group(['middleware'=>'authority'],function(){
+    Route::group(['middleware' => 'authority'], function () {
         Route::get('/home', function () {
             return view('home');
         })->name('prescription');;
@@ -88,7 +98,7 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     #APIS
-    Route::group(['middleware'=>'authority.api'],function(){
+    Route::group(['middleware' => 'authority.api'], function () {
         Route::post('/insert_patient', [\App\Http\Controllers\PatientController::class, 'store'])->name('insert_patient');
         Route::post('/insert_medicine', [\App\Http\Controllers\MedicineController::class, 'store'])->name('insert_medicine');
         Route::post('/insert_prescription', [\App\Http\Controllers\PrescriptionController::class, 'insertPrescription'])->name('insert_prescription');

@@ -24,17 +24,17 @@ class Authorize
                 if (session('access_rights') == "Doctor" || session('access_rights') == "ICC")
                     return $next($request);
                 else
-                    return redirect('/home');
+                    return redirect()->route('login');
             case "nurse_review":
                 if (session('access_rights') == "Nurse" || session('access_rights') == "Nurse Admin")
                     return $next($request);
                 else
-                    return redirect('/nurse_review');
+                    return redirect()->route('login');
             case "pharmacy_review":
                 if (session('access_rights') == "Pharmacist" || session('access_rights') == "Pharmacist Admin")
                     return $next($request);
                 else
-                    return redirect('/pharmacy_review');
+                    return redirect()->route('login');
             default:
                 return $next($request);
         }
