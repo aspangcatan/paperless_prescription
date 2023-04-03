@@ -537,8 +537,9 @@ class PrescriptionController extends Controller
     {
         try {
             $returned_prescription = ReturnedPrescription::where('prescription_id', $request->id)->first();
-            if ($returned_prescription)
-                $returned_prescription->forceDelete();
+            if (!$returned_prescription) {
+                return response(['code'=>500,'message'=>'Prescription ID dont exists']);
+            }
 
             $prescription = Prescription::find($request->id);
             $prescription->status = 0;
@@ -553,6 +554,7 @@ class PrescriptionController extends Controller
             $logs->remarks = "<span class='badge bg-success text-white'>Cycle End <i class='bi bi-hand-thumbs-up-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
             $logs->save();
 
+            $returned_prescription->forceDelete();
             return response(['code' => 200, 'message' => 'Prescription deleted']);
         } catch (\Exception $exception) {
             self::insertErrorLogs(Auth::id(), 'deletePrescription', $request, $exception->getMessage());
