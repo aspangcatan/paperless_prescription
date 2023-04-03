@@ -17,6 +17,7 @@
             if (snapshot.val()) {
                 const user_stations = $("#user_station").text().trim().split(",");
                 if (user_stations.indexOf(snapshot.key) > -1) {
+                    console.log(snapshot.val());
                     notification_counter++;
                     toastr.success('New Request')
                     speechSynthesis.speak(speaker);

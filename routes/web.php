@@ -33,6 +33,7 @@ Route::get('/logout', function () {
 Route::post('/authenticate', [\App\Http\Controllers\UserController::class, 'authenticate'])->name('authenticate');
 
 Route::group(['middleware' => 'auth'], function () {
+
     Route::get('/home', function () {
         return view('home');
     })->name('prescription');;
