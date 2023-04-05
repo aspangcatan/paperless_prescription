@@ -508,8 +508,12 @@
                 $("#success_message").text(data.message);
                 success_modal.toggle();
 
-                insert("stations/" + $("#form_station").val(), {id: 1}, function (message) {
-                    deleteChild("stations/" + $("#form_station").val());
+                // insert("stations/" + $("#form_station").val(), {id: 1}, function (message) {
+                //     deleteChild("stations/" + $("#form_station").val());
+                // });
+
+                insert("PHARMACY", {id: 1}, function (message) {
+                    deleteChild("PHARMACY");
                 });
 
                 getPrescriptions();

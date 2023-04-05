@@ -19,6 +19,7 @@ use App\Models\PharmacyReview;
 use App\Models\PrescribedMedicine;
 use App\Models\Prescription;
 use App\Models\PrescriptionLog;
+use App\Models\RenderedPrescription;
 use App\Models\ReturnedMeds;
 use App\Models\ReturnedPrescription;
 use App\Models\SepsisCriteria;
@@ -218,7 +219,6 @@ class PrescriptionController extends Controller
                 $logs->released_to = "IPCC,NURSE,PHARMACY";
                 $logs->remarks = $patient['remarks'];
                 $logs->save();
-
                 return response(['code' => 200, 'message' => 'Prescribe successfully']);
             }
 
@@ -324,7 +324,7 @@ class PrescriptionController extends Controller
             }
 
             if (!$prescription) {
-                return response(['code' => 500, 'message' => 'Prescription dont exists']);
+                return response(['code' => 500, 'message' => 'Prescription dont exists, kindly refresh']);
             }
 
             $date_approved = Carbon::now();
@@ -337,8 +337,7 @@ class PrescriptionController extends Controller
                 $date = $date->addDays($request->days_approved - 1);
                 $stop_date = date('Y-m-d', strtotime($date));
 
-                $medications = PrescribedMedicine::where('prescription_id', $request->id)
-                    ->get();
+                $medications = PrescribedMedicine::where('prescription_id', $request->id)->get();
 
                 #CHECK IF TYPE IS INTERVENTION FORM
                 #UPDATE SELECTED AMS STOP DATE INTO TODAYS DATE
@@ -372,15 +371,19 @@ class PrescriptionController extends Controller
 //                $prescribed_meds->save();
 
                 #FORWARD TO PHARMACY
-                $nurse = new NurseReview();
-                $nurse->prescription_id = $request->id;
-                $nurse->save();
-                $released_to = "NURSE";
-            } else {
-                #FORWARD TO PHARMACY
+//                $nurse = new NurseReview();
+//                $nurse->prescription_id = $request->id;
+//                $nurse->save();
+//                $released_to = "NURSE";
+
                 $pharmacy = new PharmacyReview;
                 $pharmacy->prescription_id = $request->id;
                 $pharmacy->save();
+            } else {
+                #FORWARD TO PHARMACY
+                $rendered_prescription = new RenderedPrescription();
+                $rendered_prescription->prescription_id = $request->id;
+                $rendered_prescription->save();
             }
 
             #INSERT TO PRESCRIPTION LOGS

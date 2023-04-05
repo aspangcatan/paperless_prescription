@@ -30,12 +30,12 @@ class AuthorizeApi
                 else
                     return response(['code' => 500, 'message' => 'Permission denied']);
             case "reject_prescription":
-                if (session('access_rights') == "ICC" || session('access_rights') == "Nurse" || session('access_rights') == "Pharmacy")
+                if (session('access_rights') == "ICC" || session('access_rights') == "Nurse" || session('access_rights') == "Pharmacist")
                     return $next($request);
                 else
                     return response(['code' => 500, 'message' => 'Permission denied']);
             case "render_prescription":
-                if (session('access_rights') == "Pharmacy")
+                if (session('access_rights') == "Pharmacist")
                     return $next($request);
                 else
                     return response(['code' => 500, 'message' => 'Permission denied']);

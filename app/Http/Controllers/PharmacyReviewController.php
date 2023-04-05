@@ -93,26 +93,11 @@ class PharmacyReviewController extends Controller
             }
             $released_to = "NURSE";
             $remarks = "<span class='badge bg-success text-white'>Approved <i class='bi bi-hand-thumbs-up-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
-            $rendered_prescription = new RenderedPrescription;
-            $rendered_prescription->prescription_id = $request->id;
-            $rendered_prescription->save();
-            /*
-            #If not available return to doctor
-            #@TODO: UNCOMMENT IS AVAILABLE IF RENDER AMS NO
-            if ($is_available) {
-                #INSERT RECORD TO RENDERED PRESCRIPTION
-                $rendered_prescription = new RenderedPrescription;
-                $rendered_prescription->prescription_id = $request->id;
-                $rendered_prescription->save();
-            } else {
-                $released_to = "DOCTOR";
-                $remarks = "<span class='badge bg-danger text-white'>Rejected <i class='bi bi-hand-thumbs-down-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
-                #INSERT RECORD TO RETURN PRESCRIPTION
-                $returned = new ReturnedPrescription;
-                $returned->prescription_id = $request->id;
-                $returned->save();
-            }
-            */
+
+            $nurse = new NurseReview();
+            $nurse->prescription_id = $request->id;
+            $nurse->save();
+
             $logs = new PrescriptionLog;
             $logs->prescription_id = $request->id;
             $logs->origin = $request->origin;
@@ -123,7 +108,7 @@ class PharmacyReviewController extends Controller
 
             #REMOVE RECORD FROM PHARMACY REVIEWS
             $prescription->forceDelete();
-            return response(['code' => 200, 'message' => 'Prescription rendered']);
+            return response(['code' => 200, 'message' => 'Prescription Tagged']);
         } catch (\Exception $exception) {
             self::insertErrorLogs(Auth::id(), 'renderPrescription', $request, $exception->getMessage());
             return response(['code' => 500, 'message' => "Something went wrong"]);

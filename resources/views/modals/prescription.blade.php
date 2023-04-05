@@ -92,9 +92,10 @@
                                         <option value="">Select type</option>
                                         <option value="1" disabled>Non-Restricted</option>
                                         <option value="2">Restricted</option>
-                                        <option value="3">Seventh Day Auto Stop</option>
-                                        <option value="4">Intravenous to Oral</option>
+                                        <option value="3" disabled>Seventh Day Auto Stop</option>
+                                        <option value="4" disabled>Intravenous to Oral</option>
                                         <option value="5">Monitored</option>
+                                        <option value="8">Non-Monitored</option>
                                         <option value="7">Switch Medication</option>
                                         <option value="6">Cancellation</option>
                                     </select>
@@ -285,7 +286,8 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <h6 class="card-title">Additional Laboratory Information</h6>
                             </div>
-                            <textarea class="form-control" rows="10" id="additional_labs" placeholder="(e.g. UTZ, CT Scan)"></textarea>
+                            <textarea class="form-control" rows="10" id="additional_labs"
+                                      placeholder="(e.g. UTZ, CT Scan)"></textarea>
                         </div>
                     </div>
                 </div>

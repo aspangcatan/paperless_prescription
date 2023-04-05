@@ -559,8 +559,10 @@
                 success_modal.toggle();
                 getPrescriptions();
 
-                //ADD WEBSOCKET NOTIFY DOCTRS AND NURSES WHO ARE AT THAT STATION
-                //PUT NOTIFICATION BELL BESIDE USER ICON
+                insert("stations/" + $("#form_station").val(), {id: 1}, function (message) {
+                    deleteChild("stations/" + $("#form_station").val());
+                });
+
             }).catch(err => {
             $("#error_message").text(err);
             error_modal.toggle();

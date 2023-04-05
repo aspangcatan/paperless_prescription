@@ -484,9 +484,9 @@
                 $("#success_message").text(data.message);
                 success_modal.toggle();
 
-                insert("PHARMACY", {id: 1}, function (message) {
-                    deleteChild("PHARMACY");
-                });
+                // insert("PHARMACY", {id: 1}, function (message) {
+                //     deleteChild("PHARMACY");
+                // });
 
                 getPrescriptions();
             }).catch(err => {

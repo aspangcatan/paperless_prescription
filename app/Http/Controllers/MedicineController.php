@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Medicine;
 use App\Models\PrescribedMedicine;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MedicineController extends Controller
 {
@@ -29,23 +30,30 @@ class MedicineController extends Controller
     function getMedicineList(Request $request)
     {
         try {
+            $medicine = $request->medicine;
             $type = $request->type;
-            if ($type == 3 || $type == 5) {
-                $type = 3;
-            }
-
-            $search_filters = [['status', '=', '1'], ['type', '=', $type]];
-            if ($type == 7) {
-                $search_filters = [['status', '=', '1']];
-            }
-
-            if (!$request->medicine == "")
-                $search_filters[] = ['description', 'like', "%$request->medicine%"];
-
-            $medicines = Medicine::where($search_filters)
+            $medicines = DB::table('medicines')
+                ->where(function ($query) use ($medicine, $type) {
+                    $query->where('status', '=', '1');
+                    if ($type == "2" || $type == "5" || $type == "8") {
+                        $query->whereRaw("find_in_set('" . $type . "',type)");
+                    }
+                    if ($medicine != "") {
+                        $query->where('description', 'LIKE', "%$medicine%");
+                    }
+                })
                 ->take(10)
                 ->orderBy('description', 'ASC')
                 ->get(['id', 'description', 'unit', 'type', 'status']);
+
+//            $search_filters = [['status', '=', '1']];
+//            if (!$request->medicine == "")
+//                $search_filters[] = ['description', 'like', "%$request->medicine%"];
+
+//            $medicines = Medicine::where($search_filters)->whereIn($request->type, 'type')
+//                ->take(10)
+//                ->orderBy('description', 'ASC')
+//                ->get(['id', 'description', 'unit', 'type', 'status']);
 
             return response(['code' => 200, 'results' => $medicines]);
         } catch (\Exception $exception) {
