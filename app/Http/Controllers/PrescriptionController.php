@@ -290,11 +290,11 @@ class PrescriptionController extends Controller
                 }
             }
 
-            $released_to = "NURSE";
+            $released_to = "PHARMACY";
             if ($patient['type'] == '1' || $patient['type'] == '5') {
-                $nurse = new NurseReview();
-                $nurse->prescription_id = $prescription_id;
-                $nurse->save();
+                $pharmacy = new PharmacyReview();
+                $pharmacy->prescription_id = $prescription_id;
+                $pharmacy->save();
             } else {
                 $released_to = "IPCC";
                 $icc = new IccReview();

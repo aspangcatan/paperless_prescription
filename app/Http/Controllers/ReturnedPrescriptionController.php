@@ -16,6 +16,7 @@ use App\Models\InterventionDetail;
 use App\Models\MicrobiologicalResult;
 use App\Models\NurseReview;
 use App\Models\PatientHistory;
+use App\Models\PharmacyReview;
 use App\Models\PrescribedMedicine;
 use App\Models\Prescription;
 use App\Models\PrescriptionLog;
@@ -197,12 +198,12 @@ class ReturnedPrescriptionController extends Controller
                     $icc->save();
                 }
             }else{
-                $released_to = "NURSE";
-                $nurse = NurseReview::where('prescription_id', $prescription_id)->first();
-                if (!$nurse) {
-                    $nurse = new NurseReview();
-                    $nurse->prescription_id = $prescription_id;
-                    $nurse->save();
+                $released_to = "PHARMACY";
+                $pharmacy = PharmacyReview::where('prescription_id', $prescription_id)->first();
+                if (!$pharmacy) {
+                    $pharmacy = new PharmacyReview();
+                    $pharmacy->prescription_id = $prescription_id;
+                    $pharmacy->save();
                 }
             }
 
