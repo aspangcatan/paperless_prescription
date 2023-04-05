@@ -164,6 +164,11 @@ class PrescriptionController extends Controller
         try {
             #PATIENT REQUEST DATA OBJECT
             $patient = $request->patient;
+
+            if ($patient['type'] != "2" && $patient['type'] != "5" && $patient['type'] != "8") {
+                return response(['code' => 500, 'message' => 'Prescription type are now updated to Restricted,Monitored and Non-Monitored']);
+            }
+
             $prescription = new Prescription;
             $prescription->hospital_id = $patient['hospital_id'];
             $prescription->physician_id = Auth::id();
@@ -541,7 +546,7 @@ class PrescriptionController extends Controller
         try {
             $returned_prescription = ReturnedPrescription::where('prescription_id', $request->id)->first();
             if (!$returned_prescription) {
-                return response(['code'=>500,'message'=>'Prescription ID dont exists']);
+                return response(['code' => 500, 'message' => 'Prescription ID dont exists']);
             }
 
             $prescription = Prescription::find($request->id);

@@ -84,6 +84,10 @@ class ReturnedPrescriptionController extends Controller
 
             $patient = $request->patient;
 
+            if ($patient['type'] != "2" && $patient['type'] != "5" && $patient['type'] != "8") {
+                return response(['code' => 500, 'message' => 'Prescription type are now updated to Restricted,Monitored and Non-Monitored']);
+            }
+
             $prescription->station = $patient['station'];
             $prescription->ward = $patient['ward'];
             $prescription->bed_no = $patient['bed_no'];
