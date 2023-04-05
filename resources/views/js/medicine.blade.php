@@ -3,7 +3,6 @@
 <script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
 <script>
     const medicine_modal = new bootstrap.Modal(document.getElementById('medicine_modal'));
-
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
     const error_modal = new bootstrap.Modal(document.getElementById('error_modal'));
     $(document).ready(function () {
@@ -62,6 +61,7 @@
 
         $("#search_medicine").keypress(function (e) {
             if (e.which == 13) {
+                page = 0;
                 getMedicine();
             }
         });

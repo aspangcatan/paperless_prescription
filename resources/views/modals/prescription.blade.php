@@ -90,10 +90,10 @@
                                     <select class="form-control fw-bold text-center bg-white"
                                             id="form_prescription_type">
                                         <option value="">Select type</option>
-                                        <option value="1" disabled>Non-Restricted</option>
+                                        <option hidden="hidden" value="1" disabled>Non-Restricted</option>
                                         <option value="2">Restricted</option>
-                                        <option value="3" disabled>Seventh Day Auto Stop</option>
-                                        <option value="4" disabled>Intravenous to Oral</option>
+                                        <option hidden="hidden" value="3" disabled>Seventh Day Auto Stop</option>
+                                        <option hidden="hidden" value="4" disabled>Intravenous to Oral</option>
                                         <option value="5">Monitored</option>
                                         <option value="8">Non-Monitored</option>
                                         <option value="7">Switch Medication</option>

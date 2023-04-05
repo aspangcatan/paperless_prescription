@@ -104,6 +104,7 @@
         });
 
         $("#btn_search_prescription").click(function () {
+            page = 0;
             getPrescriptions();
         });
 
