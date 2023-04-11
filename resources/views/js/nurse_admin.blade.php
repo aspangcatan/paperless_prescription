@@ -56,7 +56,7 @@
     });
 
     function updateNurseStation(params) {
-        nurses_modal.toggle();
+
         $("#spinner").removeClass("d-none");
         fetch('{{ route('update_nurse_station') }}', {
             method: "POST",
@@ -70,13 +70,12 @@
             .then(data => {
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
-                    $("#error_message").text(data.message);
-                    error_modal.toggle();
+                    toastr.error(data.message,"Ooops");
                     return;
                 }
 
-                $("#success_message").text(data.message);
-                success_modal.toggle();
+                nurses_modal.toggle();
+                toastr.success(data.message,"Information");
                 getNurses();
             }).catch(err => {
             console.log(err);
