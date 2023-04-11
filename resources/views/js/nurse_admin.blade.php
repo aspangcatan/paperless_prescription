@@ -9,6 +9,13 @@
 
     $(document).ready(function () {
 
+        $("#filter_fname,#filter_lname").keypress(function (e){
+            if (e.which == 13) {
+                page = 0;
+                getNurses();
+            }
+        });
+
         $("#btn_search_nurse").click(function () {
             page = 0;
             getNurses();
