@@ -248,7 +248,6 @@
                         return;
                     }
 
-                    console.log(data.result)
                     $("#hospital_id").val(data.result.hpatcode)
                     $("#fname").val(data.result.patfirst)
                     $("#mname").val(data.result.patmiddle)
@@ -257,7 +256,6 @@
                     $("#birthdate").val(moment(data.result.patbdate).format("YYYY-MM-DD"));
                     $("#sex").val(data.result.patsex);
                 }).catch(err => {
-                console.log(err);
                 toastr.error("Something went wrong", "Ooops");
             });
         });
@@ -271,7 +269,7 @@
             const birthdate = $("#birthdate").val();
             const sex = $("#sex").val();
 
-            if(fname == "" || lname == ""){
+            if (fname == "" || lname == "") {
                 alert("Please search patient before adding/updating");
                 return;
             }
@@ -1160,15 +1158,16 @@
                 $("#sex").val("");
                 toastr.success(data.message, "Information");
 
-
             }).catch(err => {
-            console.log(err);
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                toastr.error("Please try again", "Server Connection Timeout")
+                return;
+            }
             toastr.error("Something went wrong", "Ooops");
         });
     }
 
     function insertPrecription(params) {
-        prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('insert_prescription') }}', {
             method: "POST",
@@ -1182,15 +1181,13 @@
             .then(data => {
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
-                    $("#error_message").text(data.message);
-                    error_modal.toggle();
+                    toastr.error(data.message, "Ooops");
                     return;
                 }
 
-                $("#success_message").text(data.message);
-                success_modal.toggle();
+                prescription_modal.toggle();
+                toastr.success(data.message, "Information");
                 getPrescriptions();
-
                 //IF TYPE IS 5 SEND TO NURSE,IPCC AND PHARMACY
                 if (params.patient.type === "6") {
                     insert("ICC", {id: 1}, function (message) {
@@ -1214,8 +1211,11 @@
                 }
             }).catch(err => {
             $("#spinner").addClass("d-none");
-            $("#error_message").text(err);
-            error_modal.toggle();
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                toastr.error("Please try again", "Server Connection Timeout")
+                return;
+            }
+            toastr.error("Something went wrong", "Ooops")
         });
     }
 

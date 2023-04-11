@@ -179,6 +179,7 @@
                 alert("Please specify remarks or instructions for the receiver");
                 return;
             }
+
             const params = {
                 id: prescription_id,
                 hospital_id: $("#form_hospital_id").text().trim(),
@@ -187,7 +188,6 @@
                 remarks: remarks
             }
 
-            remarks_modal.toggle();
             if (button_clicked == "APPROVE") {
                 let days_approved = $("input[name='days_approved']:checked").next().text();
                 let updated_quantity = $("#medication_list tr:eq(0) td:eq(3) input").val();
@@ -487,7 +487,6 @@
     }
 
     function approvePrescription(params) {
-        prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('approve_prescription') }}', {
             method: "POST",
@@ -501,17 +500,13 @@
             .then(data => {
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
-                    $("#error_message").text(data.message);
-                    error_modal.toggle();
+                    toastr.error(data.message, "Ooops");
                     return;
                 }
 
-                $("#success_message").text(data.message);
-                success_modal.toggle();
-
-                // insert("stations/" + $("#form_station").val(), {id: 1}, function (message) {
-                //     deleteChild("stations/" + $("#form_station").val());
-                // });
+                remarks_modal.toggle();
+                prescription_modal.toggle();
+                toastr.success(data.message, "Information");
 
                 insert("PHARMACY", {id: 1}, function (message) {
                     deleteChild("PHARMACY");
@@ -519,13 +514,16 @@
 
                 getPrescriptions();
             }).catch(err => {
-            $("#error_message").text(err);
-            error_modal.toggle();
+            $("#spinner").addClass("d-none");
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                toastr.error("Please try again", "Server Connection Timeout")
+                return;
+            }
+            toastr.error("Something went wrong", "Ooops")
         });
     }
 
     function rejectPrescription(params) {
-        prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('reject_prescription') }}', {
             method: "POST",
@@ -539,13 +537,12 @@
             .then(data => {
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
-                    $("#error_message").text(data.message);
-                    error_modal.toggle();
+                    toastr.error(data.message, "Ooops");
                     return;
                 }
 
-                $("#success_message").text(data.message);
-                success_modal.toggle();
+                prescription_modal.toggle();
+                toastr.success(data.message, "Information");
 
                 insert("prescriber/" + data.id, {id: 1}, function (message) {
                     deleteChild("prescriber/" + data.id);
@@ -553,8 +550,12 @@
 
                 getPrescriptions();
             }).catch(err => {
-            $("#error_message").text(err);
-            error_modal.toggle();
+            $("#spinner").addClass("d-none");
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                toastr.error("Please try again", "Server Connection Timeout")
+                return;
+            }
+            toastr.error("Something went wrong", "Ooops")
         });
     }
 

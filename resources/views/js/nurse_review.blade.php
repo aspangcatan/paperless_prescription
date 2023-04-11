@@ -192,7 +192,6 @@
                 remarks: remarks
             }
 
-            remarks_modal.toggle();
             if (button_clicked == "APPROVE") {
                 approvePrescription(params);
             } else if (button_clicked == "REJECT") {
@@ -463,7 +462,6 @@
     }
 
     function approvePrescription(params) {
-        prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('approve_prescription') }}', {
             method: "POST",
@@ -477,27 +475,26 @@
             .then(data => {
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
-                    $("#error_message").text(data.message);
-                    error_modal.toggle();
+                    toastr.error(data.message, "Ooops");
                     return;
                 }
 
-                $("#success_message").text(data.message);
-                success_modal.toggle();
-
-                // insert("PHARMACY", {id: 1}, function (message) {
-                //     deleteChild("PHARMACY");
-                // });
+                remarks_modal.toggle();
+                prescription_modal.toggle();
+                toastr.success(data.message, "Information");
 
                 getPrescriptions();
             }).catch(err => {
-            $("#error_message").text(err);
-            error_modal.toggle();
+            $("#spinner").addClass("d-none");
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                toastr.error("Please try again", "Server Connection Timeout")
+                return;
+            }
+            toastr.error("Something went wrong", "Ooops")
         });
     }
 
     function rejectPrescription(params) {
-        prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('reject_prescription') }}', {
             method: "POST",
@@ -509,25 +506,26 @@
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data);
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
-                    $("#error_message").text(data.message);
-                    error_modal.toggle();
+                    toastr.error(data.message, "Oops");
                     return;
                 }
 
-                $("#success_message").text(data.message);
-                success_modal.toggle();
-
+                prescription_modal.toggle();
+                toastr.success(data.message, "Information");
                 insert("prescriber/" + data.id, {id: 1}, function (message) {
                     deleteChild("prescriber/" + data.id);
                 });
 
                 getPrescriptions();
             }).catch(err => {
-            $("#error_message").text(err);
-            error_modal.toggle();
+            $("#spinner").addClass("d-none");
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                toastr.error("Please try again", "Server Connection Timeout")
+                return;
+            }
+            toastr.error("Something went wrong", "Ooops")
         });
     }
 

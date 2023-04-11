@@ -891,7 +891,7 @@
     }
 
     function deletePrescription(params) {
-        prescription_modal.toggle();
+
         fetch('{{ route('delete_prescription') }}', {
             method: "DELETE",
             headers: {
@@ -904,23 +904,24 @@
             .then(data => {
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
-                    $("#error_message").text(data.message);
-                    error_modal.toggle();
+                    toastr.error(data.message, "Ooops");
                     return;
                 }
 
-                $("#success_message").text(data.message);
-                success_modal.toggle();
-
+                prescription_modal.toggle();
+                toastr.success(data.message, "Information");
                 getPrescriptions();
             }).catch(err => {
-            console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#spinner").addClass("d-none");
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                toastr.error("Please try again", "Server Connection Timeout")
+                return;
+            }
+            toastr.error("Something went wrong", "Ooops")
         });
     }
 
     function updatePrescription(params) {
-        prescription_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('update_prescription') }}', {
             method: "POST",
@@ -934,28 +935,31 @@
             .then(data => {
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
-                    $("#error_message").text(data.message);
-                    error_modal.toggle();
+                    toastr.error(data.message, "Ooops");
                     return;
                 }
 
-                $("#success_message").text(data.message);
-                success_modal.toggle();
+                prescription_modal.toggle();
+                toastr.success(data.message, "Information");
 
                 if ($("#form_prescription_type").val() !== "1" && $("#form_prescription_type").val() !== "5") {
                     insert("ICC", {id: 1}, function (message) {
                         deleteChild("ICC");
                     });
                 } else {
-                    insert("stations/" + params.patient.station, {id: 1}, function (message) {
-                        deleteChild("stations/" + params.patient.station);
+                    insert("PHARMACY", {id: 1}, function (message) {
+                        deleteChild("PHARMACY");
                     });
                 }
 
                 getPrescriptions();
             }).catch(err => {
-            console.log(err);
-            toastr.error("Something went wrong", "Ooops");
+            $("#spinner").addClass("d-none");
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                toastr.error("Please try again", "Server Connection Timeout")
+                return;
+            }
+            toastr.error("Something went wrong", "Ooops")
         });
     }
 

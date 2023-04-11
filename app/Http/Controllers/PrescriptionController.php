@@ -371,22 +371,12 @@ class PrescriptionController extends Controller
                     $concurrent->save();
                 }
 
-//                #SET QUANTITY ORDERED
-//                $prescribed_meds = PrescribedMedicine::where('prescription_id', $request->id)->first();
-//                $prescribed_meds->quantity_ordered = $request->updated_quantity;
-//                $prescribed_meds->save();
-
-                #FORWARD TO PHARMACY
-//                $nurse = new NurseReview();
-//                $nurse->prescription_id = $request->id;
-//                $nurse->save();
-//                $released_to = "NURSE";
-
                 $pharmacy = new PharmacyReview;
                 $pharmacy->prescription_id = $request->id;
                 $pharmacy->save();
             } else {
                 #FORWARD TO PHARMACY
+                $released_to = "END CYCLE";
                 $rendered_prescription = new RenderedPrescription();
                 $rendered_prescription->prescription_id = $request->id;
                 $rendered_prescription->save();
