@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ConcurrentTherapy;
 use App\Models\ErrorLog;
+use App\Models\NurseReview;
 use App\Models\PharmacyReview;
 use App\Models\PrescribedMedicine;
 use App\Models\PrescriptionLog;
@@ -61,47 +62,28 @@ class PharmacyReviewController extends Controller
                 if ($medications[$i]["quantity_rendered"] < 1) {
                     $is_available = false;
                 }
+
                 #IF UNAVAILABLE PROMPT ERROR
                 $medication = PrescribedMedicine::find($medications[$i]["id"]);
                 $medication->quantity_rendered = $medications[$i]["quantity_rendered"];
                 $medication->date_rendered = Carbon::now();
                 $medication->save();
-//
-//                if ($request->type != '1') {
-//                    if ($medications[$i]["quantity_rendered"] < 1) {
-//                        $is_available = false;
-//                        #CANCEL CONCURRENT THERAPY
-//                        $current_concurrent = ConcurrentTherapy::where('prescription_id', $request->id)
-//                            ->whereNotNull(['approved_by']);
-//                        $current_concurrent->forceDelete();
-//
-//                        if ($request->type == "4") {
-//                            //COMPUTE STOP DATE VIA START DATE AND DAYS APPROVED
-//                            $switched_concurrent = ConcurrentTherapy::where('for_switch', $request->id)->first();
-//
-//                            $date = Carbon::parse($switched_concurrent->start_date);
-//                            $date = $date->addDays($switched_concurrent->days_approved - 1);
-//                            $stop_date = date('Y-m-d', strtotime($date));
-//                            $switched_concurrent->stop_date = $stop_date;
-//                            $switched_concurrent->save();
-//                        }
-//                    }
-//                }
             }
 
             if (!$is_available) {
                 return response(['code' => 500, 'message' => 'Cannot render if not available']);
             }
+
             $released_to = "NURSE";
             $remarks = "<span class='badge bg-success text-white'>Approved <i class='bi bi-hand-thumbs-up-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
 
-            $nurse = new NurseReview();
+            $nurse = new NurseReview;
             $nurse->prescription_id = $request->id;
             $nurse->save();
 
             $logs = new PrescriptionLog;
             $logs->prescription_id = $request->id;
-            $logs->origin = $request->origin;
+            $logs->origin = "PHARMACY";
             $logs->released_by = Auth::id();
             $logs->released_to = $released_to;
             $logs->remarks = $remarks;

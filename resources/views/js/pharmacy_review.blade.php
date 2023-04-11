@@ -529,15 +529,17 @@
                     $("#prescription_list").append(tr);
                 }
             }).catch(err => {
-            console.log(err);
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                console.log("SHEESH")
+            }
             $("#prescription_list").empty();
             $("#prescription_list").append("<tr><td colspan='7'>Something went wrong, please reload page</td></tr>");
         });
     }
 
     function renderPrescription(params) {
-        render_modal.toggle();
-        prescription_modal.toggle();
+        // prescription_modal.toggle();
+        // render_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('render_prescription') }}', {
             method: "POST",
@@ -551,13 +553,14 @@
             .then(data => {
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
-                    $("#error_message").text(data.message);
-                    error_modal.toggle();
+                    toastr.error(data.message, "Ooops")
                     return;
                 }
 
                 $("#success_message").text(data.message);
-                success_modal.toggle();
+                toastr.success(data.message, "Something went wrong")
+                prescription_modal.toggle();
+                render_modal.toggle();
                 getPrescriptions();
 
                 insert("stations/" + $("#form_station").val(), {id: 1}, function (message) {
@@ -565,6 +568,12 @@
                 });
 
             }).catch(err => {
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                $("#spinner").addClass("d-none");
+                toastr.error("Please try again", "Server Connection Timeout")
+                return;
+            }
+
             $("#error_message").text(err);
             error_modal.toggle();
         });

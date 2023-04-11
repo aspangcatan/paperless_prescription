@@ -270,6 +270,12 @@
             const suffix = $("#suffix").val().trim().toUpperCase();
             const birthdate = $("#birthdate").val();
             const sex = $("#sex").val();
+
+            if(fname == "" || lname == ""){
+                alert("Please search patient before adding/updating");
+                return;
+            }
+
             const params = {
                 hospital_id: hospital_id,
                 fname: fname,
