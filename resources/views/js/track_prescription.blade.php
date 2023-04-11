@@ -192,6 +192,7 @@
         $("#prescription_modal select").prop("disabled", true);
         $("#prescription_modal textarea").prop("disabled", true);
 
+        $("#form_remarks").addClass("d-none");
         getMedications(id);
         getPrescriptionLogs(id);
         getConcurrentTherapy(hospital_id);

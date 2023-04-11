@@ -292,6 +292,7 @@
             $("#btn_reject").text("REJECT");
         }
 
+        $("#form_remarks").addClass("d-none");
         getMedications(id);
         getPrescriptionLogs(id);
         getConcurrentTherapy(hospital_id);

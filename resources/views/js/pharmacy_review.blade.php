@@ -357,6 +357,7 @@
             $("#btn_reject").addClass("d-none");
         }
 
+        $("#form_remarks").addClass("d-none");
         getMedications(id);
         getPrescriptionLogs(id);
         getConcurrentTherapy(hospital_id);
