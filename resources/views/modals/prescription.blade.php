@@ -168,6 +168,52 @@
                         </div>
                     </div>
                 </div>
+                <div class="cancellation_container">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">Patient Outcomes</h6>
+                            <div class="form-check ps-0">
+                                <input type="radio" name="outcome">
+                                <label class="form-check-label">
+                                    Discharged
+                                </label>
+                            </div>
+                            <div class="form-check ps-0">
+                                <input type="radio" name="outcome">
+                                <label class="form-check-label">
+                                    Hama
+                                </label>
+                            </div>
+                            <div class="form-check ps-0">
+                                <input type="radio" name="outcome">
+                                <label class="form-check-label">
+                                    Transferred
+                                </label>
+                            </div>
+                            <div class="form-check ps-0">
+                                <input type="radio" name="outcome">
+                                <label class="form-check-label">
+                                    Died
+                                </label>
+                            </div>
+                            <div class="form-check ps-0">
+                                <input type="radio" name="outcome">
+                                <label class="form-check-label">
+                                    Absconded
+                                </label>
+                            </div>
+                            <div class="form-check ps-0">
+                                <input type="radio" name="outcome">
+                                <label class="form-check-label">Others</label>
+                                <div class="d-flex">
+                                    <div>
+                                        <input class="form-control" id="outcome"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="ams_container">
                     <div class="card">
                         <div class="card-body">
@@ -351,7 +397,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="mt-3">
                     <textarea class="form-control" style="height: 150px" id="form_remarks"
                               placeholder="Remarks"></textarea>

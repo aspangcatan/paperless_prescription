@@ -132,6 +132,8 @@
             $("#medication_list").empty();
             $("#medicine_list").empty();
             $("#additional_labs_container").addClass("d-none");
+            $("#form_remarks").removeClass("d-none");
+            $(".cancellation_container").addClass("d-none");
             switch ($(this).val()) {
                 case "":
                     $(".ams_container").addClass("d-none");
@@ -162,6 +164,8 @@
                     break;
                 case "6":
                     //HIDE ALL EXCEPT REMARKS
+                    $(".cancellation_container").removeClass("d-none");
+                    $("#form_remarks").addClass("d-none");
                     $("#intervention_form_container").addClass("d-none");
                     $("#indication_use_container").addClass("d-none");
                     $("#transaminases_container").addClass("d-none");
@@ -439,7 +443,7 @@
             const ward = $("#form_ward").val();
             const bed_no = "N/A"
             const attending_physician = $("#form_attending_physician").val();
-            const remarks = $("#form_remarks").val();
+            let remarks = $("#form_remarks").val();
             const urgency = ($("#checkbox_urgent").is(":checked")) ? "Urgent" : "Normal";
             const type = $("#form_prescription_type").val();
             const drug_allergy = $("#form_drug_allergy").val();
@@ -452,6 +456,7 @@
             const sgot = $("#form_sgot").val().trim();
             const days_requested = $("#form_days_requested").val().trim();
             const additional_labs = $("#additional_labs").val().trim();
+            let outcome = null;
 
             let params = {};
             let is_valid = true;
@@ -680,6 +685,19 @@
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Please select concurrent AMS therapy to be switched</li>");
                 }
+            } else {
+                outcome = $("input[name='outcome']:checked").next().text().trim();
+
+                if (outcome == "Others") {
+                    outcome = $("#outcome").val().trim();
+                }
+
+                remarks = outcome;
+
+                if (outcome == "") {
+                    is_valid = false;
+                    $("#prescription_modal .error_list").append("<li>Please specify patient outcome</li>");
+                }
             }
 
             if (!is_valid) {
@@ -708,7 +726,8 @@
                 sgpt: sgpt,
                 sgot: sgot,
                 days_requested: days_requested,
-                additional_labs: additional_labs
+                additional_labs: additional_labs,
+                outcome: outcome
             }
 
             params.patient = patient;
@@ -824,6 +843,7 @@
         $("#btn_submit").removeClass("d-none");
         $("#form_remarks").removeClass("d-none");
         $("#transaction_container").addClass("d-none");
+        $(".cancellation_container").addClass("d-none");
 
         patient_modal.toggle();
         prescription_modal.toggle();
@@ -833,13 +853,6 @@
 
     function viewPrescription(id) {
         prescription_id = id;
-        // $("#btn_view_cart").addClass("d-none");
-        // $("#btn_add_microbiological").addClass("d-none");
-        // $("#btn_add_concurrent").addClass("d-none");
-        // $("#btn_submit").addClass("d-none");
-        // $("#form_remarks").addClass("d-none");
-        // $("#transaction_container").removeClass("d-none");
-
         const urgency = $("#prescription_id_" + id + " td:eq(0)").text();
         const hospital_id = $("#prescription_id_" + id + " td:eq(1)").text();
         const name = $("#prescription_id_" + id + " td:eq(2)").text();
@@ -861,6 +874,7 @@
         const days_requested = $("#prescription_id_" + id + " td:eq(18)").text();
         const attending_physician = $("#prescription_id_" + id + " td:eq(19)").text();
         const additional_labs = $("#prescription_id_" + id + " td:eq(20)").text();
+        const outcome = $("#prescription_id_" + id + " td:eq(21)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -887,12 +901,17 @@
         $("#form_days_requested").val(days_requested);
         $("#additional_labs").val(additional_labs);
 
-        // $("#form_prescription_type").prop("disabled", true);
-        // $("#prescription_modal input").prop("disabled", true);
-        // $("#prescription_modal input[type='checkbox']").prop("disabled", true);
-        // $("#prescription_modal input[type='radio']").prop("disabled", true);
-        // $("#prescription_modal select").prop("disabled", true);
-        // $("#prescription_modal textarea").prop("disabled", true);
+        $("input[name='outcome']").prop("checked", false);
+        $("#outcome").val("");
+        if (type == "6") {
+            const outcome_index = OUTCOMES.indexOf(outcome);
+            if (outcome_index < 0) {
+                $("input[name='outcome']:eq(5)").prop("checked", true);
+                $("#outcome").val(outcome);
+            } else {
+                $("input[name='outcome']:eq(" + outcome_index + ")").prop("checked", true);
+            }
+        }
 
         getMedications(id);
         getPrescriptionLogs(id);
@@ -1189,26 +1208,26 @@
                 toastr.success(data.message, "Information");
                 getPrescriptions();
                 //IF TYPE IS 5 SEND TO NURSE,IPCC AND PHARMACY
-                if (params.patient.type === "6") {
-                    insert("ICC", {id: 1}, function (message) {
-                        deleteChild("ICC");
-                    });
-                    insert("stations/" + params.patient.station, {id: 1}, function (message) {
-                        deleteChild("stations/" + params.patient.station);
-                    });
-                    insert("PHARMACY", {id: 1}, function (message) {
-                        deleteChild("PHARMACY");
-                    });
-
-                } else if (params.patient.type !== "1" && params.patient.type !== "5") {
-                    insert("ICC", {id: 1}, function (message) {
-                        deleteChild("ICC");
-                    });
-                } else {
-                    insert("stations/" + params.patient.station, {id: 1}, function (message) {
-                        deleteChild("stations/" + params.patient.station);
-                    });
-                }
+                // if (params.patient.type === "6") {
+                //     insert("ICC", {id: 1}, function (message) {
+                //         deleteChild("ICC");
+                //     });
+                //     insert("stations/" + params.patient.station, {id: 1}, function (message) {
+                //         deleteChild("stations/" + params.patient.station);
+                //     });
+                //     insert("PHARMACY", {id: 1}, function (message) {
+                //         deleteChild("PHARMACY");
+                //     });
+                //
+                // } else if (params.patient.type !== "1" && params.patient.type !== "5") {
+                //     insert("ICC", {id: 1}, function (message) {
+                //         deleteChild("ICC");
+                //     });
+                // } else {
+                //     insert("stations/" + params.patient.station, {id: 1}, function (message) {
+                //         deleteChild("stations/" + params.patient.station);
+                //     });
+                // }
             }).catch(err => {
             $("#spinner").addClass("d-none");
             if ((err + "").includes("SyntaxError: Unexpected token")) {
@@ -1274,6 +1293,7 @@
                                 <td class="d-none">` + it.days_requested + `</td>
                                 <td class="d-none">` + it.attending_physician + `</td>
                                 <td class="d-none">` + it.additional_labs + `</td>
+                                <td class="d-none">` + it.outcome + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>

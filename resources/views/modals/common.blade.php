@@ -51,7 +51,7 @@
                 <div class="text-secondary font-weight-bold fs-4 text-center">Warning!</div>
                 <div class="mt-2 text-secondary fs-5">
                     <div>
-                        By clicking submit, You agree to return all pending medications particular to this patient to the prescriber.
+                        By clicking submit, You agree to cancel all pending medications particular to this patient.
                     </div>
                     <div class="mt-3">
                         <div class="form-check ps-0">

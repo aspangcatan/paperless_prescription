@@ -73,7 +73,7 @@ class PrescriptionController extends Controller
                 })
                 ->skip($request->page * 10)
                 ->take(11)
-                ->orderBy('p.created_at','DESC')
+                ->orderBy('p.created_at', 'DESC')
                 ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
@@ -166,7 +166,7 @@ class PrescriptionController extends Controller
             #PATIENT REQUEST DATA OBJECT
             $patient = $request->patient;
 
-            if ($patient['type'] != "2" && $patient['type'] != "5" && $patient['type'] != "8") {
+            if ($patient['type'] == "1" || $patient['type'] == "3" || $patient['type'] == "4") {
                 return response(['code' => 500, 'message' => 'Prescription type are now updated to Restricted,Monitored and Non-Monitored']);
             }
 
@@ -190,6 +190,7 @@ class PrescriptionController extends Controller
             $prescription->sgot = $patient['sgot'];
             $prescription->days_requested = $patient['days_requested'];
             $prescription->additional_labs = $patient['additional_labs'];
+            $prescription->outcome = $patient['outcome'];
 
             $prescription->save();
             $prescription_id = $prescription->id;
@@ -423,6 +424,7 @@ class PrescriptionController extends Controller
                         ->where('p.created_at', '<=', $current_prescrption->created_at)
                         ->where('p.physician_id', '=', $current_prescrption->physician_id)
                         ->where('p.hospital_id', '=', $current_prescrption->hospital_id)
+                        ->where('p.type', '!=', '6')
                         ->get(['n.id', 'n.prescription_id']);
                 } else if ($request->origin == "ICC") {
                     $pending_prescriptions = DB::table('paperless_prescription.icc_reviews as n')
@@ -430,6 +432,7 @@ class PrescriptionController extends Controller
                         ->where('p.created_at', '<=', $current_prescrption->created_at)
                         ->where('p.physician_id', '=', $current_prescrption->physician_id)
                         ->where('p.hospital_id', '=', $current_prescrption->hospital_id)
+                        ->where('p.type', '!=', '6')
                         ->get(['n.id', 'n.prescription_id']);
                 } else {
                     $pending_prescriptions = DB::table('paperless_prescription.pharmacy_reviews as n')
@@ -437,6 +440,7 @@ class PrescriptionController extends Controller
                         ->where('p.created_at', '<=', $current_prescrption->created_at)
                         ->where('p.physician_id', '=', $current_prescrption->physician_id)
                         ->where('p.hospital_id', '=', $current_prescrption->hospital_id)
+                        ->where('p.type', '!=', '6')
                         ->get(['n.id', 'n.prescription_id']);
                 }
 
@@ -484,7 +488,7 @@ class PrescriptionController extends Controller
                     $prescription_index->forceDelete();
                 }
 
-
+                $prescription->forceDelete();
                 return response(['code' => 200, 'message' => 'All Prescription returned', 'id' => $current_prescrption->physician_id]);
             }
 
@@ -504,21 +508,23 @@ class PrescriptionController extends Controller
                 }
             }
 
-            $returned = ReturnedPrescription::where('prescription_id', $request->id)->first();
-            if (!$returned) {
-                $returned = new ReturnedPrescription;
-                $returned->prescription_id = $request->id;
-                $returned->save();
-            }
+            if ($request->type != "6") {
+                $returned = ReturnedPrescription::where('prescription_id', $request->id)->first();
+                if (!$returned) {
+                    $returned = new ReturnedPrescription;
+                    $returned->prescription_id = $request->id;
+                    $returned->save();
+                }
 
-            #INSERT TO PRESCRIPTION LOGS
-            $logs = new PrescriptionLog;
-            $logs->prescription_id = $request->id;
-            $logs->origin = $request->origin;
-            $logs->released_by = Auth::id();
-            $logs->released_to = "DOCTOR";
-            $logs->remarks = "<span class='badge bg-danger text-white'>Rejected <i class='bi bi-hand-thumbs-down-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
-            $logs->save();
+                #INSERT TO PRESCRIPTION LOGS
+                $logs = new PrescriptionLog;
+                $logs->prescription_id = $request->id;
+                $logs->origin = $request->origin;
+                $logs->released_by = Auth::id();
+                $logs->released_to = "DOCTOR";
+                $logs->remarks = "<span class='badge bg-danger text-white'>Rejected <i class='bi bi-hand-thumbs-down-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
+                $logs->save();
+            }
 
             #AFTER RETURNED DELETE RECORD
             $prescription->forceDelete();

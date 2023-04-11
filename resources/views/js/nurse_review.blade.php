@@ -79,6 +79,8 @@
             $("#medication_list").empty();
             $("#medicine_list").empty();
             $("#additional_labs_container").addClass("d-none");
+            $("#form_remarks").removeClass("d-none");
+            $(".cancellation_container").addClass("d-none");
             switch ($(this).val()) {
                 case "":
                     $(".ams_container").addClass("d-none");
@@ -109,6 +111,8 @@
                     break;
                 case "6":
                     //HIDE ALL EXCEPT REMARKS
+                    $(".cancellation_container").removeClass("d-none");
+                    $("#form_remarks").addClass("d-none");
                     $("#intervention_form_container").addClass("d-none");
                     $("#indication_use_container").addClass("d-none");
                     $("#transaminases_container").addClass("d-none");
@@ -120,6 +124,9 @@
                     $("#concurrent_table tbody tr").addClass("active");
                     $(".ams_container").addClass("d-none");
                     $("#medication_container").addClass("d-none")
+                    break;
+                case "7":
+                    $("#concurrent_table tbody tr").addClass("pointer");
                     break;
             }
         });
@@ -234,6 +241,7 @@
         const days_requested = $("#prescription_id_" + id + " td:eq(19)").text();
         const attending_physician = $("#prescription_id_" + id + " td:eq(20)").text();
         const additional_labs = $("#prescription_id_" + id + " td:eq(21)").text();
+        const outcome = $("#prescription_id_" + id + " td:eq(22)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -259,6 +267,8 @@
         $("#form_sgot").val(sgot);
         $("#form_days_requested").val(days_requested);
         $("#additional_labs").val(additional_labs);
+        $("input[name='outcome']").prop("checked", false);
+        $("#outcome").val("");
 
         $("#prescription_modal input").prop("disabled", true);
         $("#prescription_modal input[type='checkbox']").prop("disabled", true);
@@ -269,6 +279,14 @@
         if (type == 6) {
             $("#btn_submit").addClass("d-none");
             $("#btn_reject").text("Cancel pending");
+
+            const outcome_index = OUTCOMES.indexOf(outcome);
+            if (outcome_index < 0) {
+                $("input[name='outcome']:eq(5)").prop("checked", true);
+                $("#outcome").val(outcome);
+            } else {
+                $("input[name='outcome']:eq(" + outcome_index + ")").prop("checked", true);
+            }
         } else {
             $("#btn_submit").removeClass("d-none");
             $("#btn_reject").text("REJECT");
@@ -445,6 +463,7 @@
                                 <td class="d-none">` + it.days_requested + `</td>
                                 <td class="d-none">` + it.attending_physician + `</td>
                                 <td class="d-none">` + it.additional_labs + `</td>
+                                <td class="d-none">` + it.outcome + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
