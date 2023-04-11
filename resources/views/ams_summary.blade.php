@@ -5,8 +5,9 @@
             <div class="me-1">
                 <select class="form-control" id="filter_type">
                     <option value="">Filter type</option>
-                    <option value="1">Monitored</option>
-                    <option value="0">Non-monitored</option>
+                    <option value="2">Restricted</option>
+                    <option value="5">Monitored</option>
+                    <option value="8">Non-monitored</option>
                 </select>
             </div>
             <div class="ms-1 me-1">
