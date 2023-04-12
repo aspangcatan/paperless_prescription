@@ -106,6 +106,7 @@ class ReturnedPrescriptionController extends Controller
             $prescription->sgot = $patient['sgot'];
             $prescription->days_requested = $patient['days_requested'];
             $prescription->additional_labs = $patient['additional_labs'];
+            $prescription->diagnosis = $patient['diagnosis'];
             $prescription->save();
 
             #FOR SWTICH BACK TO ZERO

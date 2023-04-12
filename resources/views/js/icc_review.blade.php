@@ -12,7 +12,6 @@
     let page = 0;
     let definitive_details = {};
     $(document).ready(function () {
-
         observe("ICC", function (snapshot) {
             if (snapshot.val()) {
                 notification_counter++;
@@ -22,6 +21,19 @@
                 $("#btn_notification").addClass("btn-danger");
                 $("#btn_notification").addClass("blink");
                 $("#btn_notification").find("span").text(notification_counter);
+            }
+        });
+
+        $("input[name='reject_outcome']").change(function () {
+            const new_value = $(this).prop("checked");
+            $("input[name='reject_outcome']").prop("checked", false);
+            $(this).prop("checked", new_value);
+            if (new_value) {
+                $("#common_remarks").val($(this).next().text().trim());
+                $("#common_remarks").prop("disabled", true);
+            } else {
+                $("#common_remarks").val("");
+                $("#common_remarks").prop("disabled", false);
             }
         });
 
@@ -137,8 +149,11 @@
             button_clicked = $(this).text();
             prescription_id = $(this).val();
 
-            $("#days_approved_container").removeClass("d-none");
             $("#remarks_message").text("Reason for approval");
+            $("#reject_outcome_container").addClass("d-none");
+            $("#common_remarks").val("");
+            $("input[name='reject_outcome']").prop("checked", false).change();
+            $("#days_approved_container").removeClass("d-none");
             remarks_modal.toggle();
         });
 
@@ -163,7 +178,10 @@
             }
 
             $("#days_approved_container").addClass("d-none");
+            $("#reject_outcome_container").removeClass("d-none");
             $("#remarks_message").text("Reason for rejection");
+            $("#common_remarks").val("");
+            $("input[name='reject_outcome']").prop("checked", false).change();
             remarks_modal.toggle();
         });
 
@@ -173,6 +191,7 @@
                 hospital_id: $("#form_hospital_id").text().trim(),
                 type: $("#form_prescription_type").val(),
                 origin: "ICC",
+                outcome: null,
                 remarks: "Prescriber wishes to cancel pending medications"
             }
 
@@ -182,6 +201,7 @@
 
         $("#btn_proceed").click(function () {
             const remarks = $("#common_remarks").val().trim();
+            const outcome = $("input[name='reject_outcome']:checked").next().text().trim();
             if (remarks == "") {
                 alert("Please specify remarks or instructions for the receiver");
                 return;
@@ -192,6 +212,7 @@
                 hospital_id: $("#form_hospital_id").text().trim(),
                 type: $("#form_prescription_type").val(),
                 origin: "ICC",
+                outcome: (outcome == "") ? null : outcome,
                 remarks: remarks
             }
 
@@ -262,6 +283,7 @@
         const attending_physician = $("#prescription_id_" + id + " td:eq(19)").text();
         const additional_labs = $("#prescription_id_" + id + " td:eq(20)").text();
         const outcome = $("#prescription_id_" + id + " td:eq(21)").text();
+        const diagnosis = $("#prescription_id_" + id + " td:eq(22)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -287,6 +309,8 @@
         $("#form_sgot").val(sgot);
         $("#form_days_requested").val(days_requested);
         $("#additional_labs").val(additional_labs);
+        $("#diagnosis").val(diagnosis);
+
         $("#prescription_modal input").prop("disabled", true);
         $("#prescription_modal input[type='checkbox']").prop("disabled", true);
         $("#prescription_modal input[type='radio']").prop("disabled", true);
@@ -491,6 +515,7 @@
                                 <td class="d-none">` + it.attending_physician + `</td>
                                 <td class="d-none">` + it.additional_labs + `</td>
                                 <td class="d-none">` + it.outcome + `</td>
+                                <td class="d-none">` + it.diagnosis + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
@@ -562,6 +587,9 @@
                     return;
                 }
 
+                if (params.type != "6") {
+                    remarks_modal.toggle();
+                }
                 prescription_modal.toggle();
                 toastr.success(data.message, "Information");
 

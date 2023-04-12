@@ -29,6 +29,19 @@
             }
         });
 
+        $("input[name='reject_outcome']").change(function () {
+            const new_value = $(this).prop("checked");
+            $("input[name='reject_outcome']").prop("checked", false);
+            $(this).prop("checked", new_value);
+            if (new_value) {
+                $("#common_remarks").val($(this).next().text().trim());
+                $("#common_remarks").prop("disabled", true);
+            } else {
+                $("#common_remarks").val("");
+                $("#common_remarks").prop("disabled", false);
+            }
+        });
+
         STATIONS.forEach(it => {
             $("#form_station").append("<option>" + it + "</option>");
         });
@@ -148,6 +161,9 @@
         $("#btn_submit").click(function () {
             button_clicked = $(this).text();
             $("#remarks_message").text("Reason for approval");
+            $("#reject_outcome_container").addClass("d-none");
+            $("#common_remarks").val("");
+            $("input[name='reject_outcome']").prop("checked",false).change();
             remarks_modal.toggle();
         });
 
@@ -164,6 +180,7 @@
                 id: prescription_id,
                 type: $("#form_prescription_type").val(),
                 remarks: "Prescriber wishes to cancel pending medications",
+                outcome: null,
                 origin: "NURSE"
             }
 
@@ -172,6 +189,7 @@
         });
 
         $("#btn_reject").click(function () {
+            button_clicked = $(this).text();
             if ($("#form_prescription_type").val() == "6") {
                 warning_modal.toggle();
                 $("#i_agree").prop("checked", false).change();
@@ -179,14 +197,17 @@
                 return;
             }
 
-            button_clicked = $(this).text();
-
+            $("#reject_outcome_container").removeClass("d-none");
             $("#remarks_message").text("Reason for rejection");
+            $("#common_remarks").val("");
+            $("input[name='reject_outcome']").prop("checked",false).change();
             remarks_modal.toggle();
         });
 
         $("#btn_proceed").click(function () {
             const remarks = $("#common_remarks").val().trim();
+            const outcome = $("input[name='reject_outcome']:checked").next().text().trim();
+
             if (remarks == "") {
                 alert("Please specify remarks or instructions for the receiver");
                 return;
@@ -196,6 +217,7 @@
                 id: prescription_id,
                 origin: "NURSE",
                 type: $("#form_prescription_type").val(),
+                outcome: (outcome == "") ? null : outcome,
                 remarks: remarks
             }
 
@@ -242,6 +264,7 @@
         const attending_physician = $("#prescription_id_" + id + " td:eq(20)").text();
         const additional_labs = $("#prescription_id_" + id + " td:eq(21)").text();
         const outcome = $("#prescription_id_" + id + " td:eq(22)").text();
+        const diagnosis = $("#prescription_id_" + id + " td:eq(23)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -267,6 +290,7 @@
         $("#form_sgot").val(sgot);
         $("#form_days_requested").val(days_requested);
         $("#additional_labs").val(additional_labs);
+        $("#diagnosis").val(diagnosis);
         $("input[name='outcome']").prop("checked", false);
         $("#outcome").val("");
 
@@ -465,6 +489,7 @@
                                 <td class="d-none">` + it.attending_physician + `</td>
                                 <td class="d-none">` + it.additional_labs + `</td>
                                 <td class="d-none">` + it.outcome + `</td>
+                                <td class="d-none">` + it.diagnosis + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
@@ -532,6 +557,9 @@
                     return;
                 }
 
+                if (params.type != "6") {
+                    remarks_modal.toggle();
+                }
                 prescription_modal.toggle();
                 toastr.success(data.message, "Information");
                 insert("prescriber/" + data.id, {id: 1}, function (message) {

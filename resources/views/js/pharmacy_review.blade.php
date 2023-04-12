@@ -13,7 +13,7 @@
     let page = 0;
 
     $(document).ready(function () {
-
+        $("#quantity_render_th").text("Availability");
         observe("PHARMACY", function (snapshot) {
             if (snapshot.val()) {
                 notification_counter++;
@@ -26,8 +26,18 @@
             }
         });
 
-
-        $("#quantity_render_th").text("Availability");
+        $("input[name='reject_outcome']").change(function () {
+            const new_value = $(this).prop("checked");
+            $("input[name='reject_outcome']").prop("checked", false);
+            $(this).prop("checked", new_value);
+            if (new_value) {
+                $("#common_remarks").val($(this).next().text().trim());
+                $("#common_remarks").prop("disabled", true);
+            } else {
+                $("#common_remarks").val("");
+                $("#common_remarks").prop("disabled", false);
+            }
+        });
 
         STATIONS.forEach(it => {
             $("#form_station").append("<option>" + it + "</option>");
@@ -201,7 +211,11 @@
             }
 
             $("#days_approved_container").addClass("d-none");
+            $("#reject_outcome_container").removeClass("d-none");
             $("#remarks_message").text("Reason for rejection");
+            $("#common_remarks").val("");
+            $("input[name='reject_outcome']").prop("checked", false).change();
+
             remarks_modal.toggle();
         });
 
@@ -218,6 +232,7 @@
                 id: prescription_id,
                 type: $("#form_prescription_type").val(),
                 remarks: "Prescriber wishes to cancel pending medications",
+                outcome: null,
                 origin: "PHARMACY"
             }
 
@@ -258,6 +273,7 @@
                 type: $("#form_prescription_type").val(),
                 remarks: remarks,
                 origin: "PHARMACY",
+                outcome: null,
                 medications: medications
             }
 
@@ -305,6 +321,7 @@
         const attending_physician = $("#prescription_id_" + id + " td:eq(20)").text();
         const additional_labs = $("#prescription_id_" + id + " td:eq(21)").text();
         const outcome = $("#prescription_id_" + id + " td:eq(22)").text();
+        const diagnosis = $("#prescription_id_" + id + " td:eq(23)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -330,6 +347,7 @@
         $("#form_sgot").val(sgot);
         $("#form_days_requested").val(days_requested);
         $("#additional_labs").val(additional_labs);
+        $("#diagnosis").val(diagnosis);
         $("input[name='outcome']").prop("checked", false);
         $("#outcome").val("");
 
@@ -539,6 +557,7 @@
                                 <td class="d-none">` + it.attending_physician + `</td>
                                 <td class="d-none">` + it.additional_labs + `</td>
                                 <td class="d-none">` + it.outcome + `</td>
+                                <td class="d-none">` + it.diagnosis + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
@@ -558,8 +577,6 @@
     }
 
     function renderPrescription(params) {
-        // prescription_modal.toggle();
-        // render_modal.toggle();
         $("#spinner").removeClass("d-none");
         fetch('{{ route('render_prescription') }}', {
             method: "POST",
@@ -611,12 +628,15 @@
             .then(data => {
                 $("#spinner").addClass("d-none");
                 if (data.code == 500) {
-                    toastr.error(data.message,"Ooops");
+                    toastr.error(data.message, "Ooops");
                     return;
                 }
 
+                if (params.type != "6") {
+                    remarks_modal.toggle();
+                }
                 prescription_modal.toggle();
-                toastr.success(data.message,"Information");
+                toastr.success(data.message, "Information");
                 insert("prescriber/" + data.id, {id: 1}, function (message) {
                     deleteChild("prescriber/" + data.id);
                 });

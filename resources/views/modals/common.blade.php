@@ -78,9 +78,42 @@
                     <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close">X</button>
                 </div>
 
-                <h5 class="card-title">Give remarks</h5>
-                <h6 id="remarks_message"></h6>
+                <h6 class="card-title" id="remarks_message"></h6>
                 <textarea class="form-control" style="height: 100px" id="common_remarks"></textarea>
+
+                <div id="reject_outcome_container">
+                    <h6 class="card-title">Specific reason <small>(optional)</small></h6>
+                    <div class="form-check ps-0">
+                        <input type="checkbox" name="reject_outcome">
+                        <label class="form-check-label">
+                            Discharged
+                        </label>
+                    </div>
+                    <div class="form-check ps-0">
+                        <input type="checkbox" name="reject_outcome">
+                        <label class="form-check-label">
+                            Hama
+                        </label>
+                    </div>
+                    <div class="form-check ps-0">
+                        <input type="checkbox" name="reject_outcome">
+                        <label class="form-check-label">
+                            Transferred
+                        </label>
+                    </div>
+                    <div class="form-check ps-0">
+                        <input type="checkbox" name="reject_outcome">
+                        <label class="form-check-label">
+                            Died
+                        </label>
+                    </div>
+                    <div class="form-check ps-0">
+                        <input type="checkbox" name="reject_outcome">
+                        <label class="form-check-label">
+                            Absconded
+                        </label>
+                    </div>
+                </div>
 
                 @if(session('access_rights') == "ICC")
                     <div id="days_approved_container" class="mt-3">

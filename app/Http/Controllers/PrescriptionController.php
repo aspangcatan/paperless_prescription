@@ -191,6 +191,7 @@ class PrescriptionController extends Controller
             $prescription->days_requested = $patient['days_requested'];
             $prescription->additional_labs = $patient['additional_labs'];
             $prescription->outcome = $patient['outcome'];
+            $prescription->diagnosis = $patient['diagnosis'];
 
             $prescription->save();
             $prescription_id = $prescription->id;
@@ -492,6 +493,15 @@ class PrescriptionController extends Controller
                 return response(['code' => 200, 'message' => 'All Prescription returned', 'id' => $current_prescrption->physician_id]);
             }
 
+            if ($request->outcome != null) {
+                $selected_prescription = Prescription::find($request->id);
+                if (!$selected_prescription) {
+                    return response(['code' => 500, 'message' => "Prescription ID dont exists"]);
+                }
+                $selected_prescription->outcome = $request->outcome;
+                $selected_prescription->save();
+            }
+
             #CHECK IF INTERVENTION FORM
             if ($request->origin != "ICC") {
                 $current_concurrent = ConcurrentTherapy::where('prescription_id', $request->id)->whereNotNull(['date_approved']);
@@ -508,23 +518,23 @@ class PrescriptionController extends Controller
                 }
             }
 
-            if ($request->type != "6") {
-                $returned = ReturnedPrescription::where('prescription_id', $request->id)->first();
-                if (!$returned) {
-                    $returned = new ReturnedPrescription;
-                    $returned->prescription_id = $request->id;
-                    $returned->save();
-                }
 
-                #INSERT TO PRESCRIPTION LOGS
-                $logs = new PrescriptionLog;
-                $logs->prescription_id = $request->id;
-                $logs->origin = $request->origin;
-                $logs->released_by = Auth::id();
-                $logs->released_to = "DOCTOR";
-                $logs->remarks = "<span class='badge bg-danger text-white'>Rejected <i class='bi bi-hand-thumbs-down-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
-                $logs->save();
+            $returned = ReturnedPrescription::where('prescription_id', $request->id)->first();
+            if (!$returned) {
+                $returned = new ReturnedPrescription;
+                $returned->prescription_id = $request->id;
+                $returned->save();
             }
+
+            #INSERT TO PRESCRIPTION LOGS
+            $logs = new PrescriptionLog;
+            $logs->prescription_id = $request->id;
+            $logs->origin = $request->origin;
+            $logs->released_by = Auth::id();
+            $logs->released_to = "DOCTOR";
+            $logs->remarks = "<span class='badge bg-danger text-white'>Rejected <i class='bi bi-hand-thumbs-down-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
+            $logs->save();
+
 
             #AFTER RETURNED DELETE RECORD
             $prescription->forceDelete();

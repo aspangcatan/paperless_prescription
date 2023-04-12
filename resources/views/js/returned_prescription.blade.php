@@ -220,16 +220,6 @@
                 $("#prescription_modal .error_list").append("<li>Station is required</li>");
             }
 
-            if (ward == "") {
-                is_valid = false;
-                $("#prescription_modal .error_list").append("<li>Ward is required</li>");
-            }
-
-            if (bed_no == "") {
-                is_valid = false;
-                $("#prescription_modal .error_list").append("<li>Bed no is required</li>");
-            }
-
             if (attending_physician == "") {
                 is_valid = false;
                 $("#prescription_modal .error_list").append("<li>Attending physician is required</li>");
@@ -495,6 +485,7 @@
         const attending_physician = $("#prescription_id_" + id + " td:eq(20)").text();
         const additional_labs = $("#prescription_id_" + id + " td:eq(21)").text();
         const outcome = $("#prescription_id_" + id + " td:eq(22)").text();
+        const diagnosis = $("#prescription_id_" + id + " td:eq(23)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -520,6 +511,7 @@
         $("#form_sgot").val(sgot);
         $("#form_days_requested").val(days_requested);
         $("#additional_labs").val(additional_labs);
+        $("#diagnosis").val(diagnosis);
 
         $("input[name='outcome']").prop("checked", false);
         $("#outcome").val("");
@@ -893,6 +885,7 @@
                                 <td class="d-none">` + it.attending_physician + `</td>
                                 <td class="d-none">` + it.additional_labs + `</td>
                                 <td class="d-none">` + it.outcome + `</td>
+                                <td class="d-none">` + it.diagnosis + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
