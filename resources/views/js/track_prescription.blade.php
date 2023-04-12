@@ -225,7 +225,10 @@
                     tr += "<td>" + moment(it.start_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td></td>";
-                    tr += "<td></td>";
+                    if (!it.date_approved && !it.approved_by)
+                        tr += "<td><span class='badge bg-danger'>MANUAL</span></td>";
+                    else
+                        tr += "<td></td>";
                     tr += "<td class='d-none'>" + it.id + "</td>";
                     tr += "</tr>";
 
@@ -276,10 +279,10 @@
                     data.results.forEach(it => {
                         let bg = "";
                         let quantity_rendered = "";
-                        if(it.quantity_rendered == 1){
+                        if (it.quantity_rendered == 1) {
                             quantity_rendered = "Available";
                             bg = "bg-success text-white"
-                        }else if(it.quantity_rendered == 0){
+                        } else if (it.quantity_rendered == 0) {
                             quantity_rendered = "Not Available";
                             bg = "bg-danger text-white";
                         }

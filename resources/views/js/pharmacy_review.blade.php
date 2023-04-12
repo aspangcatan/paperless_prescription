@@ -404,7 +404,10 @@
                     tr += "<td>" + moment(it.start_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td></td>";
-                    tr += "<td></td>";
+                    if (!it.date_approved && !it.approved_by)
+                        tr += "<td><span class='badge bg-danger'>MANUAL</span></td>";
+                    else
+                        tr += "<td></td>";
                     tr += "</tr>";
 
                     $("#concurrent_list").append(tr);
