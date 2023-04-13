@@ -226,7 +226,7 @@
                                 </div>
                             </div>
 
-                            <div class="table-responsive">
+                            <div class="table-responsive" style="max-height: 300px !important;">
                                 <table class="table text-center" id="concurrent_table">
                                     <thead>
                                     <tr>
