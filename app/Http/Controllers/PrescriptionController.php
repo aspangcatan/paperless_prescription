@@ -294,7 +294,7 @@ class PrescriptionController extends Controller
             }
 
             $released_to = "PHARMACY";
-            if ($patient['type'] == '1' || $patient['type'] == '5') {
+            if ($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') {
                 $pharmacy = new PharmacyReview();
                 $pharmacy->prescription_id = $prescription_id;
                 $pharmacy->save();

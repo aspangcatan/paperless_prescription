@@ -66,7 +66,7 @@ class ReturnedPrescriptionController extends Controller
                 ->where($search_filters)
                 ->skip(0)
                 ->take(10)
-                ->orderBy('n.created_at','DESC')
+                ->orderBy('n.created_at', 'DESC')
                 ->get(['p.*', 'h.hospital_id', 'h.name', 'h.birthdate', 'h.sex', 'n.created_at as date_forwarded']);
             return response(['code' => 200, 'results' => $prescriptions]);
         } catch (\Exception $exception) {
@@ -110,8 +110,8 @@ class ReturnedPrescriptionController extends Controller
             $prescription->save();
 
             #FOR SWTICH BACK TO ZERO
-            $previous_concurrent = ConcurrentTherapy::where('for_switch',$prescription_id)->first();
-            if($previous_concurrent){
+            $previous_concurrent = ConcurrentTherapy::where('for_switch', $prescription_id)->first();
+            if ($previous_concurrent) {
                 $previous_concurrent->for_switch = null;
                 $previous_concurrent->save();
             }
@@ -141,7 +141,7 @@ class ReturnedPrescriptionController extends Controller
 
                 #INSERT MICROBIOLOGICAL
                 if ($patient['type'] != '4') {
-                    MicrobiologicalResult::where('prescription_id',$prescription_id)->delete();
+                    MicrobiologicalResult::where('prescription_id', $prescription_id)->delete();
                     $microbiologicals = $request->microbiologicals;
                     for ($i = 0; $i < count($microbiologicals); $i++) {
                         $microbiologicals[$i]['prescription_id'] = $prescription_id;
@@ -192,14 +192,14 @@ class ReturnedPrescriptionController extends Controller
             }
 
             $released_to = "ICC";
-            if ($patient['type'] != "1" && $patient['type'] != "5") {
+            if ($patient['type'] != "1" && $patient['type'] != "5" && $patient['type'] != "8") {
                 $icc = IccReview::where('prescription_id', $prescription_id)->first();
                 if (!$icc) {
                     $icc = new IccReview();
                     $icc->prescription_id = $prescription_id;
                     $icc->save();
                 }
-            }else{
+            } else {
                 $released_to = "PHARMACY";
                 $pharmacy = PharmacyReview::where('prescription_id', $prescription_id)->first();
                 if (!$pharmacy) {

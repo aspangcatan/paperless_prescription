@@ -1219,7 +1219,7 @@
                         deleteChild("PHARMACY");
                     });
 
-                } else if (params.patient.type !== "1" && params.patient.type !== "5") {
+                } else if (params.patient.type !== "1" && params.patient.type !== "5" && params.patient.type !== "8") {
                     insert("ICC", {id: 1}, function (message) {
                         deleteChild("ICC");
                     });
