@@ -12,7 +12,7 @@ class PatientController extends Controller
 {
     public function getAuthorization()
     {
-        return "02778c432af8fac59c050a297e56f1adde9ac11f1baa6bd965edb4e330de889d4fe4ed1d";
+        return response("02778c432af8fac59c050a297e56f1adde9ac11f1baa6bd965edb4e330de889d4fe4ed1d");
     }
 
     public function searchHomisPatient($hospital_id)
