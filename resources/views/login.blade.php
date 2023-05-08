@@ -71,5 +71,8 @@ $template = "http://" . $_SERVER['SERVER_NAME'] . "/template";
         </div>
     </div>
 </div>
+
+<script src="{{ $template }}/js/jquery.min.js"></script>
+<script src="{{ $template }}/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -111,6 +111,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('/accept_meds', [\App\Http\Controllers\ReturnedMedsController::class, 'receiveMedicine'])->name('accept_meds');
 
         Route::get('/homis_patient/get/{keyword}', [\App\Http\Controllers\PatientController::class, 'searchHomisPatient']);
+        Route::get('/api/pat', [\App\Http\Controllers\PatientController::class, 'searchApiPatient']);
 
         Route::get('/patient/get', [\App\Http\Controllers\PatientController::class, 'getPatient']);
         Route::get('/medicine/get/master', [\App\Http\Controllers\MedicineController::class, 'getMedicine']);
@@ -143,6 +144,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::delete('/prescription/delete', [\App\Http\Controllers\PrescriptionController::class, 'deletePrescription'])->name('delete_prescription');
         #SETTINGS
         Route::post('/password/update', [\App\Http\Controllers\UserController::class, 'changePassword'])->name('changePassword');
+        Route::get('/patient/get/recent', [\App\Http\Controllers\PrescriptionController::class, 'getLatestPrescription'])->name('getLatestPrescription');
         Route::get('/patient/get/recent', [\App\Http\Controllers\PrescriptionController::class, 'getLatestPrescription'])->name('getLatestPrescription');
     });
 });

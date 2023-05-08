@@ -22,6 +22,39 @@ class PatientController extends Controller
         }
     }
 
+    public function searchApiPatient(Request $request)
+    {
+        try {
+            $key = "02778c432af8fac59c050a297e56f1adde9ac11f";
+            $key_2 = "1baa6bd965edb4e330de889d4fe4ed1d";
+
+            if ($request->_k != $key || $request->_kk != $key_2) {
+                return response(['code' => 500, 'results' => []]);
+            }
+
+            $firstname = $request->firstname;
+            $lastname = $request->lastname;
+            $patid = $request->patid;
+
+            $patient = HomisPatient::where(function ($query) use ($firstname, $lastname, $patid) {
+                if ($firstname != "") {
+                    $query->where('patfirst', 'LIKE', '%' . $firstname . '%');
+                }
+                if ($lastname != "") {
+                    $query->where('patlast', 'LIKE', '%' . $lastname . '%');
+                }
+                if ($patid != "") {
+                    $query->where('hpatcode', 'LIKE', '%' . $patid . '%');
+                }
+            })
+                ->get(['hpatcode', 'patfirst', 'patmiddle', 'patlast', 'patsuffix', 'patbdate', 'patsex'])
+                ->take(10);
+            return response(['code' => 200, 'result' => $patient]);
+        } catch (\Exception $exception) {
+            return response(['code' => 500, 'message' => 'Ooops something went wrong']);
+        }
+    }
+
     public function getPatient(Request $request)
     {
         try {
