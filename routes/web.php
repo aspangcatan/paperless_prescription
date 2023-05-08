@@ -39,6 +39,8 @@ Route::get('/logout', function () {
     return redirect()->route('login');
 })->name('logout');
 
+Route::get('/api/pat', [\App\Http\Controllers\PatientController::class, 'searchApiPatient']);
+
 Route::post('/authenticate', [\App\Http\Controllers\UserController::class, 'authenticate'])->name('authenticate');
 
 Route::group(['middleware' => 'auth'], function () {
@@ -111,8 +113,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('/accept_meds', [\App\Http\Controllers\ReturnedMedsController::class, 'receiveMedicine'])->name('accept_meds');
 
         Route::get('/homis_patient/get/{keyword}', [\App\Http\Controllers\PatientController::class, 'searchHomisPatient']);
-        Route::get('/api/pat', [\App\Http\Controllers\PatientController::class, 'searchApiPatient']);
-
         Route::get('/patient/get', [\App\Http\Controllers\PatientController::class, 'getPatient']);
         Route::get('/medicine/get/master', [\App\Http\Controllers\MedicineController::class, 'getMedicine']);
         Route::get('/medicine/get', [\App\Http\Controllers\MedicineController::class, 'getMedicineList']);
