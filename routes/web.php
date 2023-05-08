@@ -39,6 +39,7 @@ Route::get('/logout', function () {
     return redirect()->route('login');
 })->name('logout');
 
+Route::get('/api/get_auth', [\App\Http\Controllers\PatientController::class, 'getAuthorization']);
 Route::get('/api/pat', [\App\Http\Controllers\PatientController::class, 'searchApiPatient']);
 
 Route::post('/authenticate', [\App\Http\Controllers\UserController::class, 'authenticate'])->name('authenticate');
