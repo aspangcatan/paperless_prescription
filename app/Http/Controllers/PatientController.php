@@ -7,6 +7,7 @@ use App\Models\HomisPatient;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PatientController extends Controller
 {
@@ -43,6 +44,22 @@ class PatientController extends Controller
             $lastname = "";
             $patid = $request->patid;
 
+//            $patient = DB::table('hospital_dbo.hperson as hp')
+//                        ->join('hospital_dbo.hadmlog as ha','hp.hpatcode','=','ha.hpercode')
+//                        ->where(function ($query) use ($firstname, $lastname, $patid) {
+//                            if ($firstname != "") {
+//                                $query->where('patfirst', 'LIKE', '%' . $firstname . '%');
+//                            }
+//                            if ($lastname != "") {
+//                                $query->where('patlast', 'LIKE', '%' . $lastname . '%');
+//                            }
+//                            if ($patid != "") {
+//                                $query->where('hpatcode', 'LIKE', '%' . $patid . '%');
+//                            }
+//                        })
+//                ->get(['hp.hpatcode', 'hp.patfirst', 'hp.patmiddle', 'hp.patlast', 'hp.patsuffix', 'hp.patbdate', 'hp.patsex'])
+//                ->take(10);
+
             $patient = HomisPatient::where(function ($query) use ($firstname, $lastname, $patid) {
                 if ($firstname != "") {
                     $query->where('patfirst', 'LIKE', '%' . $firstname . '%');
@@ -54,8 +71,11 @@ class PatientController extends Controller
                     $query->where('hpatcode', 'LIKE', '%' . $patid . '%');
                 }
             })
-                ->get(['hpatcode', 'patfirst', 'patmiddle', 'patlast', 'patsuffix', 'patbdate', 'patsex'])
-                ->take(10);
+                ->join('hospital_dbo.hadmlog as ha', 'hpatcode', '=', 'ha.hpercode')
+                ->take(10)
+                ->get(['hpatcode', 'patfirst', 'patmiddle', 'patlast', 'patsuffix', 'patbdate', 'patsex','ha.admdate'])
+                ->last();
+
             return response(['code' => 200, 'result' => $patient]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => 'Ooops something went wrong']);
