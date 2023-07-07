@@ -188,6 +188,7 @@
             const sgot = $("#form_sgot").val().trim();
             const days_requested = $("#form_days_requested").val().trim();
             const additional_labs = $("#additional_labs").val().trim();
+            const diagnosis = $("#diagnosis").val().trim();
 
             let params = {};
             let is_valid = true;
@@ -433,7 +434,8 @@
                 sgpt: sgpt,
                 sgot: sgot,
                 days_requested: days_requested,
-                additional_labs: additional_labs
+                additional_labs: additional_labs,
+                diagnosis: diagnosis
             }
 
             params.id = prescription_id;
