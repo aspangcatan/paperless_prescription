@@ -147,6 +147,7 @@
         const additional_labs = $("#prescription_id_" + id + " td:eq(20)").text();
         const outcome = $("#prescription_id_" + id + " td:eq(21)").text();
         const diagnosis = $("#prescription_id_" + id + " td:eq(22)").text();
+        const for_extension = $("#prescription_id_" + id + " td:eq(23)").text();
         const age = moment(created_at).diff(moment(birthdate), 'years');
 
         clearForms();
@@ -161,6 +162,7 @@
         $("#form_bed_no").val(bed_no);
         $("#form_attending_physician").val(attending_physician);
         $("#checkbox_urgent").prop("checked", (urgency == "Urgent"));
+        $("#form_for_extension").val(for_extension);
         $("#form_prescription_type").val(type).change();
         $("#form_drug_allergy").val(drug_allergy);
         $("#form_weight").val(weight);
@@ -387,6 +389,7 @@
                                 <td class="d-none">` + it.additional_labs + `</td>
                                 <td class="d-none">` + it.outcome + `</td>
                                 <td class="d-none">` + it.diagnosis + `</td>
+                                <td class="d-none">` + it.for_extension + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>

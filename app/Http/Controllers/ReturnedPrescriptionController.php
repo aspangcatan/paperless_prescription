@@ -107,6 +107,7 @@ class ReturnedPrescriptionController extends Controller
             $prescription->days_requested = $patient['days_requested'];
             $prescription->additional_labs = $patient['additional_labs'];
             $prescription->diagnosis = $patient['diagnosis'];
+            $prescription->for_extension = $patient['for_extension'];
             $prescription->save();
 
             #FOR SWTICH BACK TO ZERO
@@ -192,20 +193,20 @@ class ReturnedPrescriptionController extends Controller
             }
 
             $released_to = "ICC";
-            if ($patient['type'] != "1" && $patient['type'] != "5" && $patient['type'] != "8") {
-                $icc = IccReview::where('prescription_id', $prescription_id)->first();
-                if (!$icc) {
-                    $icc = new IccReview();
-                    $icc->prescription_id = $prescription_id;
-                    $icc->save();
-                }
-            } else {
+            if (($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1) {
                 $released_to = "PHARMACY";
                 $pharmacy = PharmacyReview::where('prescription_id', $prescription_id)->first();
                 if (!$pharmacy) {
                     $pharmacy = new PharmacyReview();
                     $pharmacy->prescription_id = $prescription_id;
                     $pharmacy->save();
+                }
+            } else {
+                $icc = IccReview::where('prescription_id', $prescription_id)->first();
+                if (!$icc) {
+                    $icc = new IccReview();
+                    $icc->prescription_id = $prescription_id;
+                    $icc->save();
                 }
             }
 

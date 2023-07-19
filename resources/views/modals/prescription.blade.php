@@ -102,6 +102,17 @@
                                     <small>(Type)</small>
                                 </div>
                             </div>
+                            <div class="col-md-4 mt-2">
+                                <div class="text-center">
+                                    <select class="form-control fw-bold text-center bg-white"
+                                            id="form_for_extension">
+                                        <option value="">Select option</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                    </select>
+                                    <small>(For Extension?)</small>
+                                </div>
+                            </div>
 
                             <div class="col-md-4 mt-2 ams_container">
                                 <div class="text-center">

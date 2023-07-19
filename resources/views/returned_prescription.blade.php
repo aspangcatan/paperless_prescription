@@ -43,7 +43,6 @@
                         <tbody id="prescription_list"></tbody>
                     </table>
                 </div>
-
             </div>
         </div>
     </div>

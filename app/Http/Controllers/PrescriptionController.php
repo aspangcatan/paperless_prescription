@@ -192,6 +192,7 @@ class PrescriptionController extends Controller
             $prescription->additional_labs = $patient['additional_labs'];
             $prescription->outcome = $patient['outcome'];
             $prescription->diagnosis = $patient['diagnosis'];
+            $prescription->for_extension = $patient['for_extension'];
 
             $prescription->save();
             $prescription_id = $prescription->id;
@@ -294,7 +295,7 @@ class PrescriptionController extends Controller
             }
 
             $released_to = "PHARMACY";
-            if ($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') {
+            if (($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1) {
                 $pharmacy = new PharmacyReview();
                 $pharmacy->prescription_id = $prescription_id;
                 $pharmacy->save();
@@ -313,7 +314,6 @@ class PrescriptionController extends Controller
             $logs->released_to = $released_to;
             $logs->remarks = $patient['remarks'];
             $logs->save();
-
             return response(['code' => 200, 'message' => 'Prescribe successfully']);
         } catch (\Exception $exception) {
             self::delete($prescription_id);
