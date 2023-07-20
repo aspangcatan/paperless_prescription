@@ -1079,7 +1079,6 @@
                     });
                 }
             }).catch(err => {
-            console.log(err);
             $("#transaction_list").empty();
             $("#transaction_list").append("<tr><td colspan='4'>Something went wrong</td></tr>");
         })

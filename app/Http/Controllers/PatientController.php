@@ -73,7 +73,7 @@ class PatientController extends Controller
             })
                 ->join('hospital_dbo.hadmlog as ha', 'hpatcode', '=', 'ha.hpercode')
                 ->take(1)
-                ->get(['hpatcode', 'patfirst', 'patmiddle', 'patlast', 'patsuffix', 'patbdate', 'patsex','ha.admdate'])
+                ->get(['hpatcode', 'patfirst', 'patmiddle', 'patlast', 'patsuffix', 'patbdate', 'patsex','ha.admdate','natcode','relcode','patempstat','patemaddr','pattelno'])
                 ->last();
 
             return response(['code' => 200, 'result' => $patient]);
