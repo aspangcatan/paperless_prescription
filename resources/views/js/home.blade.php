@@ -1216,26 +1216,26 @@
                 toastr.success(data.message, "Information");
                 getPrescriptions();
 
-                // if (params.patient.type === "6") {
-                //     insert("ICC", {id: 1}, function (message) {
-                //         deleteChild("ICC");
-                //     });
-                //     insert("stations/" + params.patient.station, {id: 1}, function (message) {
-                //         deleteChild("stations/" + params.patient.station);
-                //     });
-                //     insert("PHARMACY", {id: 1}, function (message) {
-                //         deleteChild("PHARMACY");
-                //     });
-                //
-                // } else if (params.patient.type !== "1" && params.patient.type !== "5" && params.patient.type !== "8") {
-                //     insert("ICC", {id: 1}, function (message) {
-                //         deleteChild("ICC");
-                //     });
-                // } else {
-                //     insert("stations/" + params.patient.station, {id: 1}, function (message) {
-                //         deleteChild("stations/" + params.patient.station);
-                //     });
-                // }
+                if (params.patient.type === "6") {
+                    insert("ICC", {id: 1}, function (message) {
+                        deleteChild("ICC");
+                    });
+                    insert("stations/" + params.patient.station, {id: 1}, function (message) {
+                        deleteChild("stations/" + params.patient.station);
+                    });
+                    insert("PHARMACY", {id: 1}, function (message) {
+                        deleteChild("PHARMACY");
+                    });
+
+                } else if (params.patient.type !== "1" && params.patient.type !== "5" && params.patient.type !== "8") {
+                    insert("ICC", {id: 1}, function (message) {
+                        deleteChild("ICC");
+                    });
+                } else {
+                    insert("stations/" + params.patient.station, {id: 1}, function (message) {
+                        deleteChild("stations/" + params.patient.station);
+                    });
+                }
 
             }).catch(err => {
             $("#spinner").addClass("d-none");

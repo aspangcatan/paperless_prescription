@@ -964,15 +964,15 @@
                 prescription_modal.toggle();
                 toastr.success(data.message, "Information");
 
-                // if ($("#form_prescription_type").val() !== "1" && $("#form_prescription_type").val() !== "5" && $("#form_prescription_type").val() !== "8") {
-                //     insert("ICC", {id: 1}, function (message) {
-                //         deleteChild("ICC");
-                //     });
-                // } else {
-                //     insert("PHARMACY", {id: 1}, function (message) {
-                //         deleteChild("PHARMACY");
-                //     });
-                // }
+                if ($("#form_prescription_type").val() !== "1" && $("#form_prescription_type").val() !== "5" && $("#form_prescription_type").val() !== "8") {
+                    insert("ICC", {id: 1}, function (message) {
+                        deleteChild("ICC");
+                    });
+                } else {
+                    insert("PHARMACY", {id: 1}, function (message) {
+                        deleteChild("PHARMACY");
+                    });
+                }
 
                 getPrescriptions();
             }).catch(err => {
