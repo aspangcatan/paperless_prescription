@@ -280,7 +280,7 @@
             if ($(this).text().trim() == "Proceed") {
                 renderPrescription(params);
             } else {
-                render_modal.toggle();
+                // render_modal.toggle();
                 rejectPrescription(params);
             }
         });
@@ -638,9 +638,10 @@
                     return;
                 }
 
-                if (params.type != "6") {
-                    remarks_modal.toggle();
-                }
+                // if (params.type != "6") {
+                //     remarks_modal.toggle();
+                // }
+
                 prescription_modal.toggle();
                 toastr.success(data.message, "Information");
                 insert("prescriber/" + data.id, {id: 1}, function (message) {

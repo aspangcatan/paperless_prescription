@@ -277,8 +277,9 @@ class PrescriptionController extends Controller
             }
             PrescribedMedicine::insert($medications);
 
-            #IF MONITORED PRESCRIPTION, INSERT DATA IN CONCURRENT SET AS 1 DAY APPROVED
-            if ($patient['type'] == '5') {
+            $released_to = "PHARMACY";
+            if (($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1) {
+                #IF MONITORED PRESCRIPTION, INSERT DATA IN CONCURRENT SET AS 1 DAY APPROVED
                 for ($i = 0; $i < count($medications); $i++) {
                     $concurrent = new ConcurrentTherapy;
                     $concurrent->prescription_id = $prescription_id;
@@ -287,15 +288,14 @@ class PrescriptionController extends Controller
                     $concurrent->antimicrobial = $medications[$i]['description'];
                     $concurrent->dosing_regimen = $medications[$i]['dosage_strength'] . '' . $medications[$i]['dosage_unit'] . ' ' . $medications[$i]['frequency'];
                     $concurrent->start_date = Carbon::now();
-                    $concurrent->stop_date = Carbon::now();
-                    $concurrent->days_approved = 1;
+                    $date = Carbon::now();
+                    $date = $date->addDays(6);
+                    $stop_date = date('Y-m-d', strtotime($date));
+                    $concurrent->stop_date = $stop_date;
+                    $concurrent->days_approved = 7;
                     $concurrent->date_approved = Carbon::now();
                     $concurrent->save();
                 }
-            }
-
-            $released_to = "PHARMACY";
-            if (($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1) {
                 $pharmacy = new PharmacyReview();
                 $pharmacy->prescription_id = $prescription_id;
                 $pharmacy->save();
