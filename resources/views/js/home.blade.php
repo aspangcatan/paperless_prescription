@@ -1232,8 +1232,8 @@
                         deleteChild("ICC");
                     });
                 } else {
-                    insert("stations/" + params.patient.station, {id: 1}, function (message) {
-                        deleteChild("stations/" + params.patient.station);
+                    insert("PHARMACY", {id: 1}, function (message) {
+                        deleteChild("PHARMACY");
                     });
                 }
 
