@@ -155,6 +155,7 @@
                     $("#sgpt_container").addClass("d-none");
                     $("#sgot_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#additional_labs_container").removeClass("d-none");
                     break
                 case "4":
                     //INTERVENTION ON GOING
@@ -162,6 +163,7 @@
                     $("#microbiological_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
                     $("#concurrent_table tbody tr").addClass("pointer");
+                    $("#additional_labs_container").removeClass("d-none");
                     break;
                 case "6":
                     //HIDE ALL EXCEPT REMARKS
@@ -181,6 +183,10 @@
                     break;
                 case "7":
                     $("#concurrent_table tbody tr").addClass("pointer");
+                    break;
+                case "8":
+                    $("#days_requested_container").addClass("d-none");
+                    $("#additional_labs_container").removeClass("d-none");
                     break;
             }
         });
@@ -545,12 +551,12 @@
                         $("#prescription_modal .error_list").append("<li>Creatinine clearance is required, put '0' if not applicable</li>");
                     }
 
-                    if (sgpt == "" && type == "3") {
+                    if (sgpt == "" && type == "8") {
                         is_valid = false;
                         $("#prescription_modal .error_list").append("<li>SGPT is required, put '0' if not applicable</li>");
                     }
 
-                    if (sgot == "" && type == "3") {
+                    if (sgot == "" && type == "8") {
                         is_valid = false;
                         $("#prescription_modal .error_list").append("<li>SGOT is required, put '0' if not applicable</li>");
                     }
@@ -560,7 +566,7 @@
                         $("#prescription_modal .error_list").append("<li>Transaminases is required, put '0' if not applicable</li>");
                     }
 
-                    if (additional_labs == "" && type == "2") {
+                    if (additional_labs == "") {
                         is_valid = false;
                         $("#prescription_modal .error_list").append("<li>Please specify Additional Labs, put 'N/A' if not applicable</li>");
                     }
@@ -626,6 +632,11 @@
                             pathogen: pathogen
                         });
                     }
+                }
+
+                if (microbiologicals.length < 1) {
+                    is_valid = false;
+                    $("#prescription_modal .error_list").append("<li>Please specify microbioloigcal results</li>");
                 }
 
 

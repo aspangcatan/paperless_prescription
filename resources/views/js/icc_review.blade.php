@@ -101,6 +101,7 @@
                     $("#sgpt_container").addClass("d-none");
                     $("#sgot_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#additional_labs_container").removeClass("d-none");
                     break
                 case "4":
                     //INTERVENTION ON GOING
@@ -127,6 +128,10 @@
                     break;
                 case "7":
                     $("#concurrent_table tbody tr").addClass("pointer");
+                    break;
+                case "8":
+                    $("#days_requested_container").addClass("d-none");
+                    $("#additional_labs_container").removeClass("d-none");
                     break;
             }
         });

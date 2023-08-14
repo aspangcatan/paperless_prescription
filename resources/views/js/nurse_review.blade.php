@@ -114,6 +114,7 @@
                     $("#sgpt_container").addClass("d-none");
                     $("#sgot_container").addClass("d-none");
                     $("#days_requested_container").addClass("d-none");
+                    $("#additional_labs_container").removeClass("d-none");
                     break
                 case "4":
                     //INTERVENTION ON GOING
@@ -140,6 +141,10 @@
                     break;
                 case "7":
                     $("#concurrent_table tbody tr").addClass("pointer");
+                    break;
+                case "8":
+                    $("#days_requested_container").addClass("d-none");
+                    $("#additional_labs_container").removeClass("d-none");
                     break;
             }
         });
@@ -277,7 +282,7 @@
         $("#form_sex").text(sex);
         $("#form_station").val(station);
         $("#form_ward").val(ward);
-        $("#form_bed_no").val(bed_no);
+        $("#form_bed_no").val( );
         $("#form_attending_physician").val(attending_physician);
         $("#checkbox_urgent").prop("checked", (urgency == "Urgent"));
         $("#form_for_extension").val(for_extension);
