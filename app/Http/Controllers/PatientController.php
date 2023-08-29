@@ -71,7 +71,7 @@ class PatientController extends Controller
                     $query->where('hpatcode', 'LIKE', '%' . $patid . '%');
                 }
             })
-                ->join('hospital_dbo.hadmlog as ha', 'hpatcode', '=', 'ha.hpercode')
+                ->leftJoin('hospital_dbo.hadmlog as ha', 'hpatcode', '=', 'ha.hpercode')
                 ->take(1)
                 ->get(['hpatcode', 'patfirst', 'patmiddle', 'patlast', 'patsuffix', 'patbdate', 'patsex','ha.admdate','natcode','relcode','patempstat','patemaddr','pattelno','patcstat'])
                 ->last();
