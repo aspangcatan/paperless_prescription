@@ -72,6 +72,7 @@ class PatientController extends Controller
                 }
             })
                 ->leftJoin('hospital_dbo.hadmlog as ha', 'hpatcode', '=', 'ha.hpercode')
+                ->orderBy('ha.admdate','DESC')
                 ->take(1)
                 ->get(['hpatcode', 'patfirst', 'patmiddle', 'patlast', 'patsuffix', 'patbdate', 'patsex','ha.admdate','natcode','relcode','patempstat','patemaddr','pattelno','patcstat'])
                 ->last();
