@@ -1,6 +1,5 @@
 <?php
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -22,7 +21,7 @@ Route::get('/', function () {
         switch (session('access_rights')) {
             case "ICC":
             case "Doctor":
-            return redirect()->route('prescription');
+                return redirect()->route('prescription');
             case "Nurse":
                 return redirect()->route('nurse_review');
             case "Pharmacist":

@@ -85,9 +85,18 @@ class ReturnedPrescriptionController extends Controller
             }
 
             $patient = $request->patient;
+            $indication_use_param = $request->indication_use;
+            $microbiologicals = $request->microbiologicals;
 
             if ($patient['type'] != "2" && $patient['type'] != "5" && $patient['type'] != "8") {
                 return response(['code' => 500, 'message' => 'Prescription type are now updated to Restricted,Monitored and Non-Monitored']);
+            }
+
+            if ($patient['type'] == "2") {
+                //CHECK IF INDICATION USE IS NOT EMPIRIC
+                if ($indication_use_param['description'] == "Definitive" && count($microbiologicals) < 1) {
+                    return response(['code' => 500, 'message' => 'Microbiological Results is mandatory when Indication for use is Definitive']);
+                }
             }
 
             $prescription->station = $patient['station'];
@@ -120,7 +129,6 @@ class ReturnedPrescriptionController extends Controller
             if ($patient['type'] != "1") {
                 #REINSERT AMS
                 if ($patient['type'] == "2") {
-                    $indication_use_param = $request->indication_use;
                     $indication = IndicationUse::where('prescription_id', $prescription_id)->first();
                     if (!$indication) {
                         $indication = new IndicationUse;
@@ -143,7 +151,6 @@ class ReturnedPrescriptionController extends Controller
                 #INSERT MICROBIOLOGICAL
                 if ($patient['type'] != '4') {
                     MicrobiologicalResult::where('prescription_id', $prescription_id)->delete();
-                    $microbiologicals = $request->microbiologicals;
                     for ($i = 0; $i < count($microbiologicals); $i++) {
                         $microbiologicals[$i]['prescription_id'] = $prescription_id;
                     }

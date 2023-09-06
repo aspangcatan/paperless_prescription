@@ -165,9 +165,17 @@ class PrescriptionController extends Controller
         try {
             #PATIENT REQUEST DATA OBJECT
             $patient = $request->patient;
-
+            $indication_use_param = $request->indication_use;
+            $microbiologicals = $request->microbiologicals;
             if ($patient['type'] == "1" || $patient['type'] == "3" || $patient['type'] == "4") {
                 return response(['code' => 500, 'message' => 'Prescription type are now updated to Restricted,Monitored and Non-Monitored']);
+            }
+
+            if ($patient['type'] == "2") {
+                //CHECK IF INDICATION USE IS NOT EMPIRIC
+                if ($indication_use_param['description'] == "Definitive" && count($microbiologicals) < 1) {
+                    return response(['code' => 500, 'message' => 'Microbiological Results is mandatory when Indication for use is Definitive']);
+                }
             }
 
             $prescription = new Prescription;
@@ -234,7 +242,6 @@ class PrescriptionController extends Controller
             if ($patient['type'] != "1") {
                 if ($patient['type'] == "2") {
                     #INSERT INDICATION USE
-                    $indication_use_param = $request->indication_use;
                     $indication = new IndicationUse;
                     $indication->prescription_id = $prescription_id;
                     $indication->description = $indication_use_param['description'];
@@ -253,7 +260,6 @@ class PrescriptionController extends Controller
 
                 #INSERT MICROBIOLOGICAL
                 if ($patient['type'] != '4') {
-                    $microbiologicals = $request->microbiologicals;
                     for ($i = 0; $i < count($microbiologicals); $i++) {
                         $microbiologicals[$i]['prescription_id'] = $prescription_id;
                     }

@@ -357,11 +357,10 @@
                     }
                 }
 
-                if (microbiologicals.length < 1) {
+                if (type == "2" && microbiologicals.length < 1 && params.indication_use && params.indication_use.description == "Definitive" ) {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Please specify microbioloigcal results</li>");
                 }
-
 
                 for (let i = 0; i < $("#medication_list tr").length; i++) {
                     let medication_flag = true;
@@ -782,7 +781,7 @@
             tr += "</select>";
             tr += "</div>";
             tr += "</td>";
-            tr += "<td class='d-none'>" + unit + "</td>";
+            tr += "<td>" + unit + "</td>";
             tr += "<td class='d-none'><input class='form-control text-center' type='number' value='1' min='1'/></td>";
             tr += "<td>";
             tr += "<select class='form-control text-center'>";

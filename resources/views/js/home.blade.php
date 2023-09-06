@@ -634,7 +634,7 @@
                     }
                 }
 
-                if (microbiologicals.length < 1) {
+                if (type == "2" && microbiologicals.length < 1 && params.indication_use && params.indication_use.description == "Definitive" ) {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Please specify microbioloigcal results</li>");
                 }
@@ -714,10 +714,13 @@
                 }
             }
 
+
+
             if (!is_valid) {
                 $("#prescription_modal .error_container").removeClass("d-none");
                 return;
             }
+
 
             const patient = {
                 hospital_id: hospital_id,
