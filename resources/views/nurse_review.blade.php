@@ -17,7 +17,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">For Reviews</h5>
+                    <h5 class="card-title">For Cycle End</h5>
 
                     <button class="btn btn-sm btn-secondary" id="btn_notification">
                         <i class="bi bi-bell"></i>
@@ -41,7 +41,6 @@
                         <tbody id="prescription_list"></tbody>
                     </table>
                 </div>
-
             </div>
             <div class="card-footer text-dark" id="pagination_container">
                 <div class="d-flex align-items-center justify-content-center">

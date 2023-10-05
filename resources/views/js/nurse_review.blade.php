@@ -13,6 +13,8 @@
     let is_loaded = false;
 
     $(document).ready(function () {
+        $("#btn_submit").text("CYCLE END");
+        $("#btn_reject").addClass("d-none");
         observe("stations", function (snapshot) {
             if (snapshot.val()) {
                 const user_stations = $("#user_station").text().trim().split(",");
@@ -243,7 +245,6 @@
         $("#btn_add_concurrent").addClass("d-none");
         $("#btn_submit").val(id);
         $("#btn_reject").val(id);
-        $("#btn_submit").text("APPROVE");
         $("#form_remarks").addClass("d-none");
         $("#transaction_container").removeClass("d-none");
 
