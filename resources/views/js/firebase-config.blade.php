@@ -42,4 +42,21 @@
     function deleteChild(child) {
         firebase.database().ref(child).remove();
     }
+
+    function formatFullAge(birthdate,currentdate){
+        var today = currentdate;
+        var birthdateMoment = moment(birthdate, "MM/DD/YYYY");
+
+        var years = today.diff(birthdateMoment, 'years');
+        birthdateMoment.add(years, 'years');
+
+        var months = today.diff(birthdateMoment, 'months');
+        birthdateMoment.add(months, 'months');
+
+        var days = today.diff(birthdateMoment, 'days');
+
+        var ageString = years + " years " + months + " months " + days + " days";
+
+        return ageString;
+    }
 </script>

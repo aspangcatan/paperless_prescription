@@ -839,7 +839,10 @@
         $("#form_hospital_id").text(hospital_id);
         $("#form_patient").text(name);
         $("#form_birthdate").text(birthdate);
+
         $("#form_age").text(moment().diff(moment(birthdate, "MM/DD/YYYY"), 'years'));
+        $("#form_age").text(formatFullAge(birthdate,moment()));
+
         $("#form_sex").text(sex);
         $("#form_station").val("");
         $("#form_ward").val("");
@@ -904,6 +907,7 @@
         $("#form_patient").text(name);
         $("#form_birthdate").text(moment(birthdate).format("MM/DD/YYYY"));
         $("#form_age").text(age);
+        $("#form_age").text(formatFullAge(moment(birthdate).format("MM/DD/YYYY"),moment(created_at)));
         $("#form_sex").text(sex);
         $("#form_station").val(station);
         $("#form_ward").val(ward);
