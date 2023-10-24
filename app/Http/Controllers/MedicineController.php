@@ -38,6 +38,7 @@ class MedicineController extends Controller
                     if ($type == "2" || $type == "5" || $type == "8") {
                         $query->whereRaw("find_in_set('" . $type . "',type)");
                     }
+                    
                     if ($medicine != "") {
                         $query->where('description', 'LIKE', "%$medicine%");
                     }

@@ -86,6 +86,24 @@
                     <div class="form-check ps-0">
                         <input type="checkbox" name="reject_outcome">
                         <label class="form-check-label">
+                            Wrong indication
+                        </label>
+                    </div>
+                    <div class="form-check ps-0">
+                        <input type="checkbox" name="reject_outcome">
+                        <label class="form-check-label">
+                            Double request
+                        </label>
+                    </div>
+                    <div class="form-check ps-0">
+                        <input type="checkbox" name="reject_outcome">
+                        <label class="form-check-label">
+                            Incomplete data
+                        </label>
+                    </div>
+                    <div class="form-check ps-0">
+                        <input type="checkbox" name="reject_outcome">
+                        <label class="form-check-label">
                             Discharged
                         </label>
                     </div>
