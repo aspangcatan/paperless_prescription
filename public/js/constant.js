@@ -4,5 +4,5 @@ const INDICATION_USE_ARRAY = ["Prophylactic", "Empiric", "Definitive", "Empiric 
 const STATIONS = ["INTERMEDIATE CARE UNIT", "LABOR ROOM", "LABOR ROOM NEWBORN", "MEDICAL WARD (STATION 1)", "MEDICAL WARD (STATION 2)", "NEWBORN WARD", "NICU", "OB HIGH RISK", "OB LOW RISK", "PEDIA WARD", "PICU", "SURGICAL WARD", "IER", "NIER","OPD"];
 const CLINICAL_STABILITY = ["Afebrile", "Downward trend or normalization of Inflammatory markers", "Stable vital signs"];
 const ORAL_INTAKE = ["Patient is not nil by mouth", "Tolerating oral diet, medications and/or enteral feeds", "Oral abosrption is not compromised"];
-const PRESCRIPTION_TYPES = ["", "Regular", "Restricted", "Seventh Day Auto Stop", "", "Monitored"];
+const PRESCRIPTION_TYPES = ["", "Regular", "Restricted", "Seventh Day Auto Stop", "Intravenous to Oral", "Monitored","","","Non-Monitored"];
 const OUTCOMES = ["Discharged", "Hama", "Transferred", "Died", "Absconded"];

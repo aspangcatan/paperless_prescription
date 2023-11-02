@@ -76,13 +76,14 @@
                 </a>
             </li>
         @endif
-
-        @if(session('access_rights') == "Pharmacist Admin")
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{ route('medicine') }}">
                     <i class="bi bi-grid"></i>
-                    <span>Medicine Management</span>
+                    <span>Medicine Dictionary</span>
                 </a>
+            </li>
+        @if(session('access_rights') == "Pharmacist Admin")
+
         @endif
         @if(session('access_rights') == "Nurse Admin")
             <li class="nav-item">

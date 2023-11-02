@@ -116,14 +116,10 @@
                     const tr = `
                         <tr id="medicine_id_` + it.id + `">
                            <td>` + it.description + `</td>
-                           <td class="d-none">` + it.unit + `</td>
+                           <td>` + it.unit + `</td>
                            <td>` + PRESCRIPTION_TYPES[it.type] + `</td>
                            <td><span class="` + bg + `">` + status + `</span></td>
-                           <td>
-                                <button class="btn btn-sm btn-success" onclick="viewMedicine('` + it.id + `')">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </button>
-                           </td>
+                           <td></td>
                            <td class="d-none">` + it.type + `</td>
                         </tr>`;
                     $("#medicine_list").append(tr);

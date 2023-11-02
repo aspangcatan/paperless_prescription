@@ -15,7 +15,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title">Medicines</h5>
-                    <button class="btn btn-success" id="btn_add_medicine">
+                    <button class="btn btn-success d-none" id="btn_add_medicine">
                         Add medicine
                         <i class="bi bi-plus-lg ms-2"></i>
                     </button>
@@ -25,7 +25,7 @@
                         <thead>
                         <tr>
                             <th>Description</th>
-                            <th class="d-none">Unit</th>
+                            <th>Unit</th>
                             <th style="width: 20%">Type</th>
                             <th style="width: 10%">Status</th>
                             <th style="width:4%"></th>
