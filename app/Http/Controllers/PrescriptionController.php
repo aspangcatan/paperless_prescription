@@ -285,7 +285,6 @@ class PrescriptionController extends Controller
 
             $released_to = "PHARMACY";
             if (($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1) {
-                #IF MONITORED PRESCRIPTION, INSERT DATA IN CONCURRENT SET AS 1 DAY APPROVED
                 for ($i = 0; $i < count($medications); $i++) {
                     $concurrent = new ConcurrentTherapy;
                     $concurrent->prescription_id = $prescription_id;
@@ -306,6 +305,18 @@ class PrescriptionController extends Controller
                 $pharmacy->prescription_id = $prescription_id;
                 $pharmacy->save();
             } else {
+//                #TODO CHECK IF LOADING DOSE
+//                if($patient['is_loading_dose'] && $patient['is_loading_dose'] == '1'){ //PROCEED TO PHARMACY
+//                    $pharmacy = new PharmacyReview();
+//                    $pharmacy->prescription_id = $prescription_id;
+//                    $pharmacy->save();
+//                }else{
+//                    $released_to = "IPCC";
+//                    $icc = new IccReview();
+//                    $icc->prescription_id = $prescription_id;
+//                    $icc->save();
+//                }
+
                 $released_to = "IPCC";
                 $icc = new IccReview();
                 $icc->prescription_id = $prescription_id;

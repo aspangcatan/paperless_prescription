@@ -68,7 +68,7 @@ class PatientController extends Controller
                     $query->where('patlast', 'LIKE', '%' . $lastname . '%');
                 }
                 if ($patid != "") {
-                    $query->where('hpatcode', 'LIKE', '%' . $patid . '%');
+                    $query->where('hpatcode', 'LIKE', '%' . $patid);
                 }
             })
                 ->leftJoin('hospital_dbo.hadmlog as ha', 'hpatcode', '=', 'ha.hpercode')
