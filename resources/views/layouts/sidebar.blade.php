@@ -93,6 +93,12 @@
                 </a>
             </li>
         @endif
+            <li class="nav-item d-none">
+                <a class="nav-link collapsed" href="{{ route('patient_disposition') }}">
+                    <i class="bi bi-search"></i>
+                    <span>Patient Disposition</span>
+                </a>
+            </li>
         <li class="nav-item">
             <a class="nav-link collapsed" href="{{ route('track_prescription') }}">
                 <i class="bi bi-search"></i>

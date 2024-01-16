@@ -14,6 +14,8 @@ use App\Models\IndicationUseDetails;
 use App\Models\InfectiousDiagnosis;
 use App\Models\MicrobiologicalResult;
 use App\Models\NurseReview;
+use App\Models\Patient;
+use App\Models\PatientDisposition;
 use App\Models\PatientHistory;
 use App\Models\PharmacyReview;
 use App\Models\PrescribedMedicine;
@@ -165,6 +167,20 @@ class PrescriptionController extends Controller
         try {
             #PATIENT REQUEST DATA OBJECT
             $patient = $request->patient;
+            //CHECK PATIENT IF ADMITTED IF NOT RETURN ERROR
+//            $check_patient = PatientDisposition::where('hospital_id', $patient['hospital_id'])
+//                ->orderBy('disposition_date', 'DESC')
+//                ->orderBy('id', 'DESC')
+//                ->first();
+//
+//            if(!$check_patient){
+//                return response()->json(['code' => 500, 'message' => 'Patient not yet admitted']);
+//            }
+//
+//            if ($check_patient->disposition_status !== "Admitted") {
+//                return response()->json(['code' => 500, 'message' => 'Patient not yet admitted']);
+//            }
+
             $indication_use_param = $request->indication_use;
             $microbiologicals = $request->microbiologicals;
             if ($patient['type'] == "1" || $patient['type'] == "3" || $patient['type'] == "4") {
@@ -201,6 +217,7 @@ class PrescriptionController extends Controller
             $prescription->outcome = $patient['outcome'];
             $prescription->diagnosis = $patient['diagnosis'];
             $prescription->for_extension = $patient['for_extension'];
+//            $prescription->date_admitted = $check_patient->disposition_date;
 
             $prescription->save();
             $prescription_id = $prescription->id;
@@ -333,8 +350,9 @@ class PrescriptionController extends Controller
             $logs->save();
             return response(['code' => 200, 'message' => 'Prescribe successfully']);
         } catch (\Exception $exception) {
-            self::delete($prescription_id);
             self::insertErrorLogs(Auth::id(), 'insertPrescription', $request, $exception->getMessage());
+            if ($prescription_id != 0)
+                self::delete($prescription_id);
             return response(['code' => 500, 'message' => "Something went wrong"]);
         }
     }

@@ -230,11 +230,6 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h6 class="card-title">Concurrent Antimicrobial Therapy</h6>
-                                <div>
-                                    <button class="btn btn-sm btn-success" id="btn_add_concurrent">
-                                        <i class="bi bi-plus-lg"></i>
-                                    </button>
-                                </div>
                             </div>
 
                             <div class="table-responsive" style="max-height: 300px !important;">

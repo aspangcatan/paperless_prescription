@@ -40,12 +40,11 @@ Route::get('/logout', function () {
 
 Route::get('/api/get_auth', [\App\Http\Controllers\PatientController::class, 'getAuthorization']);
 Route::get('/api/pat', [\App\Http\Controllers\PatientController::class, 'searchApiPatient']);
-
 Route::post('/authenticate', [\App\Http\Controllers\UserController::class, 'authenticate'])->name('authenticate');
 
 Route::group(['middleware' => 'auth'], function () {
-
     Route::group(['middleware' => 'authority'], function () {
+
         Route::get('/home', function () {
             return view('home');
         })->name('prescription');;
@@ -94,6 +93,10 @@ Route::group(['middleware' => 'auth'], function () {
             return view('medicine');
         })->name('medicine');
 
+        Route::get('/patient_disposition', function () {
+            return view('patient_disposition');
+        })->name('patient_disposition');
+
         Route::get('/track_prescription', function () {
             return view('track_prescription');
         })->name('track_prescription');
@@ -102,6 +105,8 @@ Route::group(['middleware' => 'auth'], function () {
     #APIS
     Route::group(['middleware' => 'authority.api'], function () {
         Route::post('/insert_patient', [\App\Http\Controllers\PatientController::class, 'store'])->name('insert_patient');
+        Route::post('/set_patient_disposition', [\App\Http\Controllers\PatientController::class, 'setDispositionStatus'])->name('set_patient_disposition');
+
         Route::post('/insert_medicine', [\App\Http\Controllers\MedicineController::class, 'store'])->name('insert_medicine');
         Route::post('/insert_prescription', [\App\Http\Controllers\PrescriptionController::class, 'insertPrescription'])->name('insert_prescription');
         Route::post('/approve_prescription', [\App\Http\Controllers\PrescriptionController::class, 'approvePrescription'])->name('approve_prescription');
@@ -114,6 +119,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::get('/homis_patient/get/{keyword}', [\App\Http\Controllers\PatientController::class, 'searchHomisPatient']);
         Route::get('/patient/get', [\App\Http\Controllers\PatientController::class, 'getPatient']);
+        Route::get('/patient/get/list', [\App\Http\Controllers\PatientController::class, 'getPatientList']);
         Route::get('/medicine/get/master', [\App\Http\Controllers\MedicineController::class, 'getMedicine']);
         Route::get('/medicine/get', [\App\Http\Controllers\MedicineController::class, 'getMedicineList']);
         Route::get('/medicine/get/issuance', [\App\Http\Controllers\PrescribedMedicineController::class, 'getIssuancesSummary']);

@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\ErrorLog;
 use App\Models\HomisPatient;
 use App\Models\Patient;
+use App\Models\PatientDisposition;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class PatientController extends Controller
 {
@@ -44,22 +45,6 @@ class PatientController extends Controller
             $lastname = "";
             $patid = $request->patid;
 
-//            $patient = DB::table('hospital_dbo.hperson as hp')
-//                        ->join('hospital_dbo.hadmlog as ha','hp.hpatcode','=','ha.hpercode')
-//                        ->where(function ($query) use ($firstname, $lastname, $patid) {
-//                            if ($firstname != "") {
-//                                $query->where('patfirst', 'LIKE', '%' . $firstname . '%');
-//                            }
-//                            if ($lastname != "") {
-//                                $query->where('patlast', 'LIKE', '%' . $lastname . '%');
-//                            }
-//                            if ($patid != "") {
-//                                $query->where('hpatcode', 'LIKE', '%' . $patid . '%');
-//                            }
-//                        })
-//                ->get(['hp.hpatcode', 'hp.patfirst', 'hp.patmiddle', 'hp.patlast', 'hp.patsuffix', 'hp.patbdate', 'hp.patsex'])
-//                ->take(10);
-
             $patient = HomisPatient::where(function ($query) use ($firstname, $lastname, $patid) {
                 if ($firstname != "") {
                     $query->where('patfirst', 'LIKE', '%' . $firstname . '%');
@@ -72,9 +57,9 @@ class PatientController extends Controller
                 }
             })
                 ->leftJoin('hospital_dbo.hadmlog as ha', 'hpatcode', '=', 'ha.hpercode')
-                ->orderBy('ha.admdate','DESC')
+                ->orderBy('ha.admdate', 'DESC')
                 ->take(1)
-                ->get(['hpatcode', 'patfirst', 'patmiddle', 'patlast', 'patsuffix', 'patbdate', 'patsex','ha.admdate','natcode','relcode','patempstat','patemaddr','pattelno','patcstat'])
+                ->get(['hpatcode', 'patfirst', 'patmiddle', 'patlast', 'patsuffix', 'patbdate', 'patsex', 'ha.admdate', 'natcode', 'relcode', 'patempstat', 'patemaddr', 'pattelno', 'patcstat'])
                 ->last();
 
             return response(['code' => 200, 'result' => $patient]);
@@ -98,6 +83,29 @@ class PatientController extends Controller
             $patient = Patient::where($search_filters)
                 ->take(10)
                 ->get(['id', 'hospital_id', 'fname', 'mname', 'lname', 'suffix', 'birthdate', 'sex']);
+
+            return response(['code' => 200, 'results' => $patient]);
+        } catch (\Exception $exception) {
+            return response(['code' => 500, 'message' => $exception->getMessage()]);
+        }
+    }
+
+    public function getPatientList(Request $request)
+    {
+        try {
+            $search_filters = [];
+            if ($request->firstname != "") {
+                $search_filters[] = ['fname', 'LIKE', "%" . $request->firstname . "%"];
+            }
+
+            if ($request->lastname != "") {
+                $search_filters[] = ['lname', 'LIKE', "%" . $request->lastname . "%"];
+            }
+
+            $patient = Patient::where($search_filters)
+                ->take(11)
+                ->skip($request->page * 10)
+                ->get(['id', 'hospital_id', 'fname', 'mname', 'lname', 'suffix', 'birthdate', 'sex','disposition_status']);
 
             return response(['code' => 200, 'results' => $patient]);
         } catch (\Exception $exception) {
@@ -140,6 +148,32 @@ class PatientController extends Controller
         }
     }
 
+    public function setDispositionStatus(Request $request)
+    {
+        try {
+            $patient = Patient::find($request->id);
+            if (!$patient) {
+                return response()->json(['code' => 500, 'message' => 'Hospital ID dont exists']);
+            }
+
+            $patient->disposition_status = $request->disposition_status;
+            $patient->save();
+            //INSERT DISPOSITION HISTORY
+            $patient_disposition = new PatientDisposition;
+            $patient_disposition->patient_id = $request->id;
+            $patient_disposition->hospital_id = $request->hospital_id;
+            $patient_disposition->disposition_status = $request->disposition_status;
+            $patient_disposition->disposition_date = $request->disposition_date;
+            $patient_disposition->user_id = Auth::id();
+            $patient_disposition->created_at = Carbon::now();
+            $patient_disposition->save();
+            return response(['code' => 200, 'message' => "Disposition status updated"]);
+        } catch (\Exception $exception) {
+            self::insertErrorLogs(Auth::id(), 'setDispositionStatus', $request, $exception->getMessage());
+            return response(['code' => 500, 'message' => $exception->getMessage()]);
+        }
+    }
+
     public function insertErrorLogs($action_by, $action, $params, $details)
     {
         $log = new ErrorLog;
@@ -150,5 +184,3 @@ class PatientController extends Controller
         $log->save();
     }
 }
-
-

@@ -15,6 +15,7 @@ use App\Models\InfectiousDiagnosis;
 use App\Models\InterventionDetail;
 use App\Models\MicrobiologicalResult;
 use App\Models\NurseReview;
+use App\Models\PatientDisposition;
 use App\Models\PatientHistory;
 use App\Models\PharmacyReview;
 use App\Models\PrescribedMedicine;
@@ -85,6 +86,20 @@ class ReturnedPrescriptionController extends Controller
             }
 
             $patient = $request->patient;
+
+//            $check_patient = PatientDisposition::where('hospital_id', $patient['hospital_id'])
+//                ->orderBy('disposition_date', 'DESC')
+//                ->orderBy('id', 'DESC')
+//                ->first();
+//
+//            if(!$check_patient){
+//                return response()->json(['code' => 500, 'message' => 'Patient not yet admitted']);
+//            }
+//
+//            if ($check_patient->disposition_status !== "Admitted") {
+//                return response()->json(['code' => 500, 'message' => 'Patient not yet admitted']);
+//            }
+
             $indication_use_param = $request->indication_use;
             $microbiologicals = $request->microbiologicals;
 
