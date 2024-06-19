@@ -566,7 +566,7 @@
                         $("#prescription_modal .error_list").append("<li>Transaminases is required, put '0' if not applicable</li>");
                     }
 
-                    if (additional_labs == "") {
+                    if (additional_labs == "" && type != "7") {
                         is_valid = false;
                         $("#prescription_modal .error_list").append("<li>Please specify Additional Labs, put 'N/A' if not applicable</li>");
                     }
@@ -634,7 +634,7 @@
                     }
                 }
 
-                if (type == "2" && microbiologicals.length < 1 && params.indication_use && params.indication_use.description == "Definitive" ) {
+                if (type == "2" && microbiologicals.length < 1 && params.indication_use && params.indication_use.description == "Definitive") {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Please specify microbioloigcal results</li>");
                 }
@@ -713,7 +713,6 @@
                     $("#prescription_modal .error_list").append("<li>Please specify patient outcome</li>");
                 }
             }
-
 
 
             if (!is_valid) {
@@ -841,7 +840,7 @@
         $("#form_birthdate").text(birthdate);
 
         $("#form_age").text(moment().diff(moment(birthdate, "MM/DD/YYYY"), 'years'));
-        $("#form_age").text(formatFullAge(birthdate,moment()));
+        $("#form_age").text(formatFullAge(birthdate, moment()));
 
         $("#form_sex").text(sex);
         $("#form_station").val("");
@@ -907,7 +906,7 @@
         $("#form_patient").text(name);
         $("#form_birthdate").text(moment(birthdate).format("MM/DD/YYYY"));
         $("#form_age").text(age);
-        $("#form_age").text(formatFullAge(moment(birthdate).format("MM/DD/YYYY"),moment(created_at)));
+        $("#form_age").text(formatFullAge(moment(birthdate).format("MM/DD/YYYY"), moment(created_at)));
         $("#form_sex").text(sex);
         $("#form_station").val(station);
         $("#form_ward").val(ward);

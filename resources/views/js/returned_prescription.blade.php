@@ -289,7 +289,7 @@
                         $("#prescription_modal .error_list").append("<li>Transaminases is required, put '0' if not applicable</li>");
                     }
 
-                    if (additional_labs == "") {
+                    if (additional_labs == "" && type != "7") {
                         is_valid = false;
                         $("#prescription_modal .error_list").append("<li>Please specify Additional Labs, put 'N/A' if not applicable</li>");
                     }
