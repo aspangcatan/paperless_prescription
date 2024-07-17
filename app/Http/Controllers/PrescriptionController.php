@@ -662,7 +662,10 @@ class PrescriptionController extends Controller
                 ->where(function ($query) use ($patient, $description, $from_date, $to_date, $type) {
                     #COMMENT THIS IF YOU WANT TO INCLUDED MANUALLY ADDED CONCURRENT ANTIBIOTIC THERAPY
                     $query->whereNotNull('c.date_approved');
-                    $query->where('p.type', '=', $type);
+
+                    if ($type != "") {
+                        $query->where('p.type', '=', $type);
+                    }
 
                     if ($patient != "") {
                         $query->where('ph.name', 'LIKE', '%' . $patient . '%');
