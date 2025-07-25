@@ -181,6 +181,10 @@ class PrescriptionController extends Controller
 //                return response()->json(['code' => 500, 'message' => 'Patient not yet admitted']);
 //            }
 
+            if ($patient['type'] == "7") {
+                return response(['code' => 500, 'message' => 'Prescription type Switch Medication is currently disabled']);
+            }
+
             $indication_use_param = $request->indication_use;
             $microbiologicals = $request->microbiologicals;
             if ($patient['type'] == "1" || $patient['type'] == "3" || $patient['type'] == "4") {

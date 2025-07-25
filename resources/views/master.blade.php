@@ -32,7 +32,7 @@
     <!-- Template Main CSS File -->
     <link href="assets/css/style.css?v={{ date('ymdhis') }}" rel="stylesheet">
     <link href="css/toastr.min.css?v={{ date('ymdhis') }}" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+    <link rel="stylesheet" type="text/css" href="css/daterangepicker.css"/>
     <!-- =======================================================
     * Template Name: NiceAdmin - v2.5.0
     * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/

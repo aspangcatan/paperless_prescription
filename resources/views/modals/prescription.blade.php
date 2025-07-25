@@ -96,7 +96,7 @@
                                         <option hidden="hidden" value="4" disabled>Intravenous to Oral</option>
                                         <option value="5">Monitored</option>
                                         <option value="8">Non-Monitored</option>
-                                        <option value="7">Switch Medication</option>
+                                        <option hidden="hidden" value="7">Switch Medication</option>
                                         <option value="6">Cancellation</option>
                                     </select>
                                     <small>(Type)</small>

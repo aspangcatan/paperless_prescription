@@ -103,6 +103,10 @@ class ReturnedPrescriptionController extends Controller
             $indication_use_param = $request->indication_use;
             $microbiologicals = $request->microbiologicals;
 
+            if ($patient['type'] == "7") {
+                return response(['code' => 500, 'message' => 'Prescription type Switch Medication is currently disabled']);
+            }
+
             if ($patient['type'] != "2" && $patient['type'] != "5" && $patient['type'] != "8") {
                 return response(['code' => 500, 'message' => 'Prescription type are now updated to Restricted,Monitored and Non-Monitored']);
             }
