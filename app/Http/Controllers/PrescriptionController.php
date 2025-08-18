@@ -14,8 +14,6 @@ use App\Models\IndicationUseDetails;
 use App\Models\InfectiousDiagnosis;
 use App\Models\MicrobiologicalResult;
 use App\Models\NurseReview;
-use App\Models\Patient;
-use App\Models\PatientDisposition;
 use App\Models\PatientHistory;
 use App\Models\PharmacyReview;
 use App\Models\PrescribedMedicine;

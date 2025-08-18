@@ -446,29 +446,29 @@
                                     <label>Hospital ID</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <input type="text" class="form-control bg-white" id="fname" placeholder="" readonly>
+                                    <input type="text" class="form-control bg-white" id="fname" placeholder="">
                                     <label>Firstname</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <input type="text" class="form-control bg-white" id="mname" placeholder="" readonly>
+                                    <input type="text" class="form-control bg-white" id="mname" placeholder="">
                                     <label>Middlename</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <input type="text" class="form-control bg-white" id="lname" placeholder="" readonly>
+                                    <input type="text" class="form-control bg-white" id="lname" placeholder="">
                                     <label>Lastname</label>
                                 </div>
                                 <div class="form-floating mt-3">
                                     <input type="text" class="form-control bg-white" id="suffix" placeholder=""
-                                           readonly>
+                                    >
                                     <label>Suffix</label>
                                 </div>
                                 <div class="form-floating mt-3">
                                     <input type="date" class="form-control bg-white" id="birthdate" placeholder=""
-                                           readonly>
+                                    >
                                     <label>Birthdate</label>
                                 </div>
                                 <div class="form-floating mt-3">
-                                    <select class="form-control bg-white" id="sex" disabled>
+                                    <select class="form-control bg-white" id="sex">
                                         <option value="">Select sex</option>
                                         <option value="M">MALE</option>
                                         <option value="F">FEMALE</option>

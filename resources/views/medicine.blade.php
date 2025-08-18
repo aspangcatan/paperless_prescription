@@ -15,10 +15,12 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title">Medicines</h5>
-                    <button class="btn btn-success d-none" id="btn_add_medicine">
+                    @if(session('access_rights') == "Pharmacist Admin"))
+                    <button class="btn btn-success" id="btn_add_medicine">
                         Add medicine
                         <i class="bi bi-plus-lg ms-2"></i>
                     </button>
+                    @endif
                 </div>
                 <div class="table-responsive">
                     <table class="table text-center">
