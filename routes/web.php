@@ -119,6 +119,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::get('/homis_patient/get/{keyword}', [\App\Http\Controllers\PatientController::class, 'searchHomisPatient']);
         Route::get('/patient/get', [\App\Http\Controllers\PatientController::class, 'getPatient']);
+        Route::get('/patient/medix/search', [\App\Http\Controllers\PatientController::class, 'searchMedixPatient']);
         Route::get('/patient/get/list', [\App\Http\Controllers\PatientController::class, 'getPatientList']);
         Route::get('/medicine/get/master', [\App\Http\Controllers\MedicineController::class, 'getMedicine']);
         Route::get('/medicine/get', [\App\Http\Controllers\MedicineController::class, 'getMedicineList']);

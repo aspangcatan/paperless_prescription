@@ -9,12 +9,67 @@ use App\Models\PatientDisposition;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class PatientController extends Controller
 {
     public function getAuthorization()
     {
         return "02778c432af8fac59c050a297e56f1adde9ac11f1baa6bd965edb4e330de889d4fe4ed1d";
+    }
+
+    private function getMedixToken()
+    {
+        $token = Cache::get('medix_access_token');
+        if ($token) {
+            return $token;
+        }
+
+        $response = Http::asForm()->post(config('services.medix.token_url'), [
+            'grant_type' => 'client_credentials',
+            'client_id' => config('services.medix.client_id'),
+            'client_secret' => config('services.medix.client_secret'),
+        ]);
+
+        if (!$response->successful()) {
+            return null;
+        }
+
+        $access_token = $response->json('access_token');
+        $expires_in = $response->json('expires_in');
+        $ttl = $expires_in ? max($expires_in - 60, 60) : 300;
+
+        Cache::put('medix_access_token', $access_token, $ttl);
+
+        return $access_token;
+    }
+
+    public function searchMedixPatient(Request $request)
+    {
+        try {
+            if (empty($request->lastname)) {
+                return response(['code' => 500, 'message' => 'Lastname is required']);
+            }
+
+            $token = self::getMedixToken();
+            if (!$token) {
+                return response(['code' => 500, 'message' => 'Unable to authenticate with MEDIX']);
+            }
+
+            $response = Http::withToken($token)->get(config('services.medix.base_url') . '/GetPatientInformation', [
+                'LastName' => $request->lastname,
+                'FirstName' => $request->firstname,
+            ]);
+
+            if (!$response->successful()) {
+                return response(['code' => 500, 'message' => 'MEDIX request failed']);
+            }
+
+            return response(['code' => 200, 'results' => $response->json()]);
+        } catch (\Exception $exception) {
+            return response(['code' => 500, 'message' => $exception->getMessage()]);
+        }
     }
 
     public function searchHomisPatient($hospital_id)
