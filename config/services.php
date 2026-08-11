@@ -30,4 +30,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'medix' => [
+        'client_id' => env('MEDIX_CLIENT_ID'),
+        'client_secret' => env('MEDIX_CLIENT_SECRET'),
+        'token_url' => env('MEDIX_TOKEN_URL'),
+        'base_url' => env('MEDIX_BASE_URL'),
+    ],
+
 ];
