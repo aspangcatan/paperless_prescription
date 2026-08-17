@@ -8,7 +8,7 @@ Let staff search MEDIX HMS for a patient by last name directly from the existing
 
 MEDIX exposes two endpoints:
 
-1. **Token** — `POST https://medixhms.com:3000/api/auth/identity/token`, form-data body `grant_type=client_credentials`, `client_id`, `client_secret`. Assumed standard OAuth2 client-credentials response shape: `{ access_token, token_type, expires_in }`.
+1. **Token** — `POST https://medixhms.com:3000/api/auth/identity/token`, form-data body `grant_type=client_credentials`, `client_id`, `client_secret`. Verified live response shape (camelCase, not standard OAuth2 snake_case): `{ accessToken, tokenType, expiresIn, refreshToken, expiryDate, idToken, scope }`. `expiresIn` was `28800` (8 hours) when tested.
 2. **Patient search** — `GET https://medixhms-external.com/api/External/GetPatientInformation?LastName=...`, header `Authorization: Bearer <token>`. Sample response:
 
 ```json
@@ -46,19 +46,23 @@ MEDIX_BASE_URL=https://medixhms-external.com/api/External
 
 Add a `medix` entry to `config/services.php` reading these four vars.
 
+## TLS Note
+
+Both `medixhms.com:3000` and `medixhms-external.com` serve the same self-signed certificate (CN `WMSvc-SHA2-LENOVO-LA0X1192`, SHA256 fingerprint `60:77:F5:80:AD:B0:EE:52:90:64:DE:9A:47:76:D2:F0:7D:FD:F8:50:FD:75:08:D5:A6:9F:46:7E:DB:20:ED:0B`) — the Windows IIS Web Management Service's auto-generated default certificate, never replaced with one issued for Medix's actual domain. This is a vendor-side misconfiguration; no local CA bundle update fixes it. Decision: both `getMedixToken()` and `searchMedixPatient()` HTTP calls use `Http::withOptions(['verify' => false])`, with a comment explaining why. This is a deliberate, documented exception — do not copy this pattern to other outbound HTTP calls in this codebase.
+
 ## Backend Changes
 
 All in `App\Http\Controllers\PatientController` — this app has no service layer (no `app/Services`), so a private helper on the controller matches existing conventions (e.g. `getAuthorization()`).
 
 1. **`private function getMedixToken()`**
    - Cache key `medix_access_token` via `Illuminate\Support\Facades\Cache` (file driver, already configured).
-   - On cache miss: `Http::asForm()->post(config('services.medix.token_url'), [...])`, cache the resulting `access_token` for `expires_in - 60` seconds (fallback 300s if `expires_in` missing).
+   - On cache miss: `Http::withOptions(['verify' => false])->asForm()->post(config('services.medix.token_url'), [...])` (see TLS Note above), cache the resulting `accessToken` for `expiresIn - 60` seconds (fallback 300s if `expiresIn` missing). Note the response uses camelCase field names, not the standard OAuth2 `access_token`/`expires_in`.
    - Returns null on failure; caller handles the `code => 500` response.
 
 2. **`public function searchMedixPatient(Request $request)`**
    - Validates `lastname` is present (`code => 500` JSON error if missing, consistent with existing methods' try/catch + `response(['code' => 500, ...])` pattern).
    - Gets token via `getMedixToken()`.
-   - `Http::withToken($token)->get(config('services.medix.base_url') . '/GetPatientInformation', ['LastName' => $request->lastname])`.
+   - `Http::withOptions(['verify' => false])->withToken($token)->get(config('services.medix.base_url') . '/GetPatientInformation', ['LastName' => $request->lastname])`.
    - Returns `{code: 200, results: [...]}` (array as returned by MEDIX, passed through) or `{code: 500, message: ...}` on failure/non-2xx.
 
 3. **Route** (`routes/web.php`, inside the existing `authority.api` middleware group alongside `/patient/get`):

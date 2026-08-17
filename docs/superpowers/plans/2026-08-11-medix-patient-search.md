@@ -119,7 +119,7 @@ class PatientControllerMedixTest extends TestCase
     public function testSearchMedixPatientReturnsMappedResults()
     {
         Http::fake([
-            'medixhms.com:3000/*' => Http::response(['access_token' => 'test-token', 'expires_in' => 3600], 200),
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
             'medixhms-external.com/*' => Http::response([[
                 'hospitalNo' => '00000744',
                 'lastName' => 'LAGOS',
@@ -158,7 +158,7 @@ class PatientControllerMedixTest extends TestCase
     public function testSearchMedixPatientCachesToken()
     {
         Http::fake([
-            'medixhms.com:3000/*' => Http::response(['access_token' => 'test-token', 'expires_in' => 3600], 200),
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
             'medixhms-external.com/*' => Http::response([], 200),
         ]);
 
@@ -173,7 +173,7 @@ class PatientControllerMedixTest extends TestCase
     public function testSearchMedixPatientReturnsErrorWhenMedixFails()
     {
         Http::fake([
-            'medixhms.com:3000/*' => Http::response(['access_token' => 'test-token', 'expires_in' => 3600], 200),
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
             'medixhms-external.com/*' => Http::response('Server error', 500),
         ]);
 
@@ -239,8 +239,8 @@ Then add these two methods to the `PatientController` class, right after `getAut
             return null;
         }
 
-        $access_token = $response->json('access_token');
-        $expires_in = $response->json('expires_in');
+        $access_token = $response->json('accessToken');
+        $expires_in = $response->json('expiresIn');
         $ttl = $expires_in ? max($expires_in - 60, 60) : 300;
 
         Cache::put('medix_access_token', $access_token, $ttl);

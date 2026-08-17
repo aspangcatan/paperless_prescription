@@ -26,7 +26,10 @@ class PatientController extends Controller
             return $token;
         }
 
-        $response = Http::asForm()->post(config('services.medix.token_url'), [
+        // Medix's server presents IIS's auto-generated self-signed default cert
+        // (CN WMSvc-SHA2-LENOVO-LA0X1192), not one issued for their domain — a
+        // vendor-side misconfiguration, not fixable via a local CA bundle update.
+        $response = Http::withOptions(['verify' => false])->asForm()->post(config('services.medix.token_url'), [
             'grant_type' => 'client_credentials',
             'client_id' => config('services.medix.client_id'),
             'client_secret' => config('services.medix.client_secret'),
@@ -36,8 +39,8 @@ class PatientController extends Controller
             return null;
         }
 
-        $access_token = $response->json('access_token');
-        $expires_in = $response->json('expires_in');
+        $access_token = $response->json('accessToken');
+        $expires_in = $response->json('expiresIn');
         $ttl = $expires_in ? max($expires_in - 60, 60) : 300;
 
         Cache::put('medix_access_token', $access_token, $ttl);
@@ -57,9 +60,9 @@ class PatientController extends Controller
                 return response(['code' => 500, 'message' => 'Unable to authenticate with MEDIX']);
             }
 
-            $response = Http::withToken($token)->get(config('services.medix.base_url') . '/GetPatientInformation', [
+            // See the TLS comment in getMedixToken() above.
+            $response = Http::withOptions(['verify' => false])->withToken($token)->get(config('services.medix.base_url') . '/GetPatientInformation', [
                 'LastName' => $request->lastname,
-                'FirstName' => $request->firstname,
             ]);
 
             if (!$response->successful()) {

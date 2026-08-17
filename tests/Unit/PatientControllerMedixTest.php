@@ -27,7 +27,7 @@ class PatientControllerMedixTest extends TestCase
     public function testSearchMedixPatientReturnsMappedResults()
     {
         Http::fake([
-            'medixhms.com:3000/*' => Http::response(['access_token' => 'test-token', 'expires_in' => 3600], 200),
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
             'medixhms-external.com/*' => Http::response([[
                 'hospitalNo' => '00000744',
                 'lastName' => 'LAGOS',
@@ -66,7 +66,7 @@ class PatientControllerMedixTest extends TestCase
     public function testSearchMedixPatientCachesToken()
     {
         Http::fake([
-            'medixhms.com:3000/*' => Http::response(['access_token' => 'test-token', 'expires_in' => 3600], 200),
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
             'medixhms-external.com/*' => Http::response([], 200),
         ]);
 
@@ -81,7 +81,7 @@ class PatientControllerMedixTest extends TestCase
     public function testSearchMedixPatientReturnsErrorWhenMedixFails()
     {
         Http::fake([
-            'medixhms.com:3000/*' => Http::response(['access_token' => 'test-token', 'expires_in' => 3600], 200),
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
             'medixhms-external.com/*' => Http::response('Server error', 500),
         ]);
 
