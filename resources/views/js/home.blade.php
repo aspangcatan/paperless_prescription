@@ -1147,11 +1147,12 @@
 
                 medix_results.forEach((it, index) => {
                     const name = it.lastName + ", " + it.firstName + " " + it.middleName;
+                    const birthdate_display = moment(it.birthDate, "MM-DD-YYYY").format("MM/DD/YYYY");
                     const tr = `
                         <tr>
                             <td>` + it.hospitalNo + `</td>
                             <td>` + name + `</td>
-                            <td>` + it.birthDate + `</td>
+                            <td>` + birthdate_display + `</td>
                             <td>` + it.gender + `</td>
                             <td>
                                 <button class="btn btn-sm btn-success" onclick="selectMedixPatient(` + index + `)">
