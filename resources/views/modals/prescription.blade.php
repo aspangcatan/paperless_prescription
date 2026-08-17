@@ -496,11 +496,11 @@
                                         <table class="table table-sm table-hover text-center">
                                             <thead>
                                             <tr>
-                                                <th>Hospital No</th>
-                                                <th>Name</th>
-                                                <th>Birthdate</th>
-                                                <th>Sex</th>
-                                                <th style="width: 4%"></th>
+                                                <th scope="col">Hospital No</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Birthdate</th>
+                                                <th scope="col">Sex</th>
+                                                <th scope="col" style="width: 4%"></th>
                                             </tr>
                                             </thead>
                                             <tbody id="medix_patient_list"></tbody>
