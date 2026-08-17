@@ -14,6 +14,7 @@
     let prescription_id = "";
     let page = 0;
     let is_loaded = false;
+    let medix_results = [];
     const db_ref = "prescriber/" + $("#code").text().trim();
     $(document).ready(function () {
         $("#btn_download").removeClass("d-none");
@@ -269,6 +270,19 @@
                 }).catch(err => {
                 toastr.error("Something went wrong", "Ooops");
             });
+        });
+
+        $("#btn_find_medix").click(function () {
+            const lastname = $("#lname").val().trim();
+
+            if (lastname == "") {
+                $("#medix_results_container").removeClass("d-none");
+                $("#medix_patient_list").empty();
+                $("#medix_search_status").removeClass("d-none").text("Lastname is required");
+                return;
+            }
+
+            getMedixPatients(lastname);
         });
 
         $("#btn_save_patient").click(function () {
@@ -1099,6 +1113,77 @@
             $("#transaction_list").empty();
             $("#transaction_list").append("<tr><td colspan='4'>Something went wrong</td></tr>");
         })
+    }
+
+    function getMedixPatients(lastname) {
+        $("#medix_search_status").addClass("d-none").text("");
+        $("#medix_patient_list").empty();
+        $("#medix_results_container").removeClass("d-none");
+        $("#medix_patient_list").append("<tr><td colspan='5'>Searching patient...</td></tr>");
+
+        const btn = $("#btn_find_medix");
+        const original_html = btn.html();
+        btn.prop("disabled", true);
+        btn.html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`);
+
+        fetch("{{ url('patient/medix/search') }}?lastname=" + encodeURIComponent(lastname), {
+            method: "GET"
+        })
+            .then(res => res.json())
+            .then(data => {
+                $("#medix_patient_list").empty();
+
+                if (data.code == 500) {
+                    $("#medix_search_status").removeClass("d-none").text(data.message);
+                    return;
+                }
+
+                medix_results = data.results;
+
+                if (medix_results.length < 1) {
+                    $("#medix_search_status").removeClass("d-none").text("No record found");
+                    return;
+                }
+
+                medix_results.forEach((it, index) => {
+                    const name = it.lastName + ", " + it.firstName + " " + it.middleName;
+                    const tr = `
+                        <tr>
+                            <td>` + it.hospitalNo + `</td>
+                            <td>` + name + `</td>
+                            <td>` + it.birthDate + `</td>
+                            <td>` + it.gender + `</td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="selectMedixPatient(` + index + `)">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                    $("#medix_patient_list").append(tr);
+                });
+            }).catch(err => {
+            console.log(err);
+            $("#medix_patient_list").empty();
+            $("#medix_search_status").removeClass("d-none").text("Something went wrong");
+        }).finally(() => {
+            btn.prop("disabled", false);
+            btn.html(original_html);
+        });
+    }
+
+    function selectMedixPatient(index) {
+        const it = medix_results[index];
+        if (!it) return;
+
+        $("#hospital_id").val(it.hospitalNo || "");
+        $("#fname").val((it.firstName || "").toUpperCase());
+        $("#mname").val((it.middleName || "").toUpperCase());
+        $("#lname").val((it.lastName || "").toUpperCase());
+        $("#suffix").val((it.suffixName || "").toUpperCase());
+        $("#birthdate").val(moment(it.birthDate, "MM-DD-YYYY").format("YYYY-MM-DD"));
+        $("#sex").val((it.gender || "").charAt(0));
+
+        $("#medix_results_container").addClass("d-none");
     }
 
     function getPatients(firstname, lastname) {
