@@ -481,8 +481,30 @@
                                         </button>
                                     </div>
                                     <div class="col-md-12 mt-2">
+                                        <button class="btn form-control btn-info text-white" id="btn_find_medix">SEARCH MEDIX
+                                        </button>
+                                    </div>
+                                    <div class="col-md-12 mt-2">
                                         <button class="btn form-control btn-success" id="btn_save_patient">ADD / UPDATE
                                         </button>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 d-none" id="medix_results_container">
+                                    <div class="small text-danger mb-1 d-none" id="medix_search_status"></div>
+                                    <div class="table-responsive" style="max-height: 250px !important;">
+                                        <table class="table table-sm table-hover text-center">
+                                            <thead>
+                                            <tr>
+                                                <th>Hospital No</th>
+                                                <th>Name</th>
+                                                <th>Birthdate</th>
+                                                <th>Sex</th>
+                                                <th style="width: 4%"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="medix_patient_list"></tbody>
+                                        </table>
                                     </div>
                                 </div>
 
