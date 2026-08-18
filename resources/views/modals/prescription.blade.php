@@ -437,7 +437,7 @@
             </div>
             <div class="modal-body" style="background: rgb(241,244,252)">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-4 d-none">
                         <div class="card">
                             <div class="card-body">
                                 <div class="mt-3 fs-5 fw-bold">Search patient in HOMIS</div>
@@ -511,25 +511,32 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-12">
                         <div class="row">
-                            <div class="col-md-5">
+                            <div class="col-md-6">
                                 <div class="form-floating">
                                     <input class="form-control mb-3" placeholder="Search patient &#xF52A"
                                            id="search_firstname"/>
                                     <label>Search firstname</label>
                                 </div>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-6">
                                 <div class="form-floating">
                                     <input class="form-control mb-3" placeholder="Search patient &#xF52A"
                                            id="search_lastname"/>
                                     <label>Search lastname</label>
                                 </div>
                             </div>
-                            <div class="col-md-2">
-                                <button class="btn btn-lg btn-success" id="btn_search_local">
-                                    <i class="bi bi-search"></i>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <button class="btn form-control btn-success" id="btn_search_local">
+                                    <i class="bi bi-search"></i> Search Locally
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn form-control btn-info text-white" id="btn_search_medix">
+                                    <i class="bi bi-search"></i> Search MEDIX
                                 </button>
                             </div>
                         </div>
@@ -541,6 +548,7 @@
                                     <table class="table table-hover text-center">
                                         <thead>
                                         <tr>
+                                            <th scope="col">Source</th>
                                             <th scope="col">Hospital ID</th>
                                             <th scope="col">Name</th>
                                             <th scope="col">Birthdate</th>
@@ -549,8 +557,8 @@
                                         </tr>
                                         </thead>
                                         <tbody id="patient_list">
-                                        <tr>
-                                            <td colspan="5">No record found</td>
+                                        <tr class="no_record_row">
+                                            <td colspan="6">No record found</td>
                                         </tr>
                                         </tbody>
                                     </table>
