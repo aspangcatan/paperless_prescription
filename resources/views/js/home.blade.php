@@ -15,6 +15,8 @@
     let page = 0;
     let is_loaded = false;
     let medix_results = [];
+    let local_search_results = [];
+    let medix_search_results = [];
     const db_ref = "prescriber/" + $("#code").text().trim();
     $(document).ready(function () {
         $("#btn_download").removeClass("d-none");
@@ -796,6 +798,18 @@
             getPatients(firstname, lastname);
         });
 
+        $("#btn_search_medix").click(function () {
+            const firstname = $("#search_firstname").val().trim();
+            const lastname = $("#search_lastname").val().trim();
+
+            if (lastname == "") {
+                toastr.error("Lastname is required", "MEDIX Search");
+                return;
+            }
+
+            searchMedixPatients(firstname, lastname);
+        });
+
         $("#search_firstname,#search_lastname").keypress(function (e) {
             if (e.which == 13) {
                 const firstname = $("#search_firstname").val().trim();
@@ -1187,42 +1201,109 @@
         $("#medix_results_container").addClass("d-none");
     }
 
+    function buildPatientRow(source, it, index) {
+        if (source === "local") {
+            const name = it.lname + ", " + it.fname + " " + it.mname;
+            const birthdate = moment(it.birthdate).format("MM/DD/YYYY");
+            return `
+                <tr id="patient_row_local_` + index + `" data-source="local">
+                    <td><span class="badge bg-secondary">Local</span></td>
+                    <td>` + it.hospital_id + `</td>
+                    <td>` + name + `</td>
+                    <td>` + birthdate + `</td>
+                    <td>` + it.sex + `</td>
+                    <td>
+                        <button class="btn btn-sm btn-success btn-action" onclick="selectPatientRow('local', ` + index + `)">
+                            <i class="bi bi-prescription"></i>
+                        </button>
+                    </td>
+                </tr>`;
+        }
+
+        const name = it.lastName + ", " + it.firstName + " " + it.middleName;
+        const birthdate = moment(it.birthDate, "MM-DD-YYYY").format("MM/DD/YYYY");
+        return `
+            <tr id="patient_row_medix_` + index + `" data-source="medix">
+                <td><span class="badge bg-info text-white">Medix</span></td>
+                <td>` + it.hospitalNo + `</td>
+                <td>` + name + `</td>
+                <td>` + birthdate + `</td>
+                <td>` + it.gender + `</td>
+                <td>
+                    <button class="btn btn-sm btn-success btn-action" onclick="selectPatientRow('medix', ` + index + `)">
+                        <i class="bi bi-cloud-download"></i>
+                    </button>
+                </td>
+            </tr>`;
+    }
+
+    function renderPatientRows(source, results) {
+        $("#patient_list tr[data-source='" + source + "']").remove();
+        $("#patient_list tr.no_record_row").remove();
+
+        results.forEach((it, index) => {
+            $("#patient_list").append(buildPatientRow(source, it, index));
+        });
+
+        if ($("#patient_list tr[data-source]").length < 1) {
+            $("#patient_list").append("<tr class='no_record_row'><td colspan='6'>No record found</td></tr>");
+        }
+    }
+
     function getPatients(firstname, lastname) {
-        $("#patient_list").empty();
-        $("#patient_list").append("<tr><td colspan='5'>Searching patient...</td></tr>");
+        $("#patient_list tr[data-source='local']").remove();
+        $("#patient_list tr.no_record_row").remove();
+        $("#patient_list").append("<tr data-source='local'><td colspan='6'>Searching patient...</td></tr>");
+
         fetch("{{ url('patient/get') }}?firstname=" + firstname + "&lastname=" + lastname, {
             method: "GET"
         })
             .then(res => res.json())
             .then(data => {
-                $("#patient_list").empty();
-                if (data.results.length < 1) {
-                    $("#patient_list").append("<tr><td colspan='5'>No record found</td></tr>");
+                local_search_results = data.results;
+                renderPatientRows("local", local_search_results);
+            }).catch(err => {
+            console.log(err);
+            local_search_results = [];
+            renderPatientRows("local", local_search_results);
+        });
+    }
+
+    function searchMedixPatients(firstname, lastname) {
+        $("#patient_list tr[data-source='medix']").remove();
+        $("#patient_list tr.no_record_row").remove();
+        $("#patient_list").append("<tr data-source='medix'><td colspan='6'>Searching patient...</td></tr>");
+
+        const btn = $("#btn_search_medix");
+        const original_html = btn.html();
+        btn.prop("disabled", true);
+        btn.html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`);
+
+        let url = "{{ url('patient/medix/search') }}?lastname=" + encodeURIComponent(lastname);
+        if (firstname !== "") {
+            url += "&firstname=" + encodeURIComponent(firstname);
+        }
+
+        fetch(url, {method: "GET"})
+            .then(res => res.json())
+            .then(data => {
+                if (data.code == 500) {
+                    medix_search_results = [];
+                    renderPatientRows("medix", medix_search_results);
+                    toastr.error(data.message, "MEDIX Search");
                     return;
                 }
 
-                data.results.forEach(it => {
-                    const name = it.lname + ", " + it.fname + " " + it.mname;
-                    const tr = `
-                        <tr id='patient_id_` + it.id + `'>
-                            <td>` + it.hospital_id + `</td>
-                            <td>` + name + `</td>
-                            <td>` + moment(it.birthdate).format("MM/DD/YYYY") + `</td>
-                            <td>` + it.sex + `</td>
-                            <td>
-                                <button class="btn btn-sm btn-success" onclick="makePrescription(` + it.id + `)">
-                                    <i class="bi bi-prescription"></i>
-                                </button>
-                            </td>
-                        </tr>`;
-
-                    $("#patient_list").append(tr);
-                })
-
+                medix_search_results = data.results;
+                renderPatientRows("medix", medix_search_results);
             }).catch(err => {
             console.log(err);
-            $("#patient_list").empty();
-            $("#patient_list").append("<tr><td colspan='5'>Something went wrong</td></tr>");
+            medix_search_results = [];
+            renderPatientRows("medix", medix_search_results);
+            toastr.error("Something went wrong", "Ooops");
+        }).finally(() => {
+            btn.prop("disabled", false);
+            btn.html(original_html);
         });
     }
 
