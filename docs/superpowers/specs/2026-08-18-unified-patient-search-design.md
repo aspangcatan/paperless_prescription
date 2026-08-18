@@ -59,7 +59,7 @@ This lets a user search Locally, then MEDIX, and see both sets at once; re-runni
 
 - **`source === 'local'`**: look up `local_results[index]`, call the prescription-opening logic directly with that object (same effect as today's `makePrescription`, just data-driven instead of DOM-scraped).
 - **`source === 'medix'`**: look up `medix_results[index]`, map fields to the `insert_patient` payload shape (`hospital_id: hospitalNo, fname: firstName, mname: middleName, lname: lastName, suffix: suffixName, birthdate: <converted>, sex: <M/F>`), add `check_duplicate: true`, and POST to `insert_patient`. Button shows a spinner during the request (matching `#btn_save_patient`'s existing pattern).
-  - On success: response includes `id`. Immediately call the same prescription-opening logic used for Local, with `{id, hospital_id, fname, mname, lname, birthdate, sex}` — no re-search, no intermediate render.
+  - On success: immediately call the same prescription-opening logic used for Local, with `{hospital_id, fname, mname, lname, birthdate, sex}` (keyed by `hospital_id`, same as the rest of the app's prescription flow — no local numeric id needed) — no re-search, no intermediate render.
   - On `code: 500` "Duplicate entry" (or any other failure): toastr error with the server's message, spinner clears, no prescription flow opens, row remains as-is for retry.
 
 ## Backend Changes
@@ -67,8 +67,7 @@ This lets a user search Locally, then MEDIX, and see both sets at once; re-runni
 `App\Http\Controllers\PatientController`:
 
 1. **`store()`** (~line 184):
-   - Add `'id' => $patient->id` to the success response (additive — no existing caller breaks).
-   - Add duplicate-rejection: when `$request->check_duplicate` is truthy, look up `Patient::where('hospital_id', $request->hospital_id)->first()` *before* the existing upsert block. If found, return `{code: 500, message: 'Duplicate entry: a patient with this Hospital ID already exists'}` immediately — no save, no update. When the flag is absent (legacy left-card ADD/UPDATE flow), behavior is exactly as today (upsert by `hospital_id`).
+   - Add duplicate-rejection: when `$request->check_duplicate` is truthy, look up `Patient::where('hospital_id', $request->hospital_id)->first()` *before* the existing upsert block. If found, return `{code: 500, message: 'Duplicate entry: a patient with this Hospital ID already exists'}` immediately — no save, no update. When the flag is absent (legacy left-card ADD/UPDATE flow), behavior is exactly as today (upsert by `hospital_id`). The response shape is otherwise unchanged (no `id` field added — nothing downstream needs it, since the prescription flow keys off `hospital_id`).
 
 2. **`searchMedixPatient()`** (~line 51): accept an optional `firstname` request param; when present, include it as `FirstName` in the `GetPatientInformation` query alongside the required `LastName`. Omitted entirely from the query when blank.
 
