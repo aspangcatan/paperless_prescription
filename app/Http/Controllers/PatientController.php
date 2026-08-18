@@ -184,8 +184,14 @@ class PatientController extends Controller
     public function store(Request $request)
     {
         try {
+            $existing = Patient::where('hospital_id', $request->hospital_id)->first();
+
+            if ($existing && $request->boolean('check_duplicate')) {
+                return response(['code' => 500, 'message' => 'Duplicate entry: a patient with this Hospital ID already exists']);
+            }
+
             $message = "Patient information updated";
-            $patient = Patient::where('hospital_id', $request->hospital_id)->first();
+            $patient = $existing;
             if (!$patient) {
                 $message = "New patient added";
                 $patient = new Patient();
