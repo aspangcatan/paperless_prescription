@@ -60,10 +60,13 @@ class PatientController extends Controller
                 return response(['code' => 500, 'message' => 'Unable to authenticate with MEDIX']);
             }
 
+            $query = ['LastName' => $request->lastname];
+            if (!empty($request->firstname)) {
+                $query['FirstName'] = $request->firstname;
+            }
+
             // See the TLS comment in getMedixToken() above.
-            $response = Http::withOptions(['verify' => false])->withToken($token)->get(config('services.medix.base_url') . '/GetPatientInformation', [
-                'LastName' => $request->lastname,
-            ]);
+            $response = Http::withOptions(['verify' => false])->withToken($token)->get(config('services.medix.base_url') . '/GetPatientInformation', $query);
 
             if (!$response->successful()) {
                 return response(['code' => 500, 'message' => 'MEDIX request failed']);

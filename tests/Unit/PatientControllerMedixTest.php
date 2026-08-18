@@ -91,4 +91,38 @@ class PatientControllerMedixTest extends TestCase
 
         $this->assertEquals(500, $data['code']);
     }
+
+    public function testSearchMedixPatientIncludesFirstNameWhenProvided()
+    {
+        Http::fake([
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
+            'medixhms-external.com/*' => Http::response([], 200),
+        ]);
+
+        $request = Request::create('/patient/medix/search', 'GET', ['lastname' => 'LAGOS', 'firstname' => 'ROLANDO']);
+        (new PatientController())->searchMedixPatient($request);
+
+        Http::assertSent(function ($req) {
+            return str_contains($req->url(), 'GetPatientInformation')
+                && $req['LastName'] === 'LAGOS'
+                && $req['FirstName'] === 'ROLANDO';
+        });
+    }
+
+    public function testSearchMedixPatientOmitsFirstNameWhenNotProvided()
+    {
+        Http::fake([
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
+            'medixhms-external.com/*' => Http::response([], 200),
+        ]);
+
+        $request = Request::create('/patient/medix/search', 'GET', ['lastname' => 'LAGOS']);
+        (new PatientController())->searchMedixPatient($request);
+
+        Http::assertSent(function ($req) {
+            return str_contains($req->url(), 'GetPatientInformation')
+                && $req['LastName'] === 'LAGOS'
+                && !isset($req['FirstName']);
+        });
+    }
 }
