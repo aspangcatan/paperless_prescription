@@ -208,6 +208,10 @@
 
         $("#btn_add_prescription").click(function () {
             clearForms();
+            local_search_results = [];
+            medix_search_results = [];
+            $("#patient_list").empty();
+            $("#patient_list").append("<tr class='no_record_row'><td colspan='6'>No record found</td></tr>");
             patient_modal.toggle();
         });
 
