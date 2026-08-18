@@ -854,12 +854,8 @@
     }
 
 
-    function makePrescription(id) {
+    function openPrescriptionForPatient(hospital_id, name, birthdate, sex) {
         prescription_id = "";
-        const hospital_id = $("#patient_id_" + id + " td:eq(0)").text();
-        const name = $("#patient_id_" + id + " td:eq(1)").text();
-        const birthdate = $("#patient_id_" + id + " td:eq(2)").text();
-        const sex = $("#patient_id_" + id + " td:eq(3)").text();
 
         $("#concurrent_table").removeClass("table-hover");
         $("#concurrent_table tbody tr").removeClass("table-hover");
@@ -898,6 +894,70 @@
         prescription_modal.toggle();
         $("#btn_download").prop("disabled", false);
         getConcurrentTherapy(hospital_id);
+    }
+
+    function selectPatientRow(source, index) {
+        if (source === "local") {
+            const it = local_search_results[index];
+            if (!it) return;
+
+            const name = it.lname + ", " + it.fname + " " + it.mname;
+            const birthdate = moment(it.birthdate).format("MM/DD/YYYY");
+            openPrescriptionForPatient(it.hospital_id, name, birthdate, it.sex);
+            return;
+        }
+
+        if (source === "medix") {
+            insertMedixPatient(index);
+        }
+    }
+
+    function insertMedixPatient(index) {
+        const it = medix_search_results[index];
+        if (!it) return;
+
+        const params = {
+            hospital_id: it.hospitalNo,
+            fname: (it.firstName || "").toUpperCase(),
+            mname: (it.middleName || "").toUpperCase(),
+            lname: (it.lastName || "").toUpperCase(),
+            suffix: (it.suffixName || "").toUpperCase(),
+            birthdate: moment(it.birthDate, "MM-DD-YYYY").format("YYYY-MM-DD"),
+            sex: (it.gender || "").charAt(0),
+            check_duplicate: true
+        };
+
+        const btn = $("#patient_row_medix_" + index + " .btn-action");
+        const original_html = btn.html();
+        btn.prop("disabled", true);
+        btn.html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`);
+
+        fetch('{{ route('insert_patient') }}', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            body: JSON.stringify(params)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code == 500) {
+                    toastr.error(data.message, "Something went wrong");
+                    btn.prop("disabled", false);
+                    btn.html(original_html);
+                    return;
+                }
+
+                const name = params.lname + ", " + params.fname + " " + params.mname;
+                const birthdate_display = moment(params.birthdate).format("MM/DD/YYYY");
+                openPrescriptionForPatient(params.hospital_id, name, birthdate_display, params.sex);
+            }).catch(err => {
+            console.log(err);
+            toastr.error("Something went wrong", "Ooops");
+            btn.prop("disabled", false);
+            btn.html(original_html);
+        });
     }
 
     function viewPrescription(id) {
