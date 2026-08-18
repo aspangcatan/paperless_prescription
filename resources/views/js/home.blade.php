@@ -1292,7 +1292,7 @@
                 <td>` + it.hospitalNo + `</td>
                 <td>` + name + `</td>
                 <td>` + birthdate + `</td>
-                <td>` + it.gender + `</td>
+                <td>` + (it.gender || "").charAt(0) + `</td>
                 <td>
                     <button class="btn btn-sm btn-success btn-action" onclick="selectPatientRow('medix', ` + index + `)">
                         <i class="bi bi-cloud-download"></i>
