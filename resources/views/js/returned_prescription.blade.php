@@ -596,7 +596,12 @@
         })
             .then(res => res.json())
             .then(data => {
-                if (data.code == 200 && data.results.length > 0) {
+                if (data.code != 200) {
+                    toastr.error("Something went wrong loading already-approved medicines", "Ooops");
+                    return;
+                }
+
+                if (data.results.length > 0) {
                     $("#approved_medication_container").removeClass("d-none");
                     data.results.forEach(it => {
                         const tr = `<tr>
@@ -611,6 +616,7 @@
                 }
             }).catch(err => {
             console.log(err);
+            toastr.error("Something went wrong loading already-approved medicines", "Ooops");
         });
 
         fetch("{{ url('prescription/get') }}/" + id + "?status=2", {
