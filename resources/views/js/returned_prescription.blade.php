@@ -406,11 +406,6 @@
                     $("#prescription_modal .error_list").append("<li>There must be a medication</li>");
                 }
 
-                if (medications.length > 1 && is_valid && (type != "1" && type != "5")) {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Maximum of 1 medication per prescription</li>");
-                }
-
                 if (remarks == "") {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Please specify remarks or instructions for the receiver</li>");
@@ -765,11 +760,6 @@
 
         if (prescribed_med_id === "") {
             //APPEND NEW RECORD
-            if (count >= 1 && $("#form_prescription_type").val() != "1") {
-                alert("Maximum of 1 medication only if Antiobiotic prescription");
-                return;
-            }
-
             let tr = "<tr>";
             tr += "<td>" + description + "</td>";
             tr += "<td>";

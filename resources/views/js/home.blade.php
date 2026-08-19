@@ -705,11 +705,6 @@
                     $("#prescription_modal .error_list").append("<li>There must be a medication</li>");
                 }
 
-                if (medications.length > 1 && is_valid && (type != "1" && type != "5")) {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Maximum of 1 medication per prescription</li>");
-                }
-
                 if (remarks == "") {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Please specify remarks or instructions for the receiver</li>");
@@ -1639,9 +1634,6 @@
 
         if (prescribed_med_id !== "") {
             $("#medication_list tr:eq(" + prescribed_med_id + ")").remove();
-        } else if (count > 0 && ($("#form_prescription_type").val() !== "1" && $("#form_prescription_type").val() !== "5ork")) {
-            alert("Maximum of 1 medication per prescription only");
-            return;
         }
 
         let tr = "<tr>";
