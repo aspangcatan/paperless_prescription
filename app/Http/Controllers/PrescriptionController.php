@@ -605,6 +605,10 @@ class PrescriptionController extends Controller
             $has_approved = false;
             $has_rejected = false;
             foreach ($medications as $medication) {
+                $prescribed_medicine = PrescribedMedicine::find($medication['id']);
+                if (!$prescribed_medicine || $prescribed_medicine->prescription_id != $request->id) {
+                    return response(['code' => 500, 'message' => 'One or more medications could not be found for this prescription']);
+                }
                 if (!in_array($medication['decision'], ['approved', 'rejected'])) {
                     return response(['code' => 500, 'message' => 'Invalid decision for a medication']);
                 }

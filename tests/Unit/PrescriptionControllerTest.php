@@ -140,6 +140,32 @@ class PrescriptionControllerTest extends TestCase
         $this->assertEquals(0, PrescribedMedicine::find($medicine->id)->status);
     }
 
+    public function testDecideRejectsWhenMedicationDoesNotBelongToPrescription()
+    {
+        $prescription = $this->makeTestPrescription();
+        $this->makeTestIccReview($prescription->id);
+
+        $other_prescription = $this->makeTestPrescription();
+        $unrelated_medicine = $this->makeTestMedicine($other_prescription->id);
+
+        $request = Request::create('/icc/decide_prescription', 'POST', [
+            'id' => $prescription->id,
+            'hospital_id' => $this->test_hospital_id,
+            'type' => '2',
+            'days_approved' => 7,
+            'medications' => [
+                ['id' => $unrelated_medicine->id, 'decision' => 'approved', 'remarks' => ''],
+            ],
+        ]);
+
+        $response = (new PrescriptionController())->decidePrescriptionMedications($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(500, $data['code']);
+        $this->assertEquals(0, PrescribedMedicine::find($unrelated_medicine->id)->status);
+        $this->assertNull(\App\Models\PharmacyReview::where('prescription_id', $prescription->id)->first());
+    }
+
     public function testDecideRequiresDaysApprovedWhenAnyMedicationIsApproved()
     {
         $prescription = $this->makeTestPrescription();
