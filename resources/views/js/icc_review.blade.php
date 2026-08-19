@@ -682,9 +682,12 @@
                 prescription_modal.toggle();
                 toastr.success(data.message, "Information");
 
-                insert("PHARMACY", {id: 1}, function (message) {
-                    deleteChild("PHARMACY");
-                });
+                const has_approved = params.medications.some(m => m.decision === "approved");
+                if (has_approved) {
+                    insert("PHARMACY", {id: 1}, function (message) {
+                        deleteChild("PHARMACY");
+                    });
+                }
 
                 getPrescriptions();
             }).catch(err => {
