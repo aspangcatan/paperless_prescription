@@ -52,6 +52,10 @@ Payload:
 ```json
 {
   "id": 123,
+  "type": "2",
+  "hospital_id": "000123",
+  "days_approved": 7,
+  "outcome": null,
   "medications": [
     { "id": 45, "decision": "approved", "remarks": "" },
     { "id": 46, "decision": "rejected", "remarks": "Dosage exceeds weight-based max" }
@@ -59,13 +63,18 @@ Payload:
 }
 ```
 
+`days_approved` and `outcome` stay **submission-level, not per-medicine** — same mechanic as today: `days_approved` drives the `ConcurrentTherapy.stop_date` calculation applied to every medicine that ends up `approved` in this submission; `outcome` is the existing optional canned-reason classification, written once to `prescriptions.outcome` if the submission contains at least one rejection (independent of which specific medicine(s) were rejected). Per-medicine granularity only applies to the approve/reject decision itself and its `remarks`.
+
 Server-side, in one transaction:
 1. Validate every medicine has a `decision` of `approved`/`rejected`, and every `rejected` decision has non-empty `remarks`. Any violation → `{code: 500, message: ...}`, nothing written.
 2. For each medicine: set `prescribed_medicines.status`, and insert one `prescription_logs` row with `prescribed_medicine_id` set and that medicine's `remarks`.
-3. `ConcurrentTherapy` bookkeeping (currently written for every medicine on whole-prescription ICC approval) now only fires for medicines that ended up `approved`.
-4. If at least one medicine is `approved` → create a `PharmacyReview` row for this `prescription_id` if one doesn't already exist.
-5. If at least one medicine is `rejected` → create a `ReturnedPrescription` row for this `prescription_id` if one doesn't already exist.
-6. Force-delete the `IccReview` row for this `prescription_id` — this review action is complete.
+3. `ConcurrentTherapy` bookkeeping (currently written for every medicine on whole-prescription ICC approval, using `days_approved` to compute `stop_date`) now only fires for medicines that ended up `approved`.
+4. The existing type `4`/`7` (intervention/switch) `ConcurrentTherapy.for_switch` stop-date update — currently dead in practice since both types are blocked at prescription creation, but still reachable for any pre-existing records — runs at most once per submission if any medicine is approved, exactly as it does today (it targets one specific prior concurrent-therapy record per prescription, not one per medicine).
+5. If at least one medicine is `approved` → create a `PharmacyReview` row for this `prescription_id` if one doesn't already exist.
+6. If at least one medicine is `rejected` → write `outcome` to `prescriptions.outcome` if provided, and create a `ReturnedPrescription` row for this `prescription_id` if one doesn't already exist.
+7. Force-delete the `IccReview` row for this `prescription_id` — this review action is complete.
+
+**Type `6` (the "cancel all pending prescriptions for this patient/physician" flow) is excluded from this endpoint entirely.** It's a fundamentally different action — a cascading cancellation across *multiple* prescriptions, not a per-medicine clinical review of one — and keeps using the existing `/reject_prescription` (origin `ICC`) whole-prescription path and its own confirmation dialog, completely untouched by this feature.
 
 ### Downstream medicine-list filtering
 
@@ -80,14 +89,19 @@ Today this force-deletes *every* `prescribed_medicines` row for the prescription
 
 ## Frontend Changes
 
-`resources/views/js/icc_review.blade.php`: ICC, Pharmacy, and Nurse each build their own `#medication_list` row HTML via their own `getMedications(id)` function (only the outer modal shell in `resources/views/modals/prescription.blade.php` is shared) — so this change is confined to ICC's row-building function and doesn't touch Pharmacy's or Nurse's rendering.
+### ICC review (`resources/views/js/icc_review.blade.php`)
 
-- Each medicine row gets a decision control (Approve/Reject) and a remarks textarea, shown/required only when that row is set to Reject.
-- The single shared remarks textarea and single Approve/Reject button pair are removed, replaced by one "Submit" button that collects every row's `{id, decision, remarks}` and posts to `/icc/decide_prescription` once.
-- Client-side validation (mirroring the existing error-list pattern in this file): block submit if any row has no decision selected, or is rejected with empty remarks.
-- While rewriting this region, remove the dead `updated_quantity` line at `icc_review.blade.php:226` — it only ever reads the first medicine row (`tr:eq(0)`) and nothing server-side ever consumes it. It sits directly in the code being rewritten here.
+ICC, Pharmacy, and Nurse each build their own `#medication_list` row HTML via their own `getMedications(id)` function (only the outer modal shell in `resources/views/modals/prescription.blade.php` is shared) — so this change is confined to ICC's row-building function and doesn't touch Pharmacy's or Nurse's rendering.
 
-**Doctor's Returned-prescription view**: shows every medicine on the prescription with a status badge — approved medicines read-only, rejected ones editable — so the doctor has full context on their own prescription rather than only seeing the fragment that needs fixing.
+Today, approving/rejecting is: click top-level `#btn_submit` ("APPROVE") or `#btn_reject`, which opens `#remarks_modal` to collect one shared `remarks` textarea plus (for approve) a `days_approved` choice or (for reject) a canned `outcome` pick, then POSTs the whole decision. That flow is **kept for type `6`** exactly as-is (its own `#btn_reject` → `warning_modal` → cascading cancel path is untouched). For every other type:
+
+- Each medicine row in `#medication_list` gets its own Approve/Reject control and a remarks textarea (shown/required only when that row is set to Reject).
+- The top-level `#btn_submit`/`#btn_reject` pair is replaced by one "Submit Decisions" button. Clicking it validates every row has a decision (and rejected rows have remarks), then opens `#remarks_modal` — now scoped to just the two submission-level fields that still apply across the batch: `days_approved` (shown only if at least one row is Approved) and the canned `outcome` pick (shown only if at least one row is Rejected). Confirming there posts everything to `/icc/decide_prescription`.
+- While rewriting this region, remove the dead `updated_quantity` line at `icc_review.blade.php:226` — it only ever reads the first medicine row (`tr:eq(0)`) and nothing server-side ever consumes it.
+
+### Doctor's Returned-prescription view (`resources/views/js/returned_prescription.blade.php`)
+
+This view's `#medication_list` is the same editable row-builder used for creating a new prescription (inputs for dosage/quantity/frequency, add/remove rows) — today it's populated with every medicine on the prescription, all editable. That changes to: fetch **all** medicines (approved + rejected), render `status = approved` rows **read-only** (no inputs, just the medicine's info plus a badge — excluded from the resubmit payload) and `status = rejected` rows in the existing **editable** row form (included in the resubmit payload, same as all rows are today), so the doctor sees full context on their prescription while only being able to touch what actually needs fixing.
 
 ## Error Handling Summary
 
