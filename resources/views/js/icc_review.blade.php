@@ -161,7 +161,6 @@
                 return;
             }
 
-            let has_approved = false;
             let has_rejected = false;
             let is_valid = true;
 
@@ -174,24 +173,29 @@
                         is_valid = false;
                     }
                 } else {
-                    has_approved = true;
+                    const days_approved_choice = $(this).find(".medicine_days_approved:checked").val();
+                    if (!days_approved_choice) {
+                        is_valid = false;
+                    } else if (days_approved_choice === "other") {
+                        const custom_days = $(this).find(".medicine_days_approved_custom").val();
+                        if (custom_days === "" || custom_days < 1) {
+                            is_valid = false;
+                        }
+                    }
                 }
             });
 
             if (!is_valid) {
-                alert("Please specify remarks for every rejected medicine");
+                alert("Please specify remarks for every rejected medicine, and number of days approved for every approved medicine");
                 return;
             }
 
             button_clicked = "SUBMIT_DECISIONS";
             prescription_id = $(this).val();
 
-            $("#remarks_message").text("Additional notes (optional)");
-            $("#common_remarks").val("");
-            $("#common_remarks").prop("required", false);
+            $("#remarks_message, #common_remarks").addClass("d-none");
             $("#reject_outcome_container").toggleClass("d-none", !has_rejected);
             $("input[name='reject_outcome']").prop("checked", false).change();
-            $("#days_approved_container").toggleClass("d-none", !has_approved);
             remarks_modal.toggle();
         });
 
@@ -256,38 +260,27 @@
 
             if (button_clicked == "SUBMIT_DECISIONS") {
                 const medications = [];
-                let has_approved = false;
 
                 $("#medication_list tr[data-medicine-id]").each(function () {
                     const decision = $(this).find(".medicine_decision:checked").val();
-                    if (decision === "approved") {
-                        has_approved = true;
-                    }
-                    medications.push({
+                    const medication = {
                         id: $(this).data("medicine-id"),
                         decision: decision,
                         remarks: $(this).find(".medicine_remarks").val().trim()
-                    });
+                    };
+
+                    if (decision === "approved") {
+                        let days_approved = $(this).find(".medicine_days_approved:checked").val();
+                        if (days_approved === "other") {
+                            days_approved = $(this).find(".medicine_days_approved_custom").val();
+                        }
+                        medication.days_approved = days_approved;
+                    }
+
+                    medications.push(medication);
                 });
 
-                let days_approved = "";
-                if (has_approved) {
-                    days_approved = $("input[name='days_approved']:checked").next().text();
-                    if (days_approved == "") {
-                        alert("Please specify number of days");
-                        return;
-                    }
-                    if (isNaN(days_approved)) {
-                        days_approved = $("#days_approved").val();
-                    }
-                    if (days_approved == "" || days_approved < 1) {
-                        alert("Please specify number of days");
-                        return;
-                    }
-                }
-
                 params.medications = medications;
-                params.days_approved = days_approved;
                 decidePrescriptionMedications(params);
             } else if (button_clicked == "REJECT") {
                 rejectPrescription(params);
