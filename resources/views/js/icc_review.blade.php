@@ -501,7 +501,31 @@
                                                     <input class="form-check-input medicine_decision" type="radio" name="medicine_decision_` + index + `" value="rejected">
                                                     <label class="form-check-label">Reject</label>
                                                 </div>
-                                                <textarea class="form-control mt-1 d-none medicine_remarks" placeholder="Reason for rejection" rows="2"></textarea>
+                                                <div class="medicine_days_approved_container mt-2">
+                                                    <div class="small text-muted">No. days approved</div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input medicine_days_approved" type="radio" name="days_approved_` + index + `" value="1">
+                                                        <label class="form-check-label">1</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input medicine_days_approved" type="radio" name="days_approved_` + index + `" value="3">
+                                                        <label class="form-check-label">3</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input medicine_days_approved" type="radio" name="days_approved_` + index + `" value="7">
+                                                        <label class="form-check-label">7</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input medicine_days_approved" type="radio" name="days_approved_` + index + `" value="14">
+                                                        <label class="form-check-label">14</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input medicine_days_approved" type="radio" name="days_approved_` + index + `" value="other">
+                                                        <label class="form-check-label">Other</label>
+                                                        <input type="number" class="form-control form-control-sm d-inline-block medicine_days_approved_custom" style="width: 70px;" min="1"/>
+                                                    </div>
+                                                </div>
+                                                <textarea class="form-control mt-2 medicine_remarks" placeholder="Notes (required if rejecting)" rows="2"></textarea>
                                             </td>
                                          </tr>`;
 
@@ -510,11 +534,12 @@
 
                     if (type != "6") {
                         $(".medicine_decision").change(function () {
-                            const textarea = $(this).closest("tr").find(".medicine_remarks");
-                            if ($(this).val() === "rejected") {
-                                textarea.removeClass("d-none");
-                            } else {
-                                textarea.addClass("d-none").val("");
+                            const row = $(this).closest("tr");
+                            const is_approved = $(this).val() === "approved";
+                            row.find(".medicine_days_approved_container").toggleClass("d-none", !is_approved);
+                            if (!is_approved) {
+                                row.find(".medicine_days_approved").prop("checked", false);
+                                row.find(".medicine_days_approved_custom").val("");
                             }
                         });
                     }
