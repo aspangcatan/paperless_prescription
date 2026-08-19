@@ -894,10 +894,13 @@
         $("#transaction_container").addClass("d-none");
         $(".cancellation_container").addClass("d-none");
 
-        patient_modal.toggle();
-        prescription_modal.toggle();
         $("#btn_download").prop("disabled", false);
-        getConcurrentTherapy(hospital_id);
+
+        $("#patient_modal").one("hidden.bs.modal", function () {
+            prescription_modal.show();
+            getConcurrentTherapy(hospital_id);
+        });
+        patient_modal.hide();
     }
 
     function selectPatientRow(source, index) {
