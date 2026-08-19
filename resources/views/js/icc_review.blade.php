@@ -151,14 +151,47 @@
         });
 
         $("#btn_submit").click(function () {
-            button_clicked = $(this).text();
+            if ($("#form_prescription_type").val() == "6") {
+                return;
+            }
+
+            const rows = $("#medication_list tr[data-medicine-id]");
+            if (rows.length < 1) {
+                alert("There are no medicines to decide on");
+                return;
+            }
+
+            let has_approved = false;
+            let has_rejected = false;
+            let is_valid = true;
+
+            rows.each(function () {
+                const decision = $(this).find(".medicine_decision:checked").val();
+                const remarks = $(this).find(".medicine_remarks").val().trim();
+                if (decision === "rejected") {
+                    has_rejected = true;
+                    if (remarks === "") {
+                        is_valid = false;
+                    }
+                } else {
+                    has_approved = true;
+                }
+            });
+
+            if (!is_valid) {
+                alert("Please specify remarks for every rejected medicine");
+                return;
+            }
+
+            button_clicked = "SUBMIT_DECISIONS";
             prescription_id = $(this).val();
 
-            $("#remarks_message").text("Reason for approval");
-            $("#reject_outcome_container").addClass("d-none");
+            $("#remarks_message").text("Additional notes (optional)");
             $("#common_remarks").val("");
+            $("#common_remarks").prop("required", false);
+            $("#reject_outcome_container").toggleClass("d-none", !has_rejected);
             $("input[name='reject_outcome']").prop("checked", false).change();
-            $("#days_approved_container").removeClass("d-none");
+            $("#days_approved_container").toggleClass("d-none", !has_approved);
             remarks_modal.toggle();
         });
 
@@ -207,7 +240,7 @@
         $("#btn_proceed").click(function () {
             const remarks = $("#common_remarks").val().trim();
             const outcome = $("input[name='reject_outcome']:checked").next().text().trim();
-            if (remarks == "") {
+            if (remarks == "" && button_clicked != "SUBMIT_DECISIONS") {
                 alert("Please specify remarks or instructions for the receiver");
                 return;
             }
@@ -221,32 +254,41 @@
                 remarks: remarks
             }
 
-            if (button_clicked == "APPROVE") {
-                let days_approved = $("input[name='days_approved']:checked").next().text();
-                let updated_quantity = $("#medication_list tr:eq(0) td:eq(3) input").val();
+            if (button_clicked == "SUBMIT_DECISIONS") {
+                const medications = [];
+                let has_approved = false;
 
-                // if (updated_quantity <= 0) {
-                //     alert("Quantity ordered must be greater than 0");
-                //     return;
-                // }
+                $("#medication_list tr[data-medicine-id]").each(function () {
+                    const decision = $(this).find(".medicine_decision:checked").val();
+                    if (decision === "approved") {
+                        has_approved = true;
+                    }
+                    medications.push({
+                        id: $(this).data("medicine-id"),
+                        decision: decision,
+                        remarks: $(this).find(".medicine_remarks").val().trim()
+                    });
+                });
 
-                if (days_approved == "") {
-                    alert("Please specify number of days");
-                    return;
+                let days_approved = "";
+                if (has_approved) {
+                    days_approved = $("input[name='days_approved']:checked").next().text();
+                    if (days_approved == "") {
+                        alert("Please specify number of days");
+                        return;
+                    }
+                    if (isNaN(days_approved)) {
+                        days_approved = $("#days_approved").val();
+                    }
+                    if (days_approved == "" || days_approved < 1) {
+                        alert("Please specify number of days");
+                        return;
+                    }
                 }
 
-                if (isNaN(days_approved)) {
-                    days_approved = $("#days_approved").val();
-                }
-
-                if (days_approved == "" || days_approved < 1) {
-                    alert("Please specify number of days");
-                    return;
-                }
-
+                params.medications = medications;
                 params.days_approved = days_approved;
-                params.updated_quantity = updated_quantity;
-                approvePrescription(params);
+                decidePrescriptionMedications(params);
             } else if (button_clicked == "REJECT") {
                 rejectPrescription(params);
             }
@@ -330,6 +372,7 @@
 
         if (type == 6) {
             $("#btn_submit").addClass("d-none");
+            $("#btn_reject").removeClass("d-none");
             $("#btn_reject").text("Cancel pending");
 
             const outcome_index = OUTCOMES.indexOf(outcome);
@@ -341,7 +384,8 @@
             }
         } else {
             $("#btn_submit").removeClass("d-none");
-            $("#btn_reject").text("REJECT");
+            $("#btn_submit").text("SUBMIT DECISIONS");
+            $("#btn_reject").addClass("d-none");
         }
 
         $("#form_remarks").addClass("d-none");
@@ -582,6 +626,43 @@
     function approvePrescription(params) {
         $("#spinner").removeClass("d-none");
         fetch('{{ route('approve_prescription') }}', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            body: JSON.stringify(params)
+        })
+            .then(res => res.json())
+            .then(data => {
+                $("#spinner").addClass("d-none");
+                if (data.code == 500) {
+                    toastr.error(data.message, "Ooops");
+                    return;
+                }
+
+                remarks_modal.toggle();
+                prescription_modal.toggle();
+                toastr.success(data.message, "Information");
+
+                insert("PHARMACY", {id: 1}, function (message) {
+                    deleteChild("PHARMACY");
+                });
+
+                getPrescriptions();
+            }).catch(err => {
+            $("#spinner").addClass("d-none");
+            if ((err + "").includes("SyntaxError: Unexpected token")) {
+                toastr.error("Please try again", "Server Connection Timeout")
+                return;
+            }
+            toastr.error("Something went wrong", "Ooops")
+        });
+    }
+
+    function decidePrescriptionMedications(params) {
+        $("#spinner").removeClass("d-none");
+        fetch('{{ route('decide_prescription') }}', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
