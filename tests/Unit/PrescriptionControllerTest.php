@@ -3,14 +3,29 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\PrescriptionController;
+use App\Models\IccReview;
+use App\Models\PharmacyReview;
 use App\Models\PrescribedMedicine;
 use App\Models\Prescription;
+use App\Models\PrescriptionLog;
+use App\Models\ReturnedPrescription;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 class PrescriptionControllerTest extends TestCase
 {
     private $test_hospital_id = 'TEST-ICC-DECIDE-0001';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $user = new User();
+        $user->id = 1;
+        Auth::setUser($user);
+    }
 
     protected function tearDown(): void
     {
@@ -91,5 +106,141 @@ class PrescriptionControllerTest extends TestCase
         $this->assertEquals(200, $data['code']);
         $this->assertCount(1, $data['results']);
         $this->assertEquals(0, $data['results'][0]['status']);
+    }
+
+    private function makeTestIccReview($prescription_id)
+    {
+        $icc = new IccReview();
+        $icc->prescription_id = $prescription_id;
+        $icc->save();
+
+        return $icc;
+    }
+
+    public function testDecideRejectsWhenAMedicationHasNoDecisionOrRejectedHasNoRemarks()
+    {
+        $prescription = $this->makeTestPrescription();
+        $this->makeTestIccReview($prescription->id);
+        $medicine = $this->makeTestMedicine($prescription->id);
+
+        $request = Request::create('/icc/decide_prescription', 'POST', [
+            'id' => $prescription->id,
+            'hospital_id' => $this->test_hospital_id,
+            'type' => '2',
+            'days_approved' => 7,
+            'medications' => [
+                ['id' => $medicine->id, 'decision' => 'rejected', 'remarks' => ''],
+            ],
+        ]);
+
+        $response = (new PrescriptionController())->decidePrescriptionMedications($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(500, $data['code']);
+        $this->assertEquals(0, PrescribedMedicine::find($medicine->id)->status);
+    }
+
+    public function testDecideRequiresDaysApprovedWhenAnyMedicationIsApproved()
+    {
+        $prescription = $this->makeTestPrescription();
+        $this->makeTestIccReview($prescription->id);
+        $medicine = $this->makeTestMedicine($prescription->id);
+
+        $request = Request::create('/icc/decide_prescription', 'POST', [
+            'id' => $prescription->id,
+            'hospital_id' => $this->test_hospital_id,
+            'type' => '2',
+            'medications' => [
+                ['id' => $medicine->id, 'decision' => 'approved', 'remarks' => ''],
+            ],
+        ]);
+
+        $response = (new PrescriptionController())->decidePrescriptionMedications($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(500, $data['code']);
+        $this->assertEquals(0, PrescribedMedicine::find($medicine->id)->status);
+    }
+
+    public function testDecideSplitsApprovedAndRejectedMedicinesInOneSubmission()
+    {
+        $prescription = $this->makeTestPrescription();
+        $this->makeTestIccReview($prescription->id);
+        $approved_medicine = $this->makeTestMedicine($prescription->id);
+        $rejected_medicine = $this->makeTestMedicine($prescription->id);
+
+        $request = Request::create('/icc/decide_prescription', 'POST', [
+            'id' => $prescription->id,
+            'hospital_id' => $this->test_hospital_id,
+            'type' => '2',
+            'days_approved' => 7,
+            'outcome' => 'Wrong indication',
+            'medications' => [
+                ['id' => $approved_medicine->id, 'decision' => 'approved', 'remarks' => ''],
+                ['id' => $rejected_medicine->id, 'decision' => 'rejected', 'remarks' => 'Dosage exceeds weight-based max'],
+            ],
+        ]);
+
+        $response = (new PrescriptionController())->decidePrescriptionMedications($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(200, $data['code']);
+        $this->assertEquals(1, PrescribedMedicine::find($approved_medicine->id)->status);
+        $this->assertEquals(2, PrescribedMedicine::find($rejected_medicine->id)->status);
+
+        $this->assertNotNull(PharmacyReview::where('prescription_id', $prescription->id)->first());
+        $this->assertNotNull(ReturnedPrescription::where('prescription_id', $prescription->id)->first());
+        $this->assertNull(IccReview::where('prescription_id', $prescription->id)->first());
+
+        $this->assertEquals('Wrong indication', Prescription::find($prescription->id)->outcome);
+
+        $approved_log = PrescriptionLog::where('prescribed_medicine_id', $approved_medicine->id)->first();
+        $rejected_log = PrescriptionLog::where('prescribed_medicine_id', $rejected_medicine->id)->first();
+        $this->assertNotNull($approved_log);
+        $this->assertNotNull($rejected_log);
+        $this->assertStringContainsString('Dosage exceeds weight-based max', $rejected_log->remarks);
+    }
+
+    public function testDecideDoesNotCreatePharmacyReviewWhenAllMedicinesRejected()
+    {
+        $prescription = $this->makeTestPrescription();
+        $this->makeTestIccReview($prescription->id);
+        $medicine = $this->makeTestMedicine($prescription->id);
+
+        $request = Request::create('/icc/decide_prescription', 'POST', [
+            'id' => $prescription->id,
+            'hospital_id' => $this->test_hospital_id,
+            'type' => '2',
+            'medications' => [
+                ['id' => $medicine->id, 'decision' => 'rejected', 'remarks' => 'Not indicated'],
+            ],
+        ]);
+
+        (new PrescriptionController())->decidePrescriptionMedications($request);
+
+        $this->assertNull(PharmacyReview::where('prescription_id', $prescription->id)->first());
+        $this->assertNotNull(ReturnedPrescription::where('prescription_id', $prescription->id)->first());
+    }
+
+    public function testDecideDoesNotCreateReturnedPrescriptionWhenAllMedicinesApproved()
+    {
+        $prescription = $this->makeTestPrescription();
+        $this->makeTestIccReview($prescription->id);
+        $medicine = $this->makeTestMedicine($prescription->id);
+
+        $request = Request::create('/icc/decide_prescription', 'POST', [
+            'id' => $prescription->id,
+            'hospital_id' => $this->test_hospital_id,
+            'type' => '2',
+            'days_approved' => 7,
+            'medications' => [
+                ['id' => $medicine->id, 'decision' => 'approved', 'remarks' => ''],
+            ],
+        ]);
+
+        (new PrescriptionController())->decidePrescriptionMedications($request);
+
+        $this->assertNotNull(PharmacyReview::where('prescription_id', $prescription->id)->first());
+        $this->assertNull(ReturnedPrescription::where('prescription_id', $prescription->id)->first());
     }
 }

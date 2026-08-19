@@ -111,6 +111,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('/insert_prescription', [\App\Http\Controllers\PrescriptionController::class, 'insertPrescription'])->name('insert_prescription');
         Route::post('/approve_prescription', [\App\Http\Controllers\PrescriptionController::class, 'approvePrescription'])->name('approve_prescription');
         Route::post('/reject_prescription', [\App\Http\Controllers\PrescriptionController::class, 'rejectPrescription'])->name('reject_prescription');
+        Route::post('/icc/decide_prescription', [\App\Http\Controllers\PrescriptionController::class, 'decidePrescriptionMedications'])->name('decide_prescription');
         Route::post('/render_prescription', [\App\Http\Controllers\PharmacyReviewController::class, 'renderPrescription'])->name('render_prescription');
         Route::post('/update_prescription', [\App\Http\Controllers\ReturnedPrescriptionController::class, 'updatePrescription'])->name('update_prescription');
         Route::post('/update_nurse_station', [\App\Http\Controllers\NurseStationController::class, 'insertNurseStation'])->name('update_nurse_station');
