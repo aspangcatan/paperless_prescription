@@ -614,6 +614,9 @@ class PrescriptionController extends Controller
                 if (!$prescribed_medicine || $prescribed_medicine->prescription_id != $request->id) {
                     return response(['code' => 500, 'message' => 'One or more medications could not be found for this prescription']);
                 }
+                if ($prescribed_medicine->status != 0) {
+                    return response(['code' => 500, 'message' => 'One or more medications have already been decided on. Please refresh and try again.']);
+                }
                 if (!in_array($medication['decision'], ['approved', 'rejected'])) {
                     return response(['code' => 500, 'message' => 'Invalid decision for a medication']);
                 }

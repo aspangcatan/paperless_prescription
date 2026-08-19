@@ -166,6 +166,29 @@ class PrescriptionControllerTest extends TestCase
         $this->assertNull(\App\Models\PharmacyReview::where('prescription_id', $prescription->id)->first());
     }
 
+    public function testDecideRejectsWhenMedicationAlreadyHasADecision()
+    {
+        $prescription = $this->makeTestPrescription();
+        $this->makeTestIccReview($prescription->id);
+        $already_approved_medicine = $this->makeTestMedicine($prescription->id, 1);
+
+        $request = Request::create('/icc/decide_prescription', 'POST', [
+            'id' => $prescription->id,
+            'hospital_id' => $this->test_hospital_id,
+            'type' => '2',
+            'days_approved' => 7,
+            'medications' => [
+                ['id' => $already_approved_medicine->id, 'decision' => 'rejected', 'remarks' => 'trying to flip it back'],
+            ],
+        ]);
+
+        $response = (new PrescriptionController())->decidePrescriptionMedications($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(500, $data['code']);
+        $this->assertEquals(1, PrescribedMedicine::find($already_approved_medicine->id)->status);
+    }
+
     public function testDecideRequiresDaysApprovedWhenAnyMedicationIsApproved()
     {
         $prescription = $this->makeTestPrescription();
