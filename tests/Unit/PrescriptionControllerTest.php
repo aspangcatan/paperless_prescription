@@ -77,4 +77,19 @@ class PrescriptionControllerTest extends TestCase
         $this->assertCount(1, $data['results']);
         $this->assertEquals(1, $data['results'][0]['status']);
     }
+
+    public function testGetPrescriptionDetailsFiltersByStatusZeroWhenProvided()
+    {
+        $prescription = $this->makeTestPrescription();
+        $this->makeTestMedicine($prescription->id, 0);
+        $this->makeTestMedicine($prescription->id, 1);
+        $this->makeTestMedicine($prescription->id, 2);
+
+        $response = (new PrescriptionController())->getPrescriptionDetails(Request::create('/prescription/get/' . $prescription->id, 'GET', ['status' => 0]), $prescription->id);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(200, $data['code']);
+        $this->assertCount(1, $data['results']);
+        $this->assertEquals(0, $data['results'][0]['status']);
+    }
 }
