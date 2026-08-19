@@ -361,22 +361,6 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="table-responsive d-none" id="approved_medication_container">
-                            <div class="small text-muted mb-1">Already approved, with Pharmacy:</div>
-                            <table class="table text-center v-center p-1 m-0">
-                                <thead>
-                                <tr>
-                                    <th>Medicine</th>
-                                    <th style="width: 20%">Strength</th>
-                                    <th style="width: 10%">Unit</th>
-                                    <th style="width: 15%">Frequency</th>
-                                    <th style="width: 16%"></th>
-                                </tr>
-                                </thead>
-                                <tbody id="approved_medication_list" style="font-size: 12px">
-                                </tbody>
-                            </table>
-                        </div>
                         <div class="table-responsive">
                             <table class="table text-center v-center p-1 m-0">
                                 <thead>

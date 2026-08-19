@@ -406,6 +406,11 @@
                     $("#prescription_modal .error_list").append("<li>There must be a medication</li>");
                 }
 
+                if (medications.length > 1 && is_valid && (type != "1" && type != "5")) {
+                    is_valid = false;
+                    $("#prescription_modal .error_list").append("<li>Maximum of 1 medication per prescription</li>");
+                }
+
                 if (remarks == "") {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>Please specify remarks or instructions for the receiver</li>");
@@ -589,37 +594,7 @@
         $("#medication_list").empty();
         $("#medication_list").append("<tr><td colspan='7'>Loading medications...</td></tr>");
         $("#microbiological_result_list").empty();
-        $("#approved_medication_list").empty();
-        $("#approved_medication_container").addClass("d-none");
-        fetch("{{ url('prescription/get') }}/" + id + "?status=1", {
-            method: "GET"
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.code != 200) {
-                    toastr.error("Something went wrong loading already-approved medicines", "Ooops");
-                    return;
-                }
-
-                if (data.results.length > 0) {
-                    $("#approved_medication_container").removeClass("d-none");
-                    data.results.forEach(it => {
-                        const tr = `<tr>
-                                            <td>` + it.description + `</td>
-                                            <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
-                                            <td>` + it.unit + `</td>
-                                            <td>` + it.frequency + `</td>
-                                            <td><span class="badge bg-success">Approved</span></td>
-                                         </tr>`;
-                        $("#approved_medication_list").append(tr);
-                    });
-                }
-            }).catch(err => {
-            console.log(err);
-            toastr.error("Something went wrong loading already-approved medicines", "Ooops");
-        });
-
-        fetch("{{ url('prescription/get') }}/" + id + "?status=2", {
+        fetch("{{ url('prescription/get') }}/" + id, {
             method: "GET"
         })
             .then(res => res.json())
@@ -790,6 +765,11 @@
 
         if (prescribed_med_id === "") {
             //APPEND NEW RECORD
+            if (count >= 1 && $("#form_prescription_type").val() != "1") {
+                alert("Maximum of 1 medication only if Antiobiotic prescription");
+                return;
+            }
+
             let tr = "<tr>";
             tr += "<td>" + description + "</td>";
             tr += "<td>";

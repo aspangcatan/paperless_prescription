@@ -191,25 +191,19 @@ class ReturnedPrescriptionController extends Controller
             $patient_history->sex = $patient['sex'];
             $patient_history->save();
 
-            #DELETE ONLY THE REJECTED MEDICATIONS
-            #INSERT THE RESUBMITTED MEDICATIONS AS BULK, RESETTING THEM TO PENDING
-            #APPROVED MEDICATIONS (ALREADY WITH PHARMACY) ARE UNTOUCHED
-            $delete_medications = PrescribedMedicine::where('prescription_id', $prescription_id)->where('status', 2);
+            #DELETE ALL MEDICATIONS
+            #INSERT ALL MEDICATIONS AS BULK
+            $delete_medications = PrescribedMedicine::where('prescription_id', $prescription_id);
             $delete_medications->forceDelete();
 
-            #TYPES 1/5/8 SKIP ICC ENTIRELY, SO THEIR MEDICINES ARE MARKED APPROVED (STATUS 1)
-            #ON RESUBMISSION RATHER THAN LEFT PENDING (STATUS 0), SINCE NO ICC DECISION WILL EVER SET THAT
             $medications = $request->medications;
-            $skips_icc = ($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1;
-            $medicine_status = $skips_icc ? 1 : 0;
             for ($i = 0; $i < count($medications); $i++) {
                 $medications[$i]['prescription_id'] = $prescription_id;
-                $medications[$i]['status'] = $medicine_status;
             }
             PrescribedMedicine::insert($medications);
 
             $released_to = "ICC";
-            if ($skips_icc) {
+            if (($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1) {
                 for ($i = 0; $i < count($medications); $i++) {
                     $concurrent = new ConcurrentTherapy;
                     $concurrent->prescription_id = $prescription_id;

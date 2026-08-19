@@ -430,7 +430,7 @@
         $("#medication_list").empty();
         $("#medication_list").append("<tr><td colspan='7'>Loading medications...</td></tr>");
         $("#microbiological_result_list").empty();
-        fetch("{{ url('prescription/get') }}/" + id + "?status=1", {
+        fetch("{{ url('prescription/get') }}/" + id, {
             method: "GET"
         })
             .then(res => res.json())

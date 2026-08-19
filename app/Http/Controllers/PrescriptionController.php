@@ -110,7 +110,7 @@ class PrescriptionController extends Controller
         }
     }
 
-    public function getPrescriptionDetails(Request $request, $id)
+    public function getPrescriptionDetails($id)
     {
         $ams = [];
         try {
@@ -126,11 +126,7 @@ class PrescriptionController extends Controller
             }
 
             #GET MEDICATIONS
-            $medications_query = PrescribedMedicine::where('prescription_id', $id);
-            if ($request->status !== null && $request->status !== '') {
-                $medications_query->where('status', $request->status);
-            }
-            $medications = $medications_query->get();
+            $medications = PrescribedMedicine::where('prescription_id', $id)->get();
             return response(['code' => 200, 'results' => $medications, 'ams' => $ams]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
@@ -300,19 +296,14 @@ class PrescriptionController extends Controller
             }
 
             #INSERT ALL MEDICATIONS AS BULK
-            #TYPES 1/5/8 SKIP ICC ENTIRELY, SO THEIR MEDICINES ARE MARKED APPROVED (STATUS 1)
-            #ON INSERT RATHER THAN LEFT PENDING (STATUS 0), SINCE NO ICC DECISION WILL EVER SET THAT
             $medications = $request->medications;
-            $skips_icc = ($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1;
-            $medicine_status = $skips_icc ? 1 : 0;
             for ($i = 0; $i < count($medications); $i++) {
                 $medications[$i]['prescription_id'] = $prescription_id;
-                $medications[$i]['status'] = $medicine_status;
             }
             PrescribedMedicine::insert($medications);
 
             $released_to = "PHARMACY";
-            if ($skips_icc) {
+            if (($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1) {
                 for ($i = 0; $i < count($medications); $i++) {
                     $concurrent = new ConcurrentTherapy;
                     $concurrent->prescription_id = $prescription_id;
@@ -590,141 +581,6 @@ class PrescriptionController extends Controller
             $returned = ReturnedPrescription::where('prescription_id', $request->id);
             $returned->forceDelete();
             self::insertErrorLogs(Auth::id(), 'rejectPrescription', $request, $exception->getMessage());
-            return response(['code' => 500, 'message' => "Something went wrong"]);
-        }
-    }
-
-    public function decidePrescriptionMedications(Request $request)
-    {
-        try {
-            $prescription_review = IccReview::where('prescription_id', $request->id)->first();
-            if (!$prescription_review) {
-                return response(['code' => 500, 'message' => 'Prescription dont exists, kindly refresh']);
-            }
-
-            $medications = $request->medications;
-            if (empty($medications)) {
-                return response(['code' => 500, 'message' => 'No medications submitted']);
-            }
-
-            $has_approved = false;
-            $has_rejected = false;
-            foreach ($medications as $medication) {
-                $prescribed_medicine = PrescribedMedicine::find($medication['id']);
-                if (!$prescribed_medicine || $prescribed_medicine->prescription_id != $request->id) {
-                    return response(['code' => 500, 'message' => 'One or more medications could not be found for this prescription']);
-                }
-                if ($prescribed_medicine->status != 0) {
-                    return response(['code' => 500, 'message' => 'One or more medications have already been decided on. Please refresh and try again.']);
-                }
-                if (!in_array($medication['decision'], ['approved', 'rejected'])) {
-                    return response(['code' => 500, 'message' => 'Invalid decision for a medication']);
-                }
-                if ($medication['decision'] == 'rejected' && empty($medication['remarks'])) {
-                    return response(['code' => 500, 'message' => 'Remarks are required for a rejected medication']);
-                }
-                if ($medication['decision'] == 'approved') {
-                    $has_approved = true;
-                } else {
-                    $has_rejected = true;
-                }
-            }
-
-            if ($has_approved && empty($request->days_approved)) {
-                return response(['code' => 500, 'message' => 'Please specify number of days approved']);
-            }
-
-            $date_approved = Carbon::now();
-
-            #CHECK IF TYPE IS INTERVENTION FORM
-            #UPDATE SELECTED AMS STOP DATE INTO TODAYS DATE (ONCE PER SUBMISSION, MATCHING EXISTING BEHAVIOR)
-            if ($has_approved && ($request->type == "4" || $request->type == "7")) {
-                $get_selected_concurrent = ConcurrentTherapy::where("for_switch", $request->id)->first();
-                if (!$get_selected_concurrent) {
-                    return response(['code' => 500, 'message' => 'You did not specify the antibiotic you wish to be switched']);
-                }
-                $get_selected_concurrent->stop_date = $date_approved;
-                $get_selected_concurrent->save();
-            }
-
-            $stop_date = null;
-            if ($has_approved) {
-                $date = Carbon::now();
-                $date = $date->addDays($request->days_approved - 1);
-                $stop_date = date('Y-m-d', strtotime($date));
-            }
-
-            foreach ($medications as $medication) {
-                $prescribed_medicine = PrescribedMedicine::find($medication['id']);
-                if (!$prescribed_medicine) {
-                    continue;
-                }
-
-                if ($medication['decision'] == 'approved') {
-                    $prescribed_medicine->status = 1;
-                    $prescribed_medicine->save();
-
-                    $concurrent = new ConcurrentTherapy;
-                    $concurrent->prescription_id = $request->id;
-                    $concurrent->hospital_id = $request->hospital_id;
-                    $concurrent->concurrent_date = $date_approved;
-                    $concurrent->antimicrobial = $prescribed_medicine->description;
-                    $concurrent->dosing_regimen = $prescribed_medicine->dosage_strength . '' . $prescribed_medicine->dosage_unit . ' ' . $prescribed_medicine->frequency;
-                    $concurrent->start_date = $date_approved;
-                    $concurrent->stop_date = $stop_date;
-                    $concurrent->days_approved = $request->days_approved;
-                    $concurrent->approved_by = Auth::id();
-                    $concurrent->date_approved = $date_approved;
-                    $concurrent->save();
-
-                    $released_to = 'PHARMACY';
-                    $badge = "<span class='badge bg-success text-white'>Approved <i class='bi bi-hand-thumbs-up-fill'></i></span>";
-                } else {
-                    $prescribed_medicine->status = 2;
-                    $prescribed_medicine->save();
-
-                    $released_to = 'DOCTOR';
-                    $badge = "<span class='badge bg-danger text-white'>Rejected <i class='bi bi-hand-thumbs-down-fill'></i></span>";
-                }
-
-                $logs = new PrescriptionLog;
-                $logs->prescription_id = $request->id;
-                $logs->prescribed_medicine_id = $prescribed_medicine->id;
-                $logs->origin = "ICC";
-                $logs->released_by = Auth::id();
-                $logs->released_to = $released_to;
-                $logs->remarks = $badge . "<span class='ms-2'>" . $medication['remarks'] . "</span>";
-                $logs->save();
-            }
-
-            if ($has_approved) {
-                $pharmacy = PharmacyReview::where('prescription_id', $request->id)->first();
-                if (!$pharmacy) {
-                    $pharmacy = new PharmacyReview;
-                    $pharmacy->prescription_id = $request->id;
-                    $pharmacy->save();
-                }
-            }
-
-            if ($has_rejected) {
-                if ($request->outcome != null) {
-                    $selected_prescription = Prescription::find($request->id);
-                    $selected_prescription->outcome = $request->outcome;
-                    $selected_prescription->save();
-                }
-
-                $returned = ReturnedPrescription::where('prescription_id', $request->id)->first();
-                if (!$returned) {
-                    $returned = new ReturnedPrescription;
-                    $returned->prescription_id = $request->id;
-                    $returned->save();
-                }
-            }
-
-            $prescription_review->forceDelete();
-            return response(['code' => 200, 'message' => 'Prescription decisions saved']);
-        } catch (\Exception $exception) {
-            self::insertErrorLogs(Auth::id(), 'decidePrescriptionMedications', $request, $exception->getMessage());
             return response(['code' => 500, 'message' => "Something went wrong"]);
         }
     }
