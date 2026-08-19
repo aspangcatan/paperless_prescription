@@ -589,7 +589,31 @@
         $("#medication_list").empty();
         $("#medication_list").append("<tr><td colspan='7'>Loading medications...</td></tr>");
         $("#microbiological_result_list").empty();
-        fetch("{{ url('prescription/get') }}/" + id, {
+        $("#approved_medication_list").empty();
+        $("#approved_medication_container").addClass("d-none");
+        fetch("{{ url('prescription/get') }}/" + id + "?status=1", {
+            method: "GET"
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code == 200 && data.results.length > 0) {
+                    $("#approved_medication_container").removeClass("d-none");
+                    data.results.forEach(it => {
+                        const tr = `<tr>
+                                            <td>` + it.description + `</td>
+                                            <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
+                                            <td>` + it.unit + `</td>
+                                            <td>` + it.frequency + `</td>
+                                            <td><span class="badge bg-success">Approved</span></td>
+                                         </tr>`;
+                        $("#approved_medication_list").append(tr);
+                    });
+                }
+            }).catch(err => {
+            console.log(err);
+        });
+
+        fetch("{{ url('prescription/get') }}/" + id + "?status=2", {
             method: "GET"
         })
             .then(res => res.json())
