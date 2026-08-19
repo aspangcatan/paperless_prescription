@@ -133,6 +133,40 @@
                     </div>
                 </div>
 
+                @if(session('access_rights') == "ICC")
+                    <div id="days_approved_container" class="mt-3">
+                        <h6>No. days approved</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input  type="radio" name="days_approved">
+                                    <label class="form-check-label">1</label>
+                                </div>
+                                <div class="form-check">
+                                    <input  type="radio" name="days_approved">
+                                    <label class="form-check-label">3</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input  type="radio" name="days_approved">
+                                    <label class="form-check-label">7</label>
+                                </div>
+                                <div class="form-check">
+                                    <input  type="radio" name="days_approved">
+                                    <label class="form-check-label">14</label>
+                                </div>
+                                <div class="form-check">
+                                    <input  type="radio" name="days_approved">
+                                    <div class="d-flex align-items-center">
+                                        <label class="form-check-label">Others</label>
+                                        <input type="number" class="underline ms-1" id="days_approved"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 <hr/>
                 <button class="btn btn-primary mt-2 float-end" id="btn_proceed">Proceed</button>
             </div>

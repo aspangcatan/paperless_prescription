@@ -3,7 +3,6 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\PrescriptionController;
-use App\Models\ConcurrentTherapy;
 use App\Models\IccReview;
 use App\Models\PharmacyReview;
 use App\Models\PrescribedMedicine;
@@ -128,6 +127,7 @@ class PrescriptionControllerTest extends TestCase
             'id' => $prescription->id,
             'hospital_id' => $this->test_hospital_id,
             'type' => '2',
+            'days_approved' => 7,
             'medications' => [
                 ['id' => $medicine->id, 'decision' => 'rejected', 'remarks' => ''],
             ],
@@ -152,8 +152,9 @@ class PrescriptionControllerTest extends TestCase
             'id' => $prescription->id,
             'hospital_id' => $this->test_hospital_id,
             'type' => '2',
+            'days_approved' => 7,
             'medications' => [
-                ['id' => $unrelated_medicine->id, 'decision' => 'approved', 'remarks' => '', 'days_approved' => 7],
+                ['id' => $unrelated_medicine->id, 'decision' => 'approved', 'remarks' => ''],
             ],
         ]);
 
@@ -175,6 +176,7 @@ class PrescriptionControllerTest extends TestCase
             'id' => $prescription->id,
             'hospital_id' => $this->test_hospital_id,
             'type' => '2',
+            'days_approved' => 7,
             'medications' => [
                 ['id' => $already_approved_medicine->id, 'decision' => 'rejected', 'remarks' => 'trying to flip it back'],
             ],
@@ -220,9 +222,10 @@ class PrescriptionControllerTest extends TestCase
             'id' => $prescription->id,
             'hospital_id' => $this->test_hospital_id,
             'type' => '2',
+            'days_approved' => 7,
             'outcome' => 'Wrong indication',
             'medications' => [
-                ['id' => $approved_medicine->id, 'decision' => 'approved', 'remarks' => '', 'days_approved' => 7],
+                ['id' => $approved_medicine->id, 'decision' => 'approved', 'remarks' => ''],
                 ['id' => $rejected_medicine->id, 'decision' => 'rejected', 'remarks' => 'Dosage exceeds weight-based max'],
             ],
         ]);
@@ -278,8 +281,9 @@ class PrescriptionControllerTest extends TestCase
             'id' => $prescription->id,
             'hospital_id' => $this->test_hospital_id,
             'type' => '2',
+            'days_approved' => 7,
             'medications' => [
-                ['id' => $medicine->id, 'decision' => 'approved', 'remarks' => '', 'days_approved' => 7],
+                ['id' => $medicine->id, 'decision' => 'approved', 'remarks' => ''],
             ],
         ]);
 
@@ -287,35 +291,6 @@ class PrescriptionControllerTest extends TestCase
 
         $this->assertNotNull(PharmacyReview::where('prescription_id', $prescription->id)->first());
         $this->assertNull(ReturnedPrescription::where('prescription_id', $prescription->id)->first());
-    }
-
-    public function testDecideAppliesDifferentDaysApprovedPerMedicine()
-    {
-        $prescription = $this->makeTestPrescription();
-        $this->makeTestIccReview($prescription->id);
-        $medicine_a = $this->makeTestMedicine($prescription->id);
-        $medicine_b = $this->makeTestMedicine($prescription->id);
-
-        $request = Request::create('/icc/decide_prescription', 'POST', [
-            'id' => $prescription->id,
-            'hospital_id' => $this->test_hospital_id,
-            'type' => '2',
-            'medications' => [
-                ['id' => $medicine_a->id, 'decision' => 'approved', 'remarks' => '', 'days_approved' => 3],
-                ['id' => $medicine_b->id, 'decision' => 'approved', 'remarks' => '', 'days_approved' => 14],
-            ],
-        ]);
-
-        $response = (new PrescriptionController())->decidePrescriptionMedications($request);
-        $data = json_decode($response->getContent(), true);
-
-        $this->assertEquals(200, $data['code']);
-
-        $concurrent_therapies = ConcurrentTherapy::where('prescription_id', $prescription->id)->orderBy('id')->get();
-        $this->assertCount(2, $concurrent_therapies);
-        $this->assertEquals(3, $concurrent_therapies[0]->days_approved);
-        $this->assertEquals(14, $concurrent_therapies[1]->days_approved);
-        $this->assertNotEquals($concurrent_therapies[0]->stop_date, $concurrent_therapies[1]->stop_date);
     }
 
     public function testInsertPrescriptionMarksMedicinesApprovedForIccSkipTypes()

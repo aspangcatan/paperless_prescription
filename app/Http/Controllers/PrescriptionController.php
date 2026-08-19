@@ -623,14 +623,15 @@ class PrescriptionController extends Controller
                 if ($medication['decision'] == 'rejected' && empty($medication['remarks'])) {
                     return response(['code' => 500, 'message' => 'Remarks are required for a rejected medication']);
                 }
-                if ($medication['decision'] == 'approved' && empty($medication['days_approved'] ?? null)) {
-                    return response(['code' => 500, 'message' => 'Please specify number of days approved for each approved medication']);
-                }
                 if ($medication['decision'] == 'approved') {
                     $has_approved = true;
                 } else {
                     $has_rejected = true;
                 }
+            }
+
+            if ($has_approved && empty($request->days_approved)) {
+                return response(['code' => 500, 'message' => 'Please specify number of days approved']);
             }
 
             $date_approved = Carbon::now();
@@ -646,6 +647,13 @@ class PrescriptionController extends Controller
                 $get_selected_concurrent->save();
             }
 
+            $stop_date = null;
+            if ($has_approved) {
+                $date = Carbon::now();
+                $date = $date->addDays($request->days_approved - 1);
+                $stop_date = date('Y-m-d', strtotime($date));
+            }
+
             foreach ($medications as $medication) {
                 $prescribed_medicine = PrescribedMedicine::find($medication['id']);
                 if (!$prescribed_medicine) {
@@ -656,10 +664,6 @@ class PrescriptionController extends Controller
                     $prescribed_medicine->status = 1;
                     $prescribed_medicine->save();
 
-                    $date = Carbon::now();
-                    $date = $date->addDays($medication['days_approved'] - 1);
-                    $stop_date = date('Y-m-d', strtotime($date));
-
                     $concurrent = new ConcurrentTherapy;
                     $concurrent->prescription_id = $request->id;
                     $concurrent->hospital_id = $request->hospital_id;
@@ -668,7 +672,7 @@ class PrescriptionController extends Controller
                     $concurrent->dosing_regimen = $prescribed_medicine->dosage_strength . '' . $prescribed_medicine->dosage_unit . ' ' . $prescribed_medicine->frequency;
                     $concurrent->start_date = $date_approved;
                     $concurrent->stop_date = $stop_date;
-                    $concurrent->days_approved = $medication['days_approved'];
+                    $concurrent->days_approved = $request->days_approved;
                     $concurrent->approved_by = Auth::id();
                     $concurrent->date_approved = $date_approved;
                     $concurrent->save();
