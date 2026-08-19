@@ -191,14 +191,16 @@ class ReturnedPrescriptionController extends Controller
             $patient_history->sex = $patient['sex'];
             $patient_history->save();
 
-            #DELETE ALL MEDICATIONS
-            #INSERT ALL MEDICATIONS AS BULK
-            $delete_medications = PrescribedMedicine::where('prescription_id', $prescription_id);
+            #DELETE ONLY THE REJECTED MEDICATIONS
+            #INSERT THE RESUBMITTED MEDICATIONS AS BULK, RESETTING THEM TO PENDING
+            #APPROVED MEDICATIONS (ALREADY WITH PHARMACY) ARE UNTOUCHED
+            $delete_medications = PrescribedMedicine::where('prescription_id', $prescription_id)->where('status', 2);
             $delete_medications->forceDelete();
 
             $medications = $request->medications;
             for ($i = 0; $i < count($medications); $i++) {
                 $medications[$i]['prescription_id'] = $prescription_id;
+                $medications[$i]['status'] = 0;
             }
             PrescribedMedicine::insert($medications);
 
