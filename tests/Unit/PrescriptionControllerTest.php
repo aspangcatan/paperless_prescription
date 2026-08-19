@@ -269,4 +269,100 @@ class PrescriptionControllerTest extends TestCase
         $this->assertNotNull(PharmacyReview::where('prescription_id', $prescription->id)->first());
         $this->assertNull(ReturnedPrescription::where('prescription_id', $prescription->id)->first());
     }
+
+    public function testInsertPrescriptionMarksMedicinesApprovedForIccSkipTypes()
+    {
+        $request = Request::create('/insert_prescription', 'POST', [
+            'patient' => [
+                'hospital_id' => $this->test_hospital_id,
+                'name' => 'TEST, PATIENT',
+                'birthdate' => '1990-01-01',
+                'sex' => 'M',
+                'station' => 'TEST STATION',
+                'ward' => 'TEST WARD',
+                'bed_no' => '1',
+                'attending_physician' => 'DR. TEST',
+                'urgency' => 'Routine',
+                'type' => '5',
+                'drug_allergy' => '',
+                'weight' => null,
+                'height' => null,
+                'serum_creatinine' => '',
+                'creatinine_clearance' => '',
+                'transaminases' => '',
+                'sgpt' => '',
+                'sgot' => '',
+                'days_requested' => null,
+                'additional_labs' => '',
+                'outcome' => '',
+                'diagnosis' => '',
+                'for_extension' => 0,
+                'remarks' => 'New prescription',
+            ],
+            'indication_use' => ['description' => 'Empiric'],
+            'microbiologicals' => [],
+            'concurrent_therapy' => [],
+            'medications' => [
+                ['description' => 'TEST MEDICINE', 'unit' => 'TABLET', 'dosage_strength' => '500', 'dosage_unit' => 'MG', 'frequency' => 'BID', 'quantity_ordered' => 0],
+            ],
+        ]);
+
+        $response = (new PrescriptionController())->insertPrescription($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(200, $data['code']);
+
+        $prescription = Prescription::where('hospital_id', $this->test_hospital_id)->first();
+        $medicine = PrescribedMedicine::where('prescription_id', $prescription->id)->first();
+        $this->assertEquals(1, $medicine->status);
+        $this->assertNotNull(\App\Models\PharmacyReview::where('prescription_id', $prescription->id)->first());
+    }
+
+    public function testInsertPrescriptionLeavesMedicinesPendingForIccReviewTypes()
+    {
+        $request = Request::create('/insert_prescription', 'POST', [
+            'patient' => [
+                'hospital_id' => $this->test_hospital_id,
+                'name' => 'TEST, PATIENT',
+                'birthdate' => '1990-01-01',
+                'sex' => 'M',
+                'station' => 'TEST STATION',
+                'ward' => 'TEST WARD',
+                'bed_no' => '1',
+                'attending_physician' => 'DR. TEST',
+                'urgency' => 'Routine',
+                'type' => '2',
+                'drug_allergy' => '',
+                'weight' => null,
+                'height' => null,
+                'serum_creatinine' => '',
+                'creatinine_clearance' => '',
+                'transaminases' => '',
+                'sgpt' => '',
+                'sgot' => '',
+                'days_requested' => null,
+                'additional_labs' => '',
+                'outcome' => '',
+                'diagnosis' => '',
+                'for_extension' => 0,
+                'remarks' => 'New prescription',
+            ],
+            'indication_use' => ['description' => 'Definitive'],
+            'microbiologicals' => [['date' => '2026-08-19', 'specimen' => 'Blood', 'pathogen' => 'E. coli']],
+            'concurrent_therapy' => [],
+            'medications' => [
+                ['description' => 'TEST MEDICINE', 'unit' => 'TABLET', 'dosage_strength' => '500', 'dosage_unit' => 'MG', 'frequency' => 'BID', 'quantity_ordered' => 0],
+            ],
+        ]);
+
+        $response = (new PrescriptionController())->insertPrescription($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(200, $data['code']);
+
+        $prescription = Prescription::where('hospital_id', $this->test_hospital_id)->first();
+        $medicine = PrescribedMedicine::where('prescription_id', $prescription->id)->first();
+        $this->assertEquals(0, $medicine->status);
+        $this->assertNull(\App\Models\PharmacyReview::where('prescription_id', $prescription->id)->first());
+    }
 }

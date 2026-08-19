@@ -300,14 +300,19 @@ class PrescriptionController extends Controller
             }
 
             #INSERT ALL MEDICATIONS AS BULK
+            #TYPES 1/5/8 SKIP ICC ENTIRELY, SO THEIR MEDICINES ARE MARKED APPROVED (STATUS 1)
+            #ON INSERT RATHER THAN LEFT PENDING (STATUS 0), SINCE NO ICC DECISION WILL EVER SET THAT
             $medications = $request->medications;
+            $skips_icc = ($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1;
+            $medicine_status = $skips_icc ? 1 : 0;
             for ($i = 0; $i < count($medications); $i++) {
                 $medications[$i]['prescription_id'] = $prescription_id;
+                $medications[$i]['status'] = $medicine_status;
             }
             PrescribedMedicine::insert($medications);
 
             $released_to = "PHARMACY";
-            if (($patient['type'] == '1' || $patient['type'] == '5' || $patient['type'] == '8') && $patient['for_extension'] != 1) {
+            if ($skips_icc) {
                 for ($i = 0; $i < count($medications); $i++) {
                     $concurrent = new ConcurrentTherapy;
                     $concurrent->prescription_id = $prescription_id;

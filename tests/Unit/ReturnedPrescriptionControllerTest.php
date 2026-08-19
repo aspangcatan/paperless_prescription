@@ -178,4 +178,67 @@ class ReturnedPrescriptionControllerTest extends TestCase
         $this->assertNotNull(IccReview::where('prescription_id', $prescription->id)->first());
         $this->assertNull(ReturnedPrescription::where('prescription_id', $prescription->id)->first());
     }
+
+    public function testUpdatePrescriptionMarksResubmittedMedicinesApprovedForIccSkipTypes()
+    {
+        $prescription = $this->makeTestPrescription('5');
+        $approved_medicine = $this->makeTestMedicine($prescription->id, 1, 'APPROVED MEDICINE');
+        $this->makeTestMedicine($prescription->id, 2, 'OLD REJECTED MEDICINE');
+
+        $returned = new ReturnedPrescription();
+        $returned->prescription_id = $prescription->id;
+        $returned->save();
+
+        $request = Request::create('/update_prescription', 'POST', [
+            'id' => $prescription->id,
+            'patient' => [
+                'hospital_id' => $this->test_hospital_id,
+                'name' => 'TEST, PATIENT',
+                'birthdate' => '1990-01-01',
+                'sex' => 'M',
+                'station' => 'TEST STATION',
+                'ward' => 'TEST WARD',
+                'bed_no' => '1',
+                'attending_physician' => 'DR. TEST',
+                'urgency' => 'Routine',
+                'type' => '5',
+                'drug_allergy' => '',
+                'weight' => null,
+                'height' => null,
+                'serum_creatinine' => '',
+                'creatinine_clearance' => '',
+                'transaminases' => '',
+                'sgpt' => '',
+                'sgot' => '',
+                'days_requested' => null,
+                'additional_labs' => '',
+                'diagnosis' => '',
+                'for_extension' => 0,
+                'remarks' => 'Resubmitting with corrected dosage',
+            ],
+            'indication_use' => ['description' => 'Empiric'],
+            'microbiologicals' => [],
+            'concurrent_therapy' => [],
+            'medications' => [
+                ['description' => 'NEW REJECTED MEDICINE', 'unit' => 'TABLET', 'dosage_strength' => '250', 'dosage_unit' => 'MG', 'frequency' => 'OD', 'quantity_ordered' => 0],
+            ],
+        ]);
+
+        $response = (new ReturnedPrescriptionController())->updatePrescription($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(200, $data['code']);
+
+        $remaining_medicines = PrescribedMedicine::where('prescription_id', $prescription->id)->get();
+        $this->assertCount(2, $remaining_medicines);
+        $this->assertTrue($remaining_medicines->contains('id', $approved_medicine->id));
+        $this->assertEquals(1, PrescribedMedicine::find($approved_medicine->id)->status);
+
+        $resubmitted_medicine = $remaining_medicines->firstWhere('description', 'NEW REJECTED MEDICINE');
+        $this->assertNotNull($resubmitted_medicine);
+        $this->assertEquals(1, $resubmitted_medicine->status);
+        $this->assertFalse($remaining_medicines->contains('description', 'OLD REJECTED MEDICINE'));
+
+        $this->assertNotNull(\App\Models\PharmacyReview::where('prescription_id', $prescription->id)->first());
+    }
 }
