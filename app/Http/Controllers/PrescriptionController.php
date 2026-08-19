@@ -110,7 +110,7 @@ class PrescriptionController extends Controller
         }
     }
 
-    public function getPrescriptionDetails($id)
+    public function getPrescriptionDetails(Request $request, $id)
     {
         $ams = [];
         try {
@@ -126,7 +126,11 @@ class PrescriptionController extends Controller
             }
 
             #GET MEDICATIONS
-            $medications = PrescribedMedicine::where('prescription_id', $id)->get();
+            $medications_query = PrescribedMedicine::where('prescription_id', $id);
+            if ($request->status !== null && $request->status !== '') {
+                $medications_query->where('status', $request->status);
+            }
+            $medications = $medications_query->get();
             return response(['code' => 200, 'results' => $medications, 'ams' => $ams]);
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
