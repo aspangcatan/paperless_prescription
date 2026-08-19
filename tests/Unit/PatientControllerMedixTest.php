@@ -92,6 +92,24 @@ class PatientControllerMedixTest extends TestCase
         $this->assertEquals(500, $data['code']);
     }
 
+    public function testSearchMedixPatientReturnsEmptyResultsWhenMedixReturns404()
+    {
+        // MEDIX's GetPatientInformation returns HTTP 404 with body "No data found."
+        // when a search has zero matches — this is MEDIX's normal "no results"
+        // signal, not a real failure, and must not surface as an error.
+        Http::fake([
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
+            'medixhms-external.com/*' => Http::response('No data found.', 404),
+        ]);
+
+        $request = Request::create('/patient/medix/search', 'GET', ['lastname' => 'ZZZZNONEXISTENTNAME123']);
+        $response = (new PatientController())->searchMedixPatient($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(200, $data['code']);
+        $this->assertEquals([], $data['results']);
+    }
+
     public function testSearchMedixPatientIncludesFirstNameWhenProvided()
     {
         Http::fake([

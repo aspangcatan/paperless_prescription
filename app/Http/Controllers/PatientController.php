@@ -68,6 +68,12 @@ class PatientController extends Controller
             // See the TLS comment in getMedixToken() above.
             $response = Http::withOptions(['verify' => false])->withToken($token)->get(config('services.medix.base_url') . '/GetPatientInformation', $query);
 
+            // MEDIX responds 404 "No data found." for a search with zero matches —
+            // that's their normal empty-result signal, not a failure.
+            if ($response->status() === 404) {
+                return response(['code' => 200, 'results' => []]);
+            }
+
             if (!$response->successful()) {
                 return response(['code' => 500, 'message' => 'MEDIX request failed']);
             }
