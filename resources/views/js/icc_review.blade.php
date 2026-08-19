@@ -392,7 +392,8 @@
         $("#medication_list").empty();
         $("#medication_list").append("<tr><td colspan='7'>Loading medications...</td></tr>");
         $("#microbiological_result_list").empty();
-        fetch("{{ url('prescription/get') }}/" + id, {
+        const type_filter = ($("#form_prescription_type").val() == "6") ? "" : "?status=0";
+        fetch("{{ url('prescription/get') }}/" + id + type_filter, {
             method: "GET"
         })
             .then(res => res.json())
@@ -424,18 +425,55 @@
                         });
                     }
 
-                    data.results.forEach(it => {
-                        const tr = `<tr>
+                    const type = $("#form_prescription_type").val();
+
+                    data.results.forEach((it, index) => {
+                        if (type == "6") {
+                            const tr = `<tr>
+                                                <td>` + it.description + `</td>
+                                                <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
+                                                <td>` + it.unit + `</td>
+                                                <td class="d-none"><input type="number" class="form-control text-center" value="` + it.quantity_ordered + `"/></td>
+                                                <td>` + it.frequency + `</td>
+                                                <td></td>
+                                             </tr>`;
+
+                            $("#medication_list").append(tr);
+                            return;
+                        }
+
+                        const tr = `<tr data-medicine-id="` + it.id + `">
                                             <td>` + it.description + `</td>
                                             <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
                                             <td>` + it.unit + `</td>
                                             <td class="d-none"><input type="number" class="form-control text-center" value="` + it.quantity_ordered + `"/></td>
                                             <td>` + it.frequency + `</td>
-                                            <td></td>
+                                            <td>
+                                                <div class="form-check">
+                                                    <input class="form-check-input medicine_decision" type="radio" name="medicine_decision_` + index + `" value="approved" checked>
+                                                    <label class="form-check-label">Approve</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input medicine_decision" type="radio" name="medicine_decision_` + index + `" value="rejected">
+                                                    <label class="form-check-label">Reject</label>
+                                                </div>
+                                                <textarea class="form-control mt-1 d-none medicine_remarks" placeholder="Reason for rejection" rows="2"></textarea>
+                                            </td>
                                          </tr>`;
 
                         $("#medication_list").append(tr);
                     });
+
+                    if (type != "6") {
+                        $(".medicine_decision").change(function () {
+                            const textarea = $(this).closest("tr").find(".medicine_remarks");
+                            if ($(this).val() === "rejected") {
+                                textarea.removeClass("d-none");
+                            } else {
+                                textarea.addClass("d-none").val("");
+                            }
+                        });
+                    }
                 }
             }).catch(err => {
             console.log(err);
