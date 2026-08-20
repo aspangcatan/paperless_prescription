@@ -229,8 +229,12 @@ class PatientControllerMedixTest extends TestCase
     public function testSearchMedixPatientRetriesOnceOn401AndSucceeds()
     {
         $search_call_count = 0;
+        $token_call_count = 0;
         Http::fake([
-            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
+            'medixhms.com:3000/*' => function () use (&$token_call_count) {
+                $token_call_count++;
+                return Http::response(['accessToken' => 'token-' . $token_call_count, 'expiresIn' => 3600], 200);
+            },
             'medixhms-external.com/*' => function () use (&$search_call_count) {
                 $search_call_count++;
                 if ($search_call_count === 1) {
@@ -247,6 +251,19 @@ class PatientControllerMedixTest extends TestCase
         $this->assertEquals(200, $data['code']);
         $this->assertCount(1, $data['results']);
         $this->assertEquals(2, $search_call_count);
+
+        // Proves the cache was actually cleared and a fresh token fetched+used on
+        // retry, not just that the search call fired twice: the first search must
+        // have carried the first token, and the retried search must carry a
+        // different, freshly-fetched token.
+        Http::assertSent(function ($req) {
+            return str_contains($req->url(), 'GetPatientInformation')
+                && $req->hasHeader('Authorization', 'Bearer token-1');
+        });
+        Http::assertSent(function ($req) {
+            return str_contains($req->url(), 'GetPatientInformation')
+                && $req->hasHeader('Authorization', 'Bearer token-2');
+        });
     }
 
     public function testSearchMedixPatientReturnsErrorWhenRetryAlsoReturns401()
