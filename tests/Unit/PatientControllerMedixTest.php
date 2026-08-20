@@ -225,4 +225,65 @@ class PatientControllerMedixTest extends TestCase
 
         $this->assertNull(Cache::get('medix_refresh_token'));
     }
+
+    public function testSearchMedixPatientRetriesOnceOn401AndSucceeds()
+    {
+        $search_call_count = 0;
+        Http::fake([
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
+            'medixhms-external.com/*' => function () use (&$search_call_count) {
+                $search_call_count++;
+                if ($search_call_count === 1) {
+                    return Http::response('Unauthorized', 401);
+                }
+                return Http::response([['hospitalNo' => '00000744', 'lastName' => 'LAGOS']], 200);
+            },
+        ]);
+
+        $request = Request::create('/', 'GET', ['lastname' => 'LAGOS']);
+        $response = (new PatientController())->searchMedixPatient($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(200, $data['code']);
+        $this->assertCount(1, $data['results']);
+        $this->assertEquals(2, $search_call_count);
+    }
+
+    public function testSearchMedixPatientReturnsErrorWhenRetryAlsoReturns401()
+    {
+        $search_call_count = 0;
+        Http::fake([
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
+            'medixhms-external.com/*' => function () use (&$search_call_count) {
+                $search_call_count++;
+                return Http::response('Unauthorized', 401);
+            },
+        ]);
+
+        $request = Request::create('/', 'GET', ['lastname' => 'LAGOS']);
+        $response = (new PatientController())->searchMedixPatient($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(500, $data['code']);
+        $this->assertEquals(2, $search_call_count);
+    }
+
+    public function testSearchMedixPatientDoesNotRetryOnNon401Failure()
+    {
+        $search_call_count = 0;
+        Http::fake([
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
+            'medixhms-external.com/*' => function () use (&$search_call_count) {
+                $search_call_count++;
+                return Http::response('Server error', 500);
+            },
+        ]);
+
+        $request = Request::create('/', 'GET', ['lastname' => 'LAGOS']);
+        $response = (new PatientController())->searchMedixPatient($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(500, $data['code']);
+        $this->assertEquals(1, $search_call_count);
+    }
 }

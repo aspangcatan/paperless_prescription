@@ -87,8 +87,16 @@ class PatientController extends Controller
                 $query['FirstName'] = $request->firstname;
             }
 
-            // See the TLS comment in getMedixToken() above.
-            $response = Http::withOptions(['verify' => false])->withToken($token)->get(config('services.medix.base_url') . '/GetPatientInformation', $query);
+            $response = self::getMedixPatientInformation($token, $query);
+
+            if ($response->status() === 401) {
+                Cache::forget('medix_access_token');
+                $token = self::getMedixToken();
+                if (!$token) {
+                    return response(['code' => 500, 'message' => 'Unable to authenticate with MEDIX']);
+                }
+                $response = self::getMedixPatientInformation($token, $query);
+            }
 
             // MEDIX responds 404 "No data found." for a search with zero matches —
             // that's their normal empty-result signal, not a failure.
@@ -104,6 +112,12 @@ class PatientController extends Controller
         } catch (\Exception $exception) {
             return response(['code' => 500, 'message' => $exception->getMessage()]);
         }
+    }
+
+    private function getMedixPatientInformation($token, $query)
+    {
+        // See the TLS comment in requestMedixToken() above.
+        return Http::withOptions(['verify' => false])->withToken($token)->get(config('services.medix.base_url') . '/GetPatientInformation', $query);
     }
 
     public function searchHomisPatient($hospital_id)
