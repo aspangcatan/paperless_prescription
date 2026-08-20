@@ -26,14 +26,32 @@ class PatientController extends Controller
             return $token;
         }
 
-        // Medix's server presents IIS's auto-generated self-signed default cert
-        // (CN WMSvc-SHA2-LENOVO-LA0X1192), not one issued for their domain — a
-        // vendor-side misconfiguration, not fixable via a local CA bundle update.
-        $response = Http::withOptions(['verify' => false])->asForm()->post(config('services.medix.token_url'), [
+        $refresh_token = Cache::get('medix_refresh_token');
+        if ($refresh_token) {
+            $refreshed = self::requestMedixToken([
+                'grant_type' => 'refresh_token',
+                'client_id' => config('services.medix.client_id'),
+                'client_secret' => config('services.medix.client_secret'),
+                'refresh_token' => $refresh_token,
+            ]);
+            if ($refreshed) {
+                return $refreshed;
+            }
+        }
+
+        return self::requestMedixToken([
             'grant_type' => 'client_credentials',
             'client_id' => config('services.medix.client_id'),
             'client_secret' => config('services.medix.client_secret'),
         ]);
+    }
+
+    private function requestMedixToken($form_params)
+    {
+        // Medix's server presents IIS's auto-generated self-signed default cert
+        // (CN WMSvc-SHA2-LENOVO-LA0X1192), not one issued for their domain — a
+        // vendor-side misconfiguration, not fixable via a local CA bundle update.
+        $response = Http::withOptions(['verify' => false])->asForm()->post(config('services.medix.token_url'), $form_params);
 
         if (!$response->successful()) {
             return null;
@@ -41,9 +59,13 @@ class PatientController extends Controller
 
         $access_token = $response->json('accessToken');
         $expires_in = $response->json('expiresIn');
+        $refresh_token = $response->json('refreshToken');
         $ttl = $expires_in ? max($expires_in - 60, 60) : 300;
 
         Cache::put('medix_access_token', $access_token, $ttl);
+        if ($refresh_token) {
+            Cache::put('medix_refresh_token', $refresh_token, 60 * 60 * 24 * 7);
+        }
 
         return $access_token;
     }

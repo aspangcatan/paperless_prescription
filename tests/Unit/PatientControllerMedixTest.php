@@ -15,6 +15,7 @@ class PatientControllerMedixTest extends TestCase
         parent::setUp();
 
         Cache::forget('medix_access_token');
+        Cache::forget('medix_refresh_token');
 
         config([
             'services.medix.token_url' => 'https://medixhms.com:3000/api/auth/identity/token',
@@ -142,5 +143,86 @@ class PatientControllerMedixTest extends TestCase
                 && $req['LastName'] === 'LAGOS'
                 && !isset($req['FirstName']);
         });
+    }
+
+    public function testSearchMedixPatientCachesRefreshTokenFromLoginResponse()
+    {
+        Http::fake([
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600, 'refreshToken' => 'my-refresh-token'], 200),
+            'medixhms-external.com/*' => Http::response([], 200),
+        ]);
+
+        (new PatientController())->searchMedixPatient(Request::create('/', 'GET', ['lastname' => 'LAGOS']));
+
+        $this->assertEquals('my-refresh-token', Cache::get('medix_refresh_token'));
+    }
+
+    public function testGetMedixTokenUsesRefreshTokenWhenAccessTokenExpired()
+    {
+        $grant_types = [];
+        Http::fake([
+            'medixhms.com:3000/*' => function ($request) use (&$grant_types) {
+                $grant_types[] = $request['grant_type'];
+                if ($request['grant_type'] === 'refresh_token') {
+                    return Http::response(['accessToken' => 'refreshed-token', 'expiresIn' => 3600], 200);
+                }
+                return Http::response(['accessToken' => 'initial-token', 'expiresIn' => 3600, 'refreshToken' => 'test-refresh-token'], 200);
+            },
+            'medixhms-external.com/*' => Http::response([], 200),
+        ]);
+
+        $controller = new PatientController();
+        $controller->searchMedixPatient(Request::create('/', 'GET', ['lastname' => 'LAGOS']));
+
+        // Simulate the access token expiring while the refresh token is still cached.
+        Cache::forget('medix_access_token');
+
+        $controller->searchMedixPatient(Request::create('/', 'GET', ['lastname' => 'LAGOS']));
+
+        $this->assertEquals(['client_credentials', 'refresh_token'], $grant_types);
+        Http::assertSent(function ($req) {
+            return str_contains($req->url(), 'GetPatientInformation')
+                && $req->hasHeader('Authorization', 'Bearer refreshed-token');
+        });
+    }
+
+    public function testGetMedixTokenFallsBackToClientCredentialsWhenRefreshFails()
+    {
+        $grant_types = [];
+        Http::fake([
+            'medixhms.com:3000/*' => function ($request) use (&$grant_types) {
+                $grant_types[] = $request['grant_type'];
+                if ($request['grant_type'] === 'refresh_token') {
+                    return Http::response('invalid_grant', 401);
+                }
+                return Http::response(['accessToken' => 'cc-token', 'expiresIn' => 3600, 'refreshToken' => 'stale-refresh-token'], 200);
+            },
+            'medixhms-external.com/*' => Http::response([], 200),
+        ]);
+
+        $controller = new PatientController();
+        $controller->searchMedixPatient(Request::create('/', 'GET', ['lastname' => 'LAGOS']));
+
+        Cache::forget('medix_access_token');
+
+        $controller->searchMedixPatient(Request::create('/', 'GET', ['lastname' => 'LAGOS']));
+
+        $this->assertEquals(['client_credentials', 'refresh_token', 'client_credentials'], $grant_types);
+        Http::assertSent(function ($req) {
+            return str_contains($req->url(), 'GetPatientInformation')
+                && $req->hasHeader('Authorization', 'Bearer cc-token');
+        });
+    }
+
+    public function testGetMedixTokenDoesNotCacheRefreshTokenWhenAbsentFromResponse()
+    {
+        Http::fake([
+            'medixhms.com:3000/*' => Http::response(['accessToken' => 'test-token', 'expiresIn' => 3600], 200),
+            'medixhms-external.com/*' => Http::response([], 200),
+        ]);
+
+        (new PatientController())->searchMedixPatient(Request::create('/', 'GET', ['lastname' => 'LAGOS']));
+
+        $this->assertNull(Cache::get('medix_refresh_token'));
     }
 }
