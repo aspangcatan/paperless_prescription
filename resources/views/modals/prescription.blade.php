@@ -437,10 +437,10 @@
             </div>
             <div class="modal-body" style="background: rgb(241,244,252)">
                 <div class="row">
-                    <div class="col-md-4 d-none">
+                    <div class="col-md-4">
                         <div class="card">
                             <div class="card-body">
-                                <div class="mt-3 fs-5 fw-bold">Search patient in HOMIS</div>
+                                <div class="mt-3 fs-5 fw-bold">Add / Update Patient</div>
                                 <div class="form-floating mt-3">
                                     <input type="text" class="form-control" id="hospital_id" placeholder="">
                                     <label>Hospital ID</label>
@@ -477,41 +477,14 @@
                                 </div>
                                 <div class="row mt-3">
                                     <div class="col-md-12">
-                                        <button class="btn form-control btn-secondary" id="btn_find">SEARCH
-                                        </button>
-                                    </div>
-                                    <div class="col-md-12 mt-2">
-                                        <button class="btn form-control btn-info text-white" id="btn_find_medix">SEARCH MEDIX
-                                        </button>
-                                    </div>
-                                    <div class="col-md-12 mt-2">
                                         <button class="btn form-control btn-success" id="btn_save_patient">ADD / UPDATE
                                         </button>
                                     </div>
                                 </div>
-
-                                <div class="mt-3 d-none" id="medix_results_container">
-                                    <div class="small text-danger mb-1 d-none" id="medix_search_status"></div>
-                                    <div class="table-responsive" style="max-height: 250px !important;">
-                                        <table class="table table-sm table-hover text-center">
-                                            <thead>
-                                            <tr>
-                                                <th scope="col">Hospital No</th>
-                                                <th scope="col">Name</th>
-                                                <th scope="col">Birthdate</th>
-                                                <th scope="col">Sex</th>
-                                                <th scope="col" style="width: 4%"></th>
-                                            </tr>
-                                            </thead>
-                                            <tbody id="medix_patient_list"></tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-8">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-floating">
