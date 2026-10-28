@@ -46,6 +46,12 @@
                         </a>
                     </li>
                     <li>
+                        <a class="dropdown-item d-flex align-items-center" href="#" id="open_whats_new">
+                            <i class="bi bi-stars"></i>
+                            <span>What's new</span>
+                        </a>
+                    </li>
+                    <li>
                         <hr class="dropdown-divider">
                     </li>
                     <li>

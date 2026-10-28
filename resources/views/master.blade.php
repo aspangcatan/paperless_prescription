@@ -51,6 +51,7 @@
 <!-- ======= Sidebar ======= -->
 @include('layouts.sidebar')
 @include('modals.settings')
+@include('modals.whats_new')
 <main id="main" class="main">
     @hasSection('Title')
         <div class="pagetitle">
@@ -97,8 +98,42 @@
 <script src="{{ asset('js/toastr.min.js') }}"></script>
 <script>
     const settings_modal = new bootstrap.Modal(document.getElementById('settings_modal'));
+    const whats_new_el = document.getElementById('whats_new_modal');
+    const whats_new_modal = new bootstrap.Modal(whats_new_el);
+    const whats_new_key = "whats_new_hidden_" + whats_new_el.dataset.user + "_" + whats_new_el.dataset.version;
+
+    function isWhatsNewHidden() {
+        try {
+            return localStorage.getItem(whats_new_key) === "1";
+        } catch (e) {
+            return false;
+        }
+    }
 
     $(document).ready(function () {
+        if (whats_new_el.dataset.autoOpen === "1" && !isWhatsNewHidden()) {
+            whats_new_modal.show();
+        }
+
+        $("#whats_new_hide").prop("checked", isWhatsNewHidden());
+
+        whats_new_el.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('whats_new_video').pause();
+            try {
+                if ($("#whats_new_hide").is(":checked")) {
+                    localStorage.setItem(whats_new_key, "1");
+                } else {
+                    localStorage.removeItem(whats_new_key);
+                }
+            } catch (e) {
+            }
+        });
+
+        $("#open_whats_new").click(function (e) {
+            e.preventDefault();
+            whats_new_modal.show();
+        });
+
         $("#change_password").click(function (e) {
             e.preventDefault();
             settings_modal.toggle();

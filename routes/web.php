@@ -49,6 +49,10 @@ Route::group(['middleware' => 'auth'], function () {
             return view('home');
         })->name('prescription');;
 
+        Route::get('/whats_new', function () {
+            return view('whats_new');
+        })->name('whats_new');
+
         Route::get('/nurse_review', function () {
             return view('nurse_review');
         })->name('nurse_review');

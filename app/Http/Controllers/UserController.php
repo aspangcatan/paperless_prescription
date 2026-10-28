@@ -31,6 +31,8 @@ class UserController extends Controller
             }
 
             session(['access_rights' => $user_priv->level]);
+            #SHOW THE WHAT'S NEW MODAL ON THE FIRST PAGE AFTER SIGNING IN
+            session()->flash('whats_new', true);
             switch ($user_priv->level) {
                 case "Doctor":
                 case "ICC":

@@ -112,5 +112,14 @@
                 <span>Track Prescription</span>
             </a>
         </li>
+
+        <li class="nav-heading">Updates</li>
+        <li class="nav-item">
+            <a class="{{ $navClass('whats_new') }}" href="{{ route('whats_new') }}">
+                <i class="bi bi-stars"></i>
+                <span>What's New?</span>
+                <span class="nav-new-badge">New</span>
+            </a>
+        </li>
     </ul>
 </aside><!-- End Sidebar-->
