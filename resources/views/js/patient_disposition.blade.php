@@ -1,6 +1,7 @@
-<script src="js/moment.min.js"></script>
-<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
-<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
 <script>
     let patient_id = "";
     let hospital_id = "";
@@ -101,11 +102,11 @@
                         birthdate = it.birthdate;
 
                     const tr = ` <tr id="patient_` + it.id + `">
-                                <td>` + it.hospital_id + `</td>
-                                <td>` + fullName + `</td>
+                                <td>` + escapeCell(it.hospital_id) + `</td>
+                                <td>` + escapeCell(fullName) + `</td>
                                 <td>` + birthdate + `</td>
-                                <td>` + it.sex + `</td>
-                                <td>` + disposition_status + `</td>
+                                <td>` + escapeCell(it.sex) + `</td>
+                                <td>` + escapeCell(disposition_status) + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="setDisposition(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>

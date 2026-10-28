@@ -11,4 +11,5 @@ class IccReview extends Model
 
     protected $connection = 'mysql';
     protected $table = 'icc_reviews';
+    protected $fillable = ['prescription_id'];
 }

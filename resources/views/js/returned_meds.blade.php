@@ -1,6 +1,7 @@
-<script src="js/moment.min.js"></script>
-<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
-<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
 <script>
     $(document).ready(function () {
 
@@ -50,13 +51,13 @@
 
                     const tr = `
                         <tr>
-                           <td>` + it.hospital_id + `</td>
-                           <td>` + it.name + `</td>
-                           <td>` + it.station + `</td>
-                           <td>` + it.description + `</td>
-                           <td>` + it.returned_amount + `</td>
-                           <td>` + it.returned_by + `</td>
-                           <td>` + it.date_returned + `</td>
+                           <td>` + escapeCell(it.hospital_id) + `</td>
+                           <td>` + escapeCell(it.name) + `</td>
+                           <td>` + escapeCell(it.station) + `</td>
+                           <td>` + escapeCell(it.description) + `</td>
+                           <td>` + escapeCell(it.returned_amount) + `</td>
+                           <td>` + escapeCell(it.returned_by) + `</td>
+                           <td>` + escapeCell(it.date_returned) + `</td>
                            <td>` + received_by.name + `</td>
                            <td>` + received_by.date + `</td>
                            <td>` + button + `</td>

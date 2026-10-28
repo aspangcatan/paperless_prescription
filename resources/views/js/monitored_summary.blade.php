@@ -1,7 +1,8 @@
-<script src="js/moment.min.js"></script>
-<script src="js/xlsx.bundle.js"></script>
-<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
-<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/xlsx.bundle.js') }}"></script>
+<script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
 <script>
@@ -79,15 +80,15 @@
                     const it = data.results[i];
                     const tr = `
                         <tr>
-                           <td>` + it.name + `</td>
-                           <td>` + it.age + `</td>
-                           <td>` + it.sex + `</td>
-                           <td>` + it.station + `</td>
+                           <td>` + escapeCell(it.name) + `</td>
+                           <td>` + escapeCell(it.age) + `</td>
+                           <td>` + escapeCell(it.sex) + `</td>
+                           <td>` + escapeCell(it.station) + `</td>
                            <td>` + moment(it.created_at).format("MM/DD/YYYY hh:mm:ss A") + `</td>
-                           <td>` + it.physician + `</td>
-                           <td class="fw-bold">` + it.description + `</td>
-                           <td>` + it.quantity_rendered + `</td>
-                           <td>` + it.quantity_returned + `</td>
+                           <td>` + escapeCell(it.physician) + `</td>
+                           <td class="fw-bold">` + escapeCell(it.description) + `</td>
+                           <td>` + escapeCell(it.quantity_rendered) + `</td>
+                           <td>` + escapeCell(it.quantity_returned) + `</td>
                         </tr>`;
                     $("#ams_summary").append(tr);
                 }

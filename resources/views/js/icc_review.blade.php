@@ -1,6 +1,7 @@
-<script src="js/moment.min.js"></script>
-<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
-<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
@@ -150,16 +151,26 @@
             getPrescriptions();
         });
 
-        $("#btn_submit").click(function () {
-            button_clicked = $(this).text();
-            prescription_id = $(this).val();
+        bindIccDecisionRows();
 
-            $("#remarks_message").text("Reason for approval");
-            $("#reject_outcome_container").addClass("d-none");
-            $("#common_remarks").val("");
-            $("input[name='reject_outcome']").prop("checked", false).change();
-            $("#days_approved_container").removeClass("d-none");
-            remarks_modal.toggle();
+        // Each medicine is decided on its own; medicines left undecided stay pending.
+        $("#btn_submit").click(function () {
+            prescription_id = $(this).val();
+            $("#prescription_modal .error_container").addClass("d-none");
+            $("#prescription_modal .error_list").empty();
+
+            const result = readIccDecisions();
+            if (result.decisions.length < 1) {
+                result.errors.push("Approve or reject at least one medicine");
+            }
+            if (result.errors.length > 0) {
+                result.errors.forEach(error => $("#prescription_modal .error_list").append($("<li>").text(error)));
+                $("#prescription_modal .error_container").removeClass("d-none");
+                $("#prescription_modal .modal-body").scrollTop(0);
+                return;
+            }
+
+            decidePrescription({id: prescription_id, medications: result.decisions});
         });
 
         $("#i_agree").change(function () {
@@ -170,24 +181,12 @@
             }
         });
 
+        // Only shown for type 6 ("Cancel pending"); other types reject per medicine.
         $("#btn_reject").click(function () {
-            button_clicked = $(this).text();
             prescription_id = $(this).val();
-
-            //DISPLAY WARNING DIALOG
-            if ($("#form_prescription_type").val() == "6") {
-                warning_modal.toggle();
-                $("#i_agree").prop("checked", false).change();
-                $("#btn_proceed_cancel").prop("disabled", true);
-                return;
-            }
-
-            $("#days_approved_container").addClass("d-none");
-            $("#reject_outcome_container").removeClass("d-none");
-            $("#remarks_message").text("Reason for rejection");
-            $("#common_remarks").val("");
-            $("input[name='reject_outcome']").prop("checked", false).change();
-            remarks_modal.toggle();
+            warning_modal.toggle();
+            $("#i_agree").prop("checked", false).change();
+            $("#btn_proceed_cancel").prop("disabled", true);
         });
 
         $("#btn_proceed_cancel").click(function () {
@@ -202,54 +201,6 @@
 
             warning_modal.toggle();
             rejectPrescription(params);
-        });
-
-        $("#btn_proceed").click(function () {
-            const remarks = $("#common_remarks").val().trim();
-            const outcome = $("input[name='reject_outcome']:checked").next().text().trim();
-            if (remarks == "") {
-                alert("Please specify remarks or instructions for the receiver");
-                return;
-            }
-
-            const params = {
-                id: prescription_id,
-                hospital_id: $("#form_hospital_id").text().trim(),
-                type: $("#form_prescription_type").val(),
-                origin: "ICC",
-                outcome: (outcome == "") ? null : outcome,
-                remarks: remarks
-            }
-
-            if (button_clicked == "APPROVE") {
-                let days_approved = $("input[name='days_approved']:checked").next().text();
-                let updated_quantity = $("#medication_list tr:eq(0) td:eq(3) input").val();
-
-                // if (updated_quantity <= 0) {
-                //     alert("Quantity ordered must be greater than 0");
-                //     return;
-                // }
-
-                if (days_approved == "") {
-                    alert("Please specify number of days");
-                    return;
-                }
-
-                if (isNaN(days_approved)) {
-                    days_approved = $("#days_approved").val();
-                }
-
-                if (days_approved == "" || days_approved < 1) {
-                    alert("Please specify number of days");
-                    return;
-                }
-
-                params.days_approved = days_approved;
-                params.updated_quantity = updated_quantity;
-                approvePrescription(params);
-            } else if (button_clicked == "REJECT") {
-                rejectPrescription(params);
-            }
         });
 
         getPrescriptions();
@@ -340,8 +291,9 @@
                 $("input[name='outcome']:eq(" + outcome_index + ")").prop("checked", true);
             }
         } else {
-            $("#btn_submit").removeClass("d-none");
-            $("#btn_reject").text("REJECT");
+            // Rejection is per medicine now, inside the medicine list.
+            $("#btn_submit").removeClass("d-none").text("SUBMIT DECISIONS");
+            $("#btn_reject").addClass("d-none");
         }
 
         $("#form_remarks").addClass("d-none");
@@ -371,8 +323,8 @@
                             tr = "<tr class='pointer active'>";
 
                         tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
-                        tr += "<td>" + it.antimicrobial + "</td>";
-                        tr += "<td>" + it.dosing_regimen + "</td>";
+                        tr += "<td>" + escapeCell(it.antimicrobial) + "</td>";
+                        tr += "<td>" + escapeCell(it.dosing_regimen) + "</td>";
                         tr += "<td>" + moment(it.start_date).format("MM/DD/YYYY") + "</td>";
                         tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
                         tr += "<td></td>";
@@ -416,26 +368,30 @@
                         ams.microbiologicals.forEach(it => {
                             let tr = "<tr>";
                             tr += "<td>" + moment(it.date).format("MM/DD/YYYY") + " </td>";
-                            tr += "<td>" + it.specimen + "</td>";
-                            tr += "<td colspan='3'>" + it.pathogen + "</td>";
+                            tr += "<td>" + escapeCell(it.specimen) + "</td>";
+                            tr += "<td colspan='3'>" + escapeCell(it.pathogen) + "</td>";
                             tr += "</tr>";
 
                             $("#microbiological_result_list").append(tr);
                         });
                     }
 
+                    $("#rx_review_status").html(reviewStatusPill(data.review_status));
+                    let pending = 0;
                     data.results.forEach(it => {
-                        const tr = `<tr>
-                                            <td>` + it.description + `</td>
-                                            <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
-                                            <td>` + it.unit + `</td>
-                                            <td class="d-none"><input type="number" class="form-control text-center" value="` + it.quantity_ordered + `"/></td>
-                                            <td>` + it.frequency + `</td>
-                                            <td></td>
-                                         </tr>`;
-
-                        $("#medication_list").append(tr);
+                        $("#medication_list").append(infoMedicineRow(it));
+                        if (parseInt(it.status, 10) === MEDICINE_STATUS.PENDING) {
+                            pending++;
+                            $("#medication_list").append(iccDecisionRow(it));
+                        }
                     });
+
+                    $("#medication_hint").text(pending > 0
+                        ? "Decide each medicine on its own. Any you leave undecided stay pending."
+                        : "Every medicine on this prescription has been decided.");
+                    if ($("#form_prescription_type").val() != "6") {
+                        $("#btn_submit").toggleClass("d-none", pending < 1);
+                    }
                 }
             }).catch(err => {
             console.log(err);
@@ -501,31 +457,32 @@
                     const it = data.results[i];
                     const bg = (it.urgency == "Urgent") ? "bg-danger" : "bg-success";
                     const tr = ` <tr id='prescription_id_` + it.id + `'>
-                                <td><span class="badge ` + bg + `">` + it.urgency + `</span></td>
-                                <td>` + it.hospital_id + `</td>
-                                <td>` + it.name + `</td>
-                                <td>` + it.station + `</td>
+                                <td><span class="badge ` + bg + `">` + escapeCell(it.urgency) + `</span></td>
+                                <td>` + escapeCell(it.hospital_id) + `</td>
+                                <td>` + escapeCell(it.name) + `</td>
+                                <td>` + escapeCell(it.station) + `</td>
                                 <td>` + moment(it.created_at).format("MM/DD/YYYY hh:mm:ss A") + `</td>
-                                <td class="d-none">` + it.sex + `</td>
-                                <td class="d-none">` + it.birthdate + `</td>
-                                <td class="d-none">` + it.ward + `</td>
-                                <td class="d-none">` + it.bed_no + `</td>
-                                <td class="d-none">` + it.type + `</td>
-                                <td class="d-none">` + it.drug_allergy + `</td>
-                                <td class="d-none">` + it.weight + `</td>
-                                <td class="d-none">` + it.height + `</td>
-                                <td class="d-none">` + it.serum_creatinine + `</td>
-                                <td class="d-none">` + it.creatinine_clearance + `</td>
-                                <td class="d-none">` + it.transaminases + `</td>
-                                <td class="d-none">` + it.sgpt + `</td>
-                                <td class="d-none">` + it.sgot + `</td>
-                                <td class="d-none">` + it.days_requested + `</td>
-                                <td class="d-none">` + it.attending_physician + `</td>
-                                <td class="d-none">` + it.additional_labs + `</td>
-                                <td class="d-none">` + it.outcome + `</td>
-                                <td class="d-none">` + it.diagnosis + `</td>
-                                <td class="d-none">` + it.for_extension + `</td>
+                                <td class="d-none">` + escapeCell(it.sex) + `</td>
+                                <td class="d-none">` + escapeCell(it.birthdate) + `</td>
+                                <td class="d-none">` + escapeCell(it.ward) + `</td>
+                                <td class="d-none">` + escapeCell(it.bed_no) + `</td>
+                                <td class="d-none">` + escapeCell(it.type) + `</td>
+                                <td class="d-none">` + escapeCell(it.drug_allergy) + `</td>
+                                <td class="d-none">` + escapeCell(it.weight) + `</td>
+                                <td class="d-none">` + escapeCell(it.height) + `</td>
+                                <td class="d-none">` + escapeCell(it.serum_creatinine) + `</td>
+                                <td class="d-none">` + escapeCell(it.creatinine_clearance) + `</td>
+                                <td class="d-none">` + escapeCell(it.transaminases) + `</td>
+                                <td class="d-none">` + escapeCell(it.sgpt) + `</td>
+                                <td class="d-none">` + escapeCell(it.sgot) + `</td>
+                                <td class="d-none">` + escapeCell(it.days_requested) + `</td>
+                                <td class="d-none">` + escapeCell(it.attending_physician) + `</td>
+                                <td class="d-none">` + escapeCell(it.additional_labs) + `</td>
+                                <td class="d-none">` + escapeCell(it.outcome) + `</td>
+                                <td class="d-none">` + escapeCell(it.diagnosis) + `</td>
+                                <td class="d-none">` + escapeCell(it.for_extension) + `</td>
                                 <td>
+                                    ` + reviewStatusPill(it.review_status) + `
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
                                     </button>
@@ -541,9 +498,9 @@
         });
     }
 
-    function approvePrescription(params) {
+    function decidePrescription(params) {
         $("#spinner").removeClass("d-none");
-        fetch('{{ route('approve_prescription') }}', {
+        fetch('{{ route('decide_prescription') }}', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -559,13 +516,19 @@
                     return;
                 }
 
-                remarks_modal.toggle();
                 prescription_modal.toggle();
                 toastr.success(data.message, "Information");
 
-                insert("PHARMACY", {id: 1}, function (message) {
-                    deleteChild("PHARMACY");
-                });
+                if (data.has_approved) {
+                    insert("PHARMACY", {id: 1}, function (message) {
+                        deleteChild("PHARMACY");
+                    });
+                }
+                if (data.has_rejected) {
+                    insert("prescriber/" + data.id, {id: 1}, function (message) {
+                        deleteChild("prescriber/" + data.id);
+                    });
+                }
 
                 getPrescriptions();
             }).catch(err => {
@@ -596,9 +559,6 @@
                     return;
                 }
 
-                if (params.type != "6") {
-                    remarks_modal.toggle();
-                }
                 prescription_modal.toggle();
                 toastr.success(data.message, "Information");
 
@@ -618,12 +578,7 @@
     }
 
     function activityLog(it) {
-        return `<tr>
-                      <td>` + it.fname + ' ' + it.mname + ' ' + it.lname + ` <span class="badge bg-primary ms-2">` + it.origin + `</span></td>
-                      <td>` + it.remarks + `</td>
-                      <td><div class="badge bg-success p-1">` + it.released_to + `</div></td>
-                      <td>` + moment(it.date_forwarded).format("MM/DD/YYYY hh:mm:ss A") + `</td>
-                    </tr>`
+        return activityLogRow(it);
     }
 
     function clearForms() {

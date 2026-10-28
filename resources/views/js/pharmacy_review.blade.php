@@ -1,6 +1,7 @@
-<script src="js/moment.min.js"></script>
-<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
-<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
@@ -164,15 +165,15 @@
 
             let is_filled_up = true;
             let li = "";
-            for (let i = 0; i < $("#medication_list tr").length; i++) {
-                const tr = $("#medication_list tr:eq(" + i + ")");
-                const description = tr.find("td:eq(1)").text();
-                const quantity_rendered = tr.find("td:eq(6) select").val();
+            $("#medication_list tr[data-dispensable]").each(function () {
+                const tr = $(this);
+                const description = escapeHtml(tr.find(".med-description").text().trim());
+                const quantity_rendered = tr.find(".med-availability").val();
 
                 if (!quantity_rendered) {
-                    tr.find("td:eq(6) select").addClass("is-invalid");
+                    tr.find(".med-availability").addClass("is-invalid");
                     is_filled_up = false;
-                    continue;
+                    return;
                 }
 
                 if (quantity_rendered > 0) {
@@ -181,10 +182,10 @@
                            </li>`;
                 } else {
                     li += `<li style="font-size: 13px" class="text-danger">
-                               <span class="me-2" ">` + description + `</span><i class="bi bi-exclamation-circle-fill"></i>
+                               <span class="me-2">` + description + `</span><i class="bi bi-exclamation-circle-fill"></i>
                            </li>`;
                 }
-            }
+            });
 
             $("#rendered_list").html(li);
 
@@ -261,16 +262,20 @@
             }
 
             const medications = [];
-            for (let i = 0; i < $("#medication_list tr").length; i++) {
-                const tr = $("#medication_list tr:eq(" + i + ")");
-                const id = tr.find("td:eq(0)").text();
-                const quantity_rendered = tr.find("td:eq(6) select").val();
-
-                if ($(this).text().trim() == "Proceed" && quantity_rendered <= 0 & $("#form_prescription_type").val() != "1") {
-                    alert("Antibiotic medications not allowed to be rendered if not available, must be returned to the doctor");
-                    return;
+            const proceeding = $(this).text().trim() == "Proceed";
+            let unavailable = false;
+            $("#medication_list tr[data-dispensable]").each(function () {
+                const tr = $(this);
+                const quantity_rendered = tr.find(".med-availability").val();
+                if (proceeding && quantity_rendered <= 0 && $("#form_prescription_type").val() != "1") {
+                    unavailable = true;
                 }
-                medications.push({id: id, quantity_rendered: quantity_rendered});
+                medications.push({id: tr.data("id"), quantity_rendered: parseInt(quantity_rendered || 0, 10)});
+            });
+
+            if (unavailable) {
+                alert("Antibiotic medications not allowed to be rendered if not available, must be returned to the doctor");
+                return;
             }
 
             const params = {
@@ -407,8 +412,8 @@
                     if (it.for_switch == prescription_id && ($("#form_prescription_type").val() == "4" || $("#form_prescription_type").val() == "7"))
                         tr = "<tr class='pointer active'>";
                     tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
-                    tr += "<td>" + it.antimicrobial + "</td>";
-                    tr += "<td>" + it.dosing_regimen + "</td>";
+                    tr += "<td>" + escapeCell(it.antimicrobial) + "</td>";
+                    tr += "<td>" + escapeCell(it.dosing_regimen) + "</td>";
                     tr += "<td>" + moment(it.start_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td></td>";
@@ -454,32 +459,36 @@
                         ams.microbiologicals.forEach(it => {
                             let tr = "<tr>";
                             tr += "<td>" + moment(it.date).format("MM/DD/YYYY") + " </td>";
-                            tr += "<td>" + it.specimen + "</td>";
-                            tr += "<td colspan='3'>" + it.pathogen + "</td>";
+                            tr += "<td>" + escapeCell(it.specimen) + "</td>";
+                            tr += "<td colspan='3'>" + escapeCell(it.pathogen) + "</td>";
                             tr += "</tr>";
 
                             $("#microbiological_result_list").append(tr);
                         });
                     }
 
+                    // Every medicine shows its status; only approved, undispensed ones can be dispensed now.
+                    $("#rx_review_status").html(reviewStatusPill(data.review_status));
+                    let dispensable = 0;
                     data.results.forEach(it => {
-                        const tr = `<tr>
-                                            <td class="d-none">` + it.id + `</td>
-                                            <td>` + it.description + `</td>
-                                            <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
-                                            <td>` + it.unit + `</td>
-                                            <td class="d-none">` + it.quantity_ordered + `</td>
-                                            <td>` + it.frequency + `</td>
-                                            <td colspan="2">
-                                                <select class="form-control text-center">
-                                                    <option value=""></option>
-                                                    <option value="1">Available</option>
-                                                    <option value="0">Not Available</option>
-                                                </select>
-                                            </td>
-                                         </tr>`;
-                        $("#medication_list").append(tr);
+                        const can_dispense = parseInt(it.status, 10) === MEDICINE_STATUS.APPROVED && !it.date_rendered;
+                        const action = can_dispense
+                            ? `<select class="form-select form-select-sm mt-1 med-availability" aria-label="Availability">
+                                   <option value=""></option>
+                                   <option value="1">Available</option>
+                                   <option value="0">Not Available</option>
+                               </select>`
+                            : "";
+                        const row = $(infoMedicineRow(it, action));
+                        if (can_dispense) {
+                            dispensable++;
+                            row.attr("data-dispensable", "1");
+                        }
+                        $("#medication_list").append(row);
                     });
+                    $("#medication_hint").text(dispensable > 0
+                        ? "Set availability for each approved medicine. Pending and rejected medicines can't be dispensed."
+                        : "No approved medicine is waiting to be dispensed.");
                 }
             }).catch(err => {
             console.log(err);
@@ -545,32 +554,33 @@
                     const it = data.results[i];
                     const bg = (it.urgency == "Urgent") ? "bg-danger" : "bg-success";
                     const tr = ` <tr id='prescription_id_` + it.id + `'>
-                                <td><span class="badge ` + bg + `">` + it.urgency + `</span></td>
-                                <td>` + it.hospital_id + `</td>
-                                <td>` + it.name + `</td>
-                                <td>` + it.station + `</td>
+                                <td><span class="badge ` + bg + `">` + escapeCell(it.urgency) + `</span></td>
+                                <td>` + escapeCell(it.hospital_id) + `</td>
+                                <td>` + escapeCell(it.name) + `</td>
+                                <td>` + escapeCell(it.station) + `</td>
                                 <td>` + moment(it.date_forwarded).format("MM/DD/YYYY hh:mm:ss A") + `</td>
                                 <td>` + moment(it.created_at).format("MM/DD/YYYY hh:mm:ss A") + `</td>
-                                <td class="d-none">` + it.sex + `</td>
-                                <td class="d-none">` + it.birthdate + `</td>
-                                <td class="d-none">` + it.ward + `</td>
-                                <td class="d-none">` + it.bed_no + `</td>
-                                <td class="d-none">` + it.type + `</td>
-                                <td class="d-none">` + it.drug_allergy + `</td>
-                                <td class="d-none">` + it.weight + `</td>
-                                <td class="d-none">` + it.height + `</td>
-                                <td class="d-none">` + it.serum_creatinine + `</td>
-                                <td class="d-none">` + it.creatinine_clearance + `</td>
-                                <td class="d-none">` + it.transaminases + `</td>
-                                <td class="d-none">` + it.sgpt + `</td>
-                                <td class="d-none">` + it.sgot + `</td>
-                                <td class="d-none">` + it.days_requested + `</td>
-                                <td class="d-none">` + it.attending_physician + `</td>
-                                <td class="d-none">` + it.additional_labs + `</td>
-                                <td class="d-none">` + it.outcome + `</td>
-                                <td class="d-none">` + it.diagnosis + `</td>
-                                <td class="d-none">` + it.for_extension + `</td>
+                                <td class="d-none">` + escapeCell(it.sex) + `</td>
+                                <td class="d-none">` + escapeCell(it.birthdate) + `</td>
+                                <td class="d-none">` + escapeCell(it.ward) + `</td>
+                                <td class="d-none">` + escapeCell(it.bed_no) + `</td>
+                                <td class="d-none">` + escapeCell(it.type) + `</td>
+                                <td class="d-none">` + escapeCell(it.drug_allergy) + `</td>
+                                <td class="d-none">` + escapeCell(it.weight) + `</td>
+                                <td class="d-none">` + escapeCell(it.height) + `</td>
+                                <td class="d-none">` + escapeCell(it.serum_creatinine) + `</td>
+                                <td class="d-none">` + escapeCell(it.creatinine_clearance) + `</td>
+                                <td class="d-none">` + escapeCell(it.transaminases) + `</td>
+                                <td class="d-none">` + escapeCell(it.sgpt) + `</td>
+                                <td class="d-none">` + escapeCell(it.sgot) + `</td>
+                                <td class="d-none">` + escapeCell(it.days_requested) + `</td>
+                                <td class="d-none">` + escapeCell(it.attending_physician) + `</td>
+                                <td class="d-none">` + escapeCell(it.additional_labs) + `</td>
+                                <td class="d-none">` + escapeCell(it.outcome) + `</td>
+                                <td class="d-none">` + escapeCell(it.diagnosis) + `</td>
+                                <td class="d-none">` + escapeCell(it.for_extension) + `</td>
                                 <td>
+                                    ` + reviewStatusPill(it.review_status) + `
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
                                     </button>
@@ -666,12 +676,7 @@
     }
 
     function activityLog(it) {
-        return `<tr>
-                      <td>` + it.fname + ' ' + it.mname + ' ' + it.lname + ` <span class="badge bg-primary ms-2">` + it.origin + `</span></td>
-                      <td>` + it.remarks + `</td>
-                      <td><div class="badge bg-success p-1">` + it.released_to + `</div></td>
-                      <td>` + moment(it.date_forwarded).format("MM/DD/YYYY hh:mm:ss A") + `</td>
-                    </tr>`
+        return activityLogRow(it);
     }
 
     function clearForms() {

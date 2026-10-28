@@ -1,60 +1,65 @@
 @extends('master')
 @section('content')
     <div class="col-12">
-        <div class="d-flex justify-content-end mb-2">
-            <div class="me-1">
-                <select class="form-control" id="filter_type">
-                    <option value="">Filter type</option>
+        <div class="page-head">
+            <div>
+                <p class="eyebrow">Reports</p>
+                <h1>AMS summary</h1>
+                <p class="page-sub">Antimicrobial use across the hospital: who prescribed, who approved, and for how long.</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-outline-primary" id="btn_download">
+                    <i class="bi bi-download"></i> Export to Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="card list-card">
+            <div class="toolbar">
+                <select class="form-select toolbar-select" id="filter_type">
+                    <option value="">All types</option>
                     <option value="2">Restricted</option>
                     <option value="5">Monitored</option>
                     <option value="8">Non-monitored</option>
                 </select>
-            </div>
-            <div class="ms-1 me-1">
-                <input class="form-control" placeholder="Search patient" id="filter_patient"/>
-            </div>
-            <div class="ms-1 me-1">
-                <input class="form-control" placeholder="Search medicine" id="filter_description"/>
-            </div>
-            <div class="ms-1">
-                <input name="datefilter" class="form-control" placeholder="Select daterange" id="filter_date" readonly/>
-            </div>
-            <div class="ms-1">
-                <button class="btn btn-success" id="btn_search">
+                <div class="input-icon flex-grow-1">
                     <i class="bi bi-search"></i>
+                    <input class="form-control" placeholder="Patient" id="filter_patient"/>
+                </div>
+                <div class="input-icon flex-grow-1">
+                    <i class="bi bi-capsule"></i>
+                    <input class="form-control" placeholder="Medicine" id="filter_description"/>
+                </div>
+                <div class="input-icon">
+                    <i class="bi bi-calendar3"></i>
+                    <input name="datefilter" class="form-control" placeholder="Date range" id="filter_date" readonly/>
+                </div>
+                <button class="btn btn-primary" id="btn_search">
+                    <i class="bi bi-funnel"></i> Apply
                 </button>
             </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">AMS Summary</h5>
-                    <button class="btn btn-primary" id="btn_download">
-                        <i class="bi bi-download"></i>
-                    </button>
-                </div>
-                <div class="table-responsive">
-                    <table class="table text-center">
-                        <thead>
-                        <tr>
-                            <th style="width: 10%">Patient</th>
-                            <th style="width: 4%">Age</th>
-                            <th style="width: 4%">Gender</th>
-                            <th style="width: 7%">Ward</th>
-                            <th style="width: 10%">Prescribed by</th>
-                            <th style="width: 10%">Date prescribed</th>
-                            <th style="width: 10%">Attending Physician</th>
-                            <th>Antibiotic</th>
-                            <th style="width: 10%">Approved by</th>
-                            <th style="width: 5%">Days<br />approved</th>
-                            <th>Date<br />Approved</th>
-                            <th style="width: 7%">Start date</th>
-                            <th style="width: 7%">Stop date</th>
-                        </tr>
-                        </thead>
-                        <tbody id="ams_summary" style="font-size: 12px"></tbody>
-                    </table>
-                </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-sm m-0 data-table report-table">
+                    <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Age</th>
+                        <th>Sex</th>
+                        <th>Ward</th>
+                        <th>Prescribed by</th>
+                        <th>Date prescribed</th>
+                        <th>Attending physician</th>
+                        <th>Antibiotic</th>
+                        <th>Approved by</th>
+                        <th>Days approved</th>
+                        <th>Date approved</th>
+                        <th>Start date</th>
+                        <th>Stop date</th>
+                    </tr>
+                    </thead>
+                    <tbody id="ams_summary"></tbody>
+                </table>
             </div>
         </div>
     </div>

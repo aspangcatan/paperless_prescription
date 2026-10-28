@@ -10,10 +10,12 @@ use App\Models\PrescribedMedicine;
 use App\Models\PrescriptionLog;
 use App\Models\RenderedPrescription;
 use App\Models\ReturnedPrescription;
+use App\Services\PrescriptionWorkflow;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class PharmacyReviewController extends Controller
 {
@@ -47,51 +49,63 @@ class PharmacyReviewController extends Controller
         }
     }
 
+    /**
+     * Dispenses the approved medicines that haven't been dispensed yet, all of them at once.
+     * Pending, rejected and already-dispensed medicines can't be touched from here.
+     */
     public function renderPrescription(Request $request)
     {
         try {
-            $prescription = PharmacyReview::where('prescription_id', $request->id)->first();
-            if (!$prescription) {
-                return response(['code' => 500, 'message' => 'Prescription dont exists']);
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|integer',
+                'remarks' => 'nullable|string|max:2000',
+                'medications' => 'array',
+                'medications.*.id' => 'required|integer|distinct',
+                'medications.*.quantity_rendered' => 'required|integer|min:0',
+            ]);
+            if ($validator->fails()) {
+                return response(['code' => 500, 'message' => $validator->errors()->first()]);
             }
 
-            #UPDATE MEDICATINS QUANTITY RENDERED
-            $is_available = true;
-            $medications = $request->medications;
-            for ($i = 0; $i < count($medications); $i++) {
-                if ($medications[$i]["quantity_rendered"] < 1) {
-                    $is_available = false;
+            $result = DB::transaction(function () use ($request) {
+                $prescription = PharmacyReview::where('prescription_id', $request->id)->lockForUpdate()->first();
+                if (!$prescription) {
+                    return ['code' => 500, 'message' => 'Prescription dont exists'];
                 }
 
-                #IF UNAVAILABLE PROMPT ERROR
-                $medication = PrescribedMedicine::find($medications[$i]["id"]);
-                $medication->quantity_rendered = $medications[$i]["quantity_rendered"];
-                $medication->date_rendered = Carbon::now();
-                $medication->save();
-            }
+                $to_dispense = PrescriptionController::medicinesInStep("PHARMACY", $request->id)->keyBy('id');
+                $submitted = collect($request->medications ?? [])->keyBy(function ($medication) {
+                    return (int)$medication['id'];
+                });
 
-            if (!$is_available) {
-                return response(['code' => 500, 'message' => 'Cannot render if not available']);
-            }
+                if ($submitted->keys()->sort()->values()->all() !== $to_dispense->keys()->sort()->values()->all()) {
+                    return ['code' => 500, 'message' => 'The medicines to dispense have changed. Please refresh and try again.'];
+                }
 
-            $released_to = "NURSE";
-            $remarks = "<span class='badge bg-success text-white'>Approved <i class='bi bi-hand-thumbs-up-fill'></i></span><span class='ms-2'>" . $request->remarks . "</span>";
+                #IF UNAVAILABLE PROMPT ERROR, BEFORE ANYTHING IS SAVED
+                foreach ($submitted as $medication) {
+                    if ($medication["quantity_rendered"] < 1) {
+                        return ['code' => 500, 'message' => 'Cannot render if not available'];
+                    }
+                }
 
-            $nurse = new NurseReview;
-            $nurse->prescription_id = $request->id;
-            $nurse->save();
+                #UPDATE MEDICATINS QUANTITY RENDERED
+                foreach ($submitted as $id => $medication) {
+                    $medicine = $to_dispense->get($id);
+                    $medicine->quantity_rendered = $medication["quantity_rendered"];
+                    $medicine->date_rendered = Carbon::now();
+                    $medicine->save();
+                }
 
-            $logs = new PrescriptionLog;
-            $logs->prescription_id = $request->id;
-            $logs->origin = "PHARMACY";
-            $logs->released_by = Auth::id();
-            $logs->released_to = $released_to;
-            $logs->remarks = $remarks;
-            $logs->save();
+                NurseReview::firstOrCreate(['prescription_id' => $request->id]);
+                PrescriptionWorkflow::log($request->id, "PHARMACY", "NURSE", $request->remarks, 'approved');
 
-            #REMOVE RECORD FROM PHARMACY REVIEWS
-            $prescription->forceDelete();
-            return response(['code' => 200, 'message' => 'Prescription Tagged']);
+                #REMOVE RECORD FROM PHARMACY REVIEWS
+                $prescription->forceDelete();
+                return ['code' => 200, 'message' => 'Prescription Tagged'];
+            });
+
+            return response($result);
         } catch (\Exception $exception) {
             self::insertErrorLogs(Auth::id(), 'renderPrescription', $request, $exception->getMessage());
             return response(['code' => 500, 'message' => "Something went wrong"]);

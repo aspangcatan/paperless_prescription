@@ -1,6 +1,7 @@
-<script src="js/moment.min.js"></script>
-<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
-<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
 <script>
     const nurses_modal = new bootstrap.Modal(document.getElementById('nurses_modal'));
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
@@ -117,11 +118,11 @@
                     const it = data.results[i];
                     const stations = (it.stations) ? it.stations : "";
                     const tr = `<tr id='user_id_` + it.id + `'>
-                                <td>` + it.fname + `</td>
-                                <td>` + it.mname + `</td>
-                                <td>` + it.lname + `</td>
-                                <td>` + it.suffix + `</td>
-                                <td>` + stations + `</td>
+                                <td>` + escapeCell(it.fname) + `</td>
+                                <td>` + escapeCell(it.mname) + `</td>
+                                <td>` + escapeCell(it.lname) + `</td>
+                                <td>` + escapeCell(it.suffix) + `</td>
+                                <td>` + escapeCell(stations) + `</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="viewDetails(` + it.id + `)">
                                         <i class="bi bi-gear"></i>
@@ -165,15 +166,12 @@
     }
 
     function populateStations() {
-        STATIONS.forEach(it => {
+        STATIONS.forEach((it, index) => {
+            // The save handler reads each station from the label right after its checkbox.
             $("#stations").append(`
-<div class="col-md-12">
-    <div class="form-check">
-      <input  type="checkbox" name="station">
-      <label class="form-check-label" for="flexCheckChecked">
-        ` + it + `
-      </label>
-    </div>
+<div class="choice">
+    <input type="checkbox" name="station" id="station_` + index + `">
+    <label for="station_` + index + `">` + it + `</label>
 </div>`);
 
         });

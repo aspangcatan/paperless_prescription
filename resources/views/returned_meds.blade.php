@@ -1,43 +1,47 @@
 @extends('master')
 @section('content')
     <div class="col-12">
-        <div class="d-flex justify-content-end mb-2">
+        <div class="page-head">
             <div>
-                <input class="form-control" placeholder="Search medicine" id="filter_description"/>
-            </div>
-            <div>
-                <input type="date" class="form-control" placeholder="Search medicine" id="filter_date"/>
-            </div>
-            <div class="ms-1">
-                <button class="btn btn-success" id="btn_search_medicine">
-                    <i class="bi bi-search"></i>
-                </button>
+                <p class="eyebrow">Pharmacy</p>
+                <h1>Returned medicines</h1>
+                <p class="page-sub">Unused antimicrobials returned by the wards. Receive them to close the record.</p>
             </div>
         </div>
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">Returned Medicines</h5>
+
+        <div class="card list-card">
+            <div class="toolbar">
+                <div class="input-icon flex-grow-1">
+                    <i class="bi bi-capsule"></i>
+                    <input class="form-control" placeholder="Medicine" id="filter_description"/>
                 </div>
-                <div class="table-responsive">
-                    <table class="table text-center">
-                        <thead>
-                        <tr>
-                            <th>Hospital ID</th>
-                            <th>Patient</th>
-                            <th>Ward</th>
-                            <th>Medicine</th>
-                            <th>Amount</th>
-                            <th>Returned By</th>
-                            <th>Date Returned</th>
-                            <th>Received By</th>
-                            <th>Date Received</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody id="medicine_list"></tbody>
-                    </table>
+                <div class="input-icon">
+                    <i class="bi bi-calendar3"></i>
+                    <input type="date" class="form-control" id="filter_date"/>
                 </div>
+                <button class="btn btn-primary" id="btn_search_medicine">
+                    <i class="bi bi-funnel"></i> Apply
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover m-0 data-table">
+                    <thead>
+                    <tr>
+                        <th>Hospital ID</th>
+                        <th>Patient</th>
+                        <th>Ward</th>
+                        <th>Medicine</th>
+                        <th>Amount</th>
+                        <th>Returned by</th>
+                        <th>Date returned</th>
+                        <th>Received by</th>
+                        <th>Date received</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="medicine_list"></tbody>
+                </table>
             </div>
         </div>
     </div>

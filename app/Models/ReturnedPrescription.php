@@ -10,4 +10,5 @@ class ReturnedPrescription extends Model
     use HasFactory;
     protected $connection = 'mysql';
     protected $table = 'returned_prescriptions';
+    protected $fillable = ['prescription_id'];
 }

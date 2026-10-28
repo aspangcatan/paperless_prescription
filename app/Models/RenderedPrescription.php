@@ -10,5 +10,5 @@ class RenderedPrescription extends Model
     use HasFactory;
     protected $connection = 'mysql';
     protected $table = 'rendered_prescriptions';
-
+    protected $fillable = ['prescription_id'];
 }

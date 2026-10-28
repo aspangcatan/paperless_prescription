@@ -9,6 +9,28 @@ use Illuminate\Support\Facades\Route;
 class Authorize
 {
     /**
+     * Roles allowed to open each page, matching what the sidebar offers them.
+     * Unlisted pages (medicine dictionary, track prescription, disposition) are open to every signed-in user.
+     */
+    const ALLOWED_ROLES = [
+        #PRESCRIBER
+        'home' => ['Doctor', 'ICC'],
+        'returned_prescription' => ['Doctor', 'ICC'],
+        #IPCC
+        'icc_review' => ['ICC'],
+        'monitored_summary' => ['ICC'],
+        'ams_summary' => ['ICC', 'Pharmacist', 'Pharmacist Admin'],
+        #NURSE
+        'nurse_review' => ['Nurse', 'Nurse Admin'],
+        'rendered_prescription' => ['Nurse', 'Nurse Admin'],
+        'nurse_admin' => ['Nurse Admin'],
+        #PHARMACY
+        'pharmacy_review' => ['Pharmacist', 'Pharmacist Admin'],
+        'returned_meds' => ['Pharmacist', 'Pharmacist Admin'],
+        'issuances' => ['Pharmacist', 'Pharmacist Admin'],
+    ];
+
+    /**
      * Handle an incoming request.
      *
      * @param \Illuminate\Http\Request $request
@@ -17,26 +39,11 @@ class Authorize
      */
     public function handle(Request $request, Closure $next)
     {
-        switch (Route::getCurrentRoute()->uri) {
-            #PRESCRIBER
-            case "home":
-            case "returned_prescription":
-                if (session('access_rights') == "Doctor" || session('access_rights') == "ICC")
-                    return $next($request);
-                else
-                    return redirect()->route('login');
-            case "nurse_review":
-                if (session('access_rights') == "Nurse" || session('access_rights') == "Nurse Admin")
-                    return $next($request);
-                else
-                    return redirect()->route('login');
-            case "pharmacy_review":
-                if (session('access_rights') == "Pharmacist" || session('access_rights') == "Pharmacist Admin")
-                    return $next($request);
-                else
-                    return redirect()->route('login');
-            default:
-                return $next($request);
+        $roles = self::ALLOWED_ROLES[Route::getCurrentRoute()->uri] ?? null;
+        if ($roles !== null && !in_array(session('access_rights'), $roles, true)) {
+            return redirect()->route('login');
         }
+
+        return $next($request);
     }
 }

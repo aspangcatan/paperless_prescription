@@ -1,0 +1,925 @@
+/*
+ * E-AMSP app theme, layered on NiceAdmin + Bootstrap 5.
+ * master.blade.php puts .theme-v2 on <body>; colours and type match the sign-in page.
+ */
+.theme-v2 {
+    --primary: #00236f;
+    --primary-container: #1e3a8a;
+    --primary-fixed: #dce1ff;
+    --primary-soft: #eef0ff;
+    --secondary: #006a61;
+    --secondary-container: #86f2e4;
+    --on-secondary-container: #00504a;
+    --danger: #ba1a1a;
+    --danger-container: #ffdad6;
+    --on-danger-container: #93000a;
+    --warning-container: #ffdcbe;
+    --on-warning-container: #7a4100;
+    --background: #f5f6fc;
+    --surface: #ffffff;
+    --surface-low: #f2f3ff;
+    --on-surface: #131b2e;
+    --on-surface-variant: #444651;
+    --outline: #757682;
+    --outline-variant: #d5d6e2;
+    --line: #e6e8f2;
+    --radius: 0.875rem;
+    --sidebar-width: 264px;
+    --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-head: 'Plus Jakarta Sans', var(--font-body);
+
+    --bs-primary: var(--primary);
+    --bs-primary-rgb: 0, 35, 111;
+    --bs-body-font-family: var(--font-body);
+
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    color: var(--on-surface);
+    background: var(--background);
+    -webkit-font-smoothing: antialiased;
+}
+
+.theme-v2 h1, .theme-v2 h2, .theme-v2 h3,
+.theme-v2 h4, .theme-v2 h5, .theme-v2 h6 { font-family: var(--font-head); color: var(--on-surface); }
+
+.theme-v2 a { color: var(--primary); }
+
+/* ---------- Header ---------- */
+.theme-v2 .header {
+    height: 64px;
+    padding-left: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: none;
+    border-bottom: 1px solid var(--line);
+}
+
+.theme-v2 .logo { gap: 0.625rem; }
+
+@media (min-width: 1200px) {
+    .theme-v2 .logo { width: calc(var(--sidebar-width) - 1rem); }
+}
+
+.theme-v2 .logo img { max-height: 36px; margin-right: 0; }
+
+.theme-v2 .logo .brand-text { line-height: 1.1; }
+
+.theme-v2 .logo .brand-name {
+    font: 700 1.125rem/1.2 var(--font-head);
+    color: var(--primary);
+    letter-spacing: -0.01em;
+}
+
+.theme-v2 .logo .brand-sub {
+    font-size: 0.6875rem !important;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--secondary);
+}
+
+.theme-v2 .header .toggle-sidebar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    font-size: 1.375rem;
+    color: var(--on-surface-variant);
+    border-radius: 0.5rem;
+}
+
+.theme-v2 .header .toggle-sidebar-btn:hover { background: var(--surface-low); color: var(--primary); }
+
+.theme-v2 .header-nav .nav-profile {
+    padding: 0.25rem 0.75rem 0.25rem 0.25rem !important;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+}
+
+.theme-v2 .header-nav .nav-profile:hover { background: var(--surface-low); }
+
+.theme-v2 .header-nav .nav-profile img {
+    width: 2rem;
+    height: 2rem;
+    max-height: none;
+    object-fit: cover;
+    background: var(--surface);
+}
+
+.theme-v2 .header-nav .nav-profile span { font-size: 0.875rem; font-weight: 600; color: var(--on-surface); }
+
+.theme-v2 .dropdown-menu {
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    box-shadow: 0 16px 32px -12px rgba(19, 27, 46, 0.2);
+    padding: 0.375rem;
+}
+
+.theme-v2 .dropdown-menu-arrow::before { display: none; }
+
+.theme-v2 .header-nav .profile { min-width: 15rem; }
+
+.theme-v2 .header-nav .profile .dropdown-header { text-align: left; padding: 0.625rem 0.75rem; }
+
+.theme-v2 .header-nav .profile .dropdown-header h6 { font-size: 0.9375rem; font-weight: 700; color: var(--on-surface); }
+
+.theme-v2 .header-nav .profile .dropdown-header span {
+    display: inline-block;
+    margin-top: 0.25rem;
+    padding: 0.0625rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--primary-fixed);
+    color: var(--primary);
+}
+
+.theme-v2 .dropdown-menu .dropdown-item {
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--on-surface);
+}
+
+.theme-v2 .dropdown-menu .dropdown-item i { color: var(--outline); }
+
+.theme-v2 .dropdown-menu .dropdown-item:hover { background: var(--surface-low); }
+
+.theme-v2 .dropdown-menu .dropdown-divider { margin: 0.25rem 0; border-color: var(--line); }
+
+/* ---------- Sidebar ---------- */
+.theme-v2 .sidebar {
+    top: 64px;
+    width: var(--sidebar-width);
+    padding: 1.25rem 0.875rem;
+    box-shadow: none;
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+}
+
+@media (max-width: 1199px) {
+    .theme-v2 .sidebar { left: calc(-1 * var(--sidebar-width)); box-shadow: 0 0 32px rgba(19, 27, 46, 0.18); }
+    .theme-v2.toggle-sidebar .sidebar { left: 0; }
+}
+
+@media (min-width: 1200px) {
+    .theme-v2 #main, .theme-v2 #footer { margin-left: var(--sidebar-width); }
+    .theme-v2.toggle-sidebar #main, .theme-v2.toggle-sidebar #footer { margin-left: 0; }
+    .theme-v2.toggle-sidebar .sidebar { left: calc(-1 * var(--sidebar-width)); }
+}
+
+.theme-v2 .sidebar-nav .nav-heading {
+    margin: 1rem 0 0.375rem 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--outline);
+}
+
+.theme-v2 .sidebar-nav .nav-heading:first-child { margin-top: 0; }
+
+.theme-v2 .sidebar-nav .nav-item { margin-bottom: 0.125rem; }
+
+.theme-v2 .sidebar-nav .nav-link,
+.theme-v2 .sidebar-nav .nav-link.collapsed {
+    position: relative;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+    background: transparent;
+}
+
+.theme-v2 .sidebar-nav .nav-link i,
+.theme-v2 .sidebar-nav .nav-link.collapsed i { margin: 0; font-size: 1.0625rem; color: var(--outline); }
+
+.theme-v2 .sidebar-nav .nav-link:hover { background: var(--surface-low); color: var(--primary); }
+
+.theme-v2 .sidebar-nav .nav-link:hover i { color: var(--primary); }
+
+.theme-v2 .sidebar-nav .nav-link:not(.collapsed) {
+    background: var(--primary-fixed);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.theme-v2 .sidebar-nav .nav-link:not(.collapsed) i { color: var(--primary); }
+
+.theme-v2 .sidebar-nav .nav-link:not(.collapsed)::before {
+    content: '';
+    position: absolute;
+    left: -0.875rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--primary);
+}
+
+/* ---------- Main + footer ---------- */
+.theme-v2 #main { margin-top: 64px; padding: 1.75rem 2rem 2rem; }
+
+@media (max-width: 1199px) {
+    .theme-v2 #main { padding: 1.25rem 1rem 1.5rem; }
+}
+
+.theme-v2 .footer { border-top: 1px solid var(--line); padding: 1rem 0; font-size: 0.75rem; }
+
+.theme-v2 .footer .copyright,
+.theme-v2 .footer .credits { color: var(--outline); font-size: 0.75rem; }
+
+.theme-v2 .footer .credits a { color: var(--outline); }
+
+.theme-v2 .back-to-top { background: var(--primary); border-radius: 0.625rem; }
+
+/* ---------- Page header ---------- */
+.theme-v2 .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.theme-v2 .eyebrow {
+    margin: 0 0 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--secondary);
+}
+
+.theme-v2 .page-head h1 {
+    margin: 0;
+    font: 700 1.75rem/2.125rem var(--font-head);
+    letter-spacing: -0.02em;
+    color: var(--primary);
+}
+
+.theme-v2 .page-sub { margin: 0.25rem 0 0; color: var(--outline); }
+
+.theme-v2 .page-actions { display: flex; gap: 0.5rem; }
+
+/* ---------- Buttons ---------- */
+.theme-v2 .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5625rem 1rem;
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    box-shadow: none;
+}
+
+.theme-v2 .btn-sm { padding: 0.375rem 0.625rem; font-size: 0.8125rem; border-radius: 0.5rem; }
+
+.theme-v2 .btn-primary,
+.theme-v2 .btn-success {
+    --bs-btn-bg: var(--primary);
+    --bs-btn-border-color: var(--primary);
+    --bs-btn-hover-bg: var(--primary-container);
+    --bs-btn-hover-border-color: var(--primary-container);
+    --bs-btn-active-bg: var(--primary-container);
+    --bs-btn-active-border-color: var(--primary-container);
+    --bs-btn-disabled-bg: var(--primary);
+    --bs-btn-disabled-border-color: var(--primary);
+    --bs-btn-focus-shadow-rgb: 0, 35, 111;
+}
+
+.theme-v2 .btn-outline-primary {
+    --bs-btn-color: var(--primary);
+    --bs-btn-border-color: var(--outline-variant);
+    --bs-btn-bg: var(--surface);
+    --bs-btn-hover-bg: var(--primary-soft);
+    --bs-btn-hover-color: var(--primary);
+    --bs-btn-hover-border-color: var(--primary-fixed);
+    --bs-btn-active-bg: var(--primary-fixed);
+    --bs-btn-active-color: var(--primary);
+    --bs-btn-active-border-color: var(--primary-fixed);
+}
+
+.theme-v2 .btn-light,
+.theme-v2 .btn-secondary {
+    --bs-btn-color: var(--on-surface);
+    --bs-btn-bg: var(--surface);
+    --bs-btn-border-color: var(--outline-variant);
+    --bs-btn-hover-color: var(--primary);
+    --bs-btn-hover-bg: var(--surface-low);
+    --bs-btn-hover-border-color: var(--outline-variant);
+    --bs-btn-active-bg: var(--primary-fixed);
+    --bs-btn-active-border-color: var(--primary-fixed);
+}
+
+.theme-v2 .btn-danger {
+    --bs-btn-bg: var(--danger);
+    --bs-btn-border-color: var(--danger);
+    --bs-btn-hover-bg: #93000a;
+    --bs-btn-hover-border-color: #93000a;
+}
+
+.theme-v2 .btn-outline-danger {
+    --bs-btn-color: var(--danger);
+    --bs-btn-border-color: var(--danger-container);
+    --bs-btn-bg: var(--surface);
+    --bs-btn-hover-bg: var(--danger-container);
+    --bs-btn-hover-color: var(--on-danger-container);
+    --bs-btn-hover-border-color: var(--danger-container);
+}
+
+/* Pharmacy's "ACCEPT" on returned medicines. */
+.theme-v2 .data-table .btn-success { --bs-btn-bg: var(--secondary); --bs-btn-border-color: var(--secondary); --bs-btn-hover-bg: #00504a; --bs-btn-hover-border-color: #00504a; }
+
+.theme-v2 .btn-icon { position: relative; width: 2.5rem; padding-left: 0; padding-right: 0; }
+
+.theme-v2 .btn-icon .badge-number:empty { display: none; }
+
+.theme-v2 .btn-icon .badge-number {
+    position: absolute;
+    top: -0.375rem;
+    right: -0.375rem;
+    min-width: 1.25rem;
+    padding: 0.1875rem 0.375rem;
+    border-radius: 999px;
+    border: 2px solid var(--background);
+    font-size: 0.6875rem;
+}
+
+/* ---------- Forms ---------- */
+.theme-v2 .form-label,
+.theme-v2 label.form-label {
+    margin-bottom: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+}
+
+.theme-v2 .form-control,
+.theme-v2 .form-select {
+    min-height: 2.5rem;
+    border: 1px solid var(--outline-variant);
+    border-radius: 0.625rem;
+    background-color: var(--surface);
+    color: var(--on-surface);
+    font-size: 0.875rem;
+}
+
+.theme-v2 .form-control-sm { min-height: 2rem; border-radius: 0.5rem; }
+
+.theme-v2 textarea.form-control { min-height: 0; }
+
+.theme-v2 .form-control::placeholder { color: #9a9ba6; }
+
+.theme-v2 .form-control:focus,
+.theme-v2 .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-fixed);
+}
+
+.theme-v2 .form-control.is-invalid,
+.theme-v2 .form-select.is-invalid { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-container); }
+
+.theme-v2 .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+
+.theme-v2 .input-icon { position: relative; }
+
+.theme-v2 .input-icon > i {
+    position: absolute;
+    top: 50%;
+    left: 0.875rem;
+    transform: translateY(-50%);
+    color: var(--outline);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.theme-v2 .input-icon .form-control,
+.theme-v2 .input-icon .form-select { padding-left: 2.5rem; }
+
+.theme-v2 .toolbar-select { width: 11rem; }
+
+.theme-v2 .form-switch .form-check-input { width: 2.25rem; height: 1.25rem; cursor: pointer; }
+
+.theme-v2 .form-switch .form-check-label { margin-left: 0.25rem; font-weight: 600; cursor: pointer; }
+
+/* ---------- Cards + tables ---------- */
+.theme-v2 .card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(19, 27, 46, 0.04);
+    margin-bottom: 1.25rem;
+}
+
+.theme-v2 .list-card { overflow: hidden; }
+
+.theme-v2 .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.theme-v2 .toolbar .input-icon:not(.flex-grow-1) { width: 13rem; }
+
+.theme-v2 .data-table { --bs-table-hover-bg: var(--primary-soft); margin: 0; }
+
+.theme-v2 .data-table > thead th {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-low);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--outline);
+    white-space: nowrap;
+}
+
+.theme-v2 .data-table > tbody td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+    color: var(--on-surface);
+}
+
+.theme-v2 .data-table > tbody tr:last-child td { border-bottom: 0; }
+
+/* Empty / loading rows: a single cell spanning the table. */
+.theme-v2 .data-table > tbody td[colspan]:only-child { padding: 2rem 1rem; text-align: center; color: var(--outline); }
+
+.theme-v2 .data-table > tbody tr.decision-row > td:only-child { padding: 0.75rem 1rem 1rem; text-align: left; color: var(--on-surface); }
+
+.theme-v2 .data-table.table-sm > thead th { padding: 0.5rem 0.75rem; }
+
+.theme-v2 .data-table.table-sm > tbody td { padding: 0.5rem 0.75rem; font-size: 0.8125rem; }
+
+/* Prescription list: patient name stands out, the open button sits at the right edge. */
+.theme-v2 #prescription_list td:nth-child(3) { font-weight: 600; }
+
+.theme-v2 #prescription_list td:nth-child(2),
+.theme-v2 #prescription_list td:nth-child(5) { color: var(--on-surface-variant); font-variant-numeric: tabular-nums; }
+
+.theme-v2 #prescription_list td:last-child { text-align: right; }
+
+.theme-v2 #prescription_list td:nth-child(6) { color: var(--on-surface-variant); font-variant-numeric: tabular-nums; }
+
+/* Row actions the page scripts render as solid buttons read lighter as outlines. */
+.theme-v2 .data-table > tbody td:last-child > .btn-sm.btn-primary {
+    --bs-btn-color: var(--primary);
+    --bs-btn-bg: var(--surface);
+    --bs-btn-border-color: var(--outline-variant);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--primary);
+    --bs-btn-hover-border-color: var(--primary);
+}
+
+.theme-v2 .data-table > tbody td:last-child:not([colspan]) { text-align: right; }
+
+.theme-v2 #prescription_list td:last-child .btn::after { content: 'Open'; }
+
+/* Wide report tables stay compact. */
+.theme-v2 .report-table > thead th { white-space: normal; }
+
+.theme-v2 .report-table > tbody td { font-size: 0.75rem; }
+
+.theme-v2 .report-table > tbody td:last-child { text-align: left; }
+
+.theme-v2 .table-scroll { max-height: 18.75rem; }
+
+.theme-v2 .table-scroll-lg { max-height: 31rem; }
+
+.theme-v2 .pointer:hover,
+.theme-v2 .pointer.active { background: var(--primary-fixed) !important; color: var(--primary) !important; }
+
+.theme-v2 .card-footer {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.theme-v2 .pager { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+
+.theme-v2 .pager-label { color: var(--outline); }
+
+.theme-v2 .pager-label strong { color: var(--on-surface); font-weight: 600; }
+
+.theme-v2 .pager-buttons { display: flex; gap: 0.375rem; }
+
+.theme-v2 .pager-buttons .btn { width: 2.25rem; padding-left: 0; padding-right: 0; }
+
+/* Soft status pills. */
+.theme-v2 .badge {
+    padding: 0.3125rem 0.625rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.theme-v2 .data-table .badge.bg-success,
+.theme-v2 .data-table .badge.bg-secondary { background: var(--secondary-container) !important; color: var(--on-secondary-container) !important; }
+
+.theme-v2 .data-table .badge.bg-danger { background: var(--danger-container) !important; color: var(--on-danger-container) !important; }
+
+.theme-v2 .data-table .badge.bg-info,
+.theme-v2 .data-table .badge.bg-primary { background: var(--primary-fixed) !important; color: var(--primary) !important; }
+
+.theme-v2 .data-table .badge.bg-danger::before { content: '\25CF\00a0'; }
+
+/* ---------- Modals ---------- */
+.theme-v2 .modal-backdrop.show { opacity: 0.55; background: #131b2e; }
+
+.theme-v2 .modal-content {
+    border: 0;
+    border-radius: 1rem;
+    box-shadow: 0 32px 64px -16px rgba(19, 27, 46, 0.35);
+    overflow: hidden;
+}
+
+.theme-v2 .modal-header {
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.theme-v2 .modal-heading { display: flex; align-items: center; gap: 0.875rem; min-width: 0; }
+
+.theme-v2 .modal-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    background: var(--primary-fixed);
+    color: var(--primary);
+    font-size: 1.125rem;
+}
+
+.theme-v2 .modal-title { margin: 0; font: 700 1.125rem/1.5rem var(--font-head); color: var(--on-surface); }
+
+.theme-v2 .modal-sub { margin: 0.125rem 0 0; font-size: 0.8125rem; color: var(--outline); }
+
+.theme-v2 .modal-body { padding: 1.25rem; background: var(--background); }
+
+.theme-v2 .modal-footer {
+    gap: 0.5rem;
+    padding: 0.875rem 1.25rem;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.theme-v2 .modal-footer > * { margin: 0; }
+
+.theme-v2 .modal-footer .btn { min-width: 6.5rem; }
+
+.theme-v2 .btn-close:focus { box-shadow: 0 0 0 3px var(--primary-fixed); }
+
+@media (min-width: 576px) {
+    .theme-v2 .modal-sm-plus { max-width: 26rem; }
+}
+
+/* Sections inside long forms. */
+.theme-v2 .form-section {
+    padding: 1.125rem 1.25rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.theme-v2 .row > [class*="col"] > .form-section { margin-bottom: 0; }
+
+.theme-v2 .row.g-3 + .form-section,
+.theme-v2 .ams_container > .row.g-3 { margin-bottom: 1rem; }
+
+.theme-v2 .section-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.875rem; }
+
+.theme-v2 .section-head .section-title { margin: 0; }
+
+.theme-v2 .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.875rem;
+    font: 700 0.9375rem/1.375rem var(--font-head);
+    color: var(--primary);
+}
+
+.theme-v2 .section-title > i { color: var(--secondary); font-size: 1rem; }
+
+.theme-v2 .callout { background: var(--primary-soft); border-color: var(--primary-fixed); }
+
+.theme-v2 .criteria { margin: 0; padding-left: 1.125rem; color: var(--on-surface-variant); }
+
+.theme-v2 .criteria li { margin-bottom: 0.25rem; }
+
+.theme-v2 .criteria small { color: var(--outline); }
+
+/* Read-only patient tiles. */
+.theme-v2 .info-grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.theme-v2 .info-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.625rem;
+    background: var(--surface-low);
+}
+
+.theme-v2 .info-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--outline);
+}
+
+.theme-v2 .info-value {
+    font-weight: 600;
+    color: var(--on-surface);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.theme-v2 .info-tile-wide .info-value { font: 700 1rem/1.5rem var(--font-head); color: var(--primary); }
+
+@media (max-width: 991px) {
+    .theme-v2 .info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .theme-v2 .info-tile-wide { grid-column: 1 / -1; }
+}
+
+/* Radio and checkbox choices drawn as selectable pills. The native input stays focusable. */
+.theme-v2 .choice-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.theme-v2 .choice { position: relative; display: flex; align-items: center; gap: 0.5rem; }
+
+.theme-v2 .choice > input[type="radio"],
+.theme-v2 .choice > input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.theme-v2 .choice > label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.4375rem 0.875rem;
+    border: 1px solid var(--outline-variant);
+    border-radius: 999px;
+    background: var(--surface);
+    font-weight: 500;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.theme-v2 .choice > label:hover { border-color: var(--primary); color: var(--primary); }
+
+.theme-v2 .choice > input:checked + label {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+}
+
+.theme-v2 .choice > input:checked + label::before { content: '\2713'; font-weight: 700; }
+
+.theme-v2 .choice > input:focus-visible + label { box-shadow: 0 0 0 3px var(--primary-fixed); }
+
+.theme-v2 .choice-other .form-control { width: 9rem; }
+
+/* Rx order. */
+.theme-v2 .rx-section { border-color: var(--primary-fixed); }
+
+.theme-v2 .rx-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.5rem;
+    background: var(--primary);
+    color: #fff;
+    font: italic 700 0.875rem/1 Georgia, serif;
+}
+
+.theme-v2 #medication_list .form-control { min-height: 2.25rem; }
+
+.theme-v2 .urgent-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: fit-content;
+    margin-top: 1rem;
+    padding: 0.5rem 0.875rem;
+    border: 1px dashed var(--outline-variant);
+    border-radius: 0.625rem;
+}
+
+.theme-v2 .urgent-toggle .form-check-input { margin: 0; cursor: pointer; }
+
+.theme-v2 .urgent-toggle label { font-weight: 600; color: var(--on-surface-variant); cursor: pointer; }
+
+.theme-v2 .urgent-toggle:has(input:checked) { border-style: solid; border-color: var(--danger); background: var(--danger-container); }
+
+.theme-v2 .urgent-toggle:has(input:checked) label,
+.theme-v2 .urgent-toggle .bi { color: var(--danger); }
+
+.theme-v2 .urgent-toggle .form-check-input:checked { background-color: var(--danger); border-color: var(--danger); }
+
+/* Per-medicine status (public/js/prescription-ui.js). */
+.theme-v2 .med-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.1875rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.theme-v2 .med-pending { background: var(--warning-container); color: var(--on-warning-container); }
+
+.theme-v2 .med-approved { background: var(--secondary-container); color: var(--on-secondary-container); }
+
+.theme-v2 .med-rejected { background: var(--danger-container); color: var(--on-danger-container); }
+
+.theme-v2 .med-withdrawn { background: #e7e8ef; color: var(--on-surface-variant); }
+
+.theme-v2 .med-dispensed { background: var(--primary-fixed); color: var(--primary); }
+
+.theme-v2 .med-status-cell { white-space: normal; }
+
+.theme-v2 .med-status-cell .form-select { min-width: 9rem; }
+
+.theme-v2 .med-note { margin-top: 0.125rem; font-size: 0.75rem; line-height: 1.125rem; color: var(--outline); }
+
+.theme-v2 .med-note-rejected { color: var(--on-danger-container); }
+
+.theme-v2 .med-row[data-status="3"] td { color: var(--outline); text-decoration: line-through; }
+
+.theme-v2 .med-row[data-status="3"] .med-badge { text-decoration: none; }
+
+.theme-v2 .review-pill {
+    display: inline-block;
+    margin: 0 0.375rem 0 0;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    font: 700 0.6875rem/1rem var(--font-body);
+    letter-spacing: 0.02em;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.theme-v2 .review-pending { background: var(--warning-container); color: var(--on-warning-container); }
+
+.theme-v2 .review-partial { background: var(--primary-fixed); color: var(--primary); }
+
+.theme-v2 .review-approved { background: var(--secondary-container); color: var(--on-secondary-container); }
+
+.theme-v2 .review-rejected { background: var(--danger-container); color: var(--on-danger-container); }
+
+.theme-v2 .section-title .review-pill { margin-left: 0.25rem; }
+
+.theme-v2 .section-hint { margin: -0.5rem 0 0; font-size: 0.75rem; color: var(--outline); }
+
+.theme-v2 .section-head .section-title + .section-hint { margin-top: 0.125rem; }
+
+/* IPCC decision strip under each pending medicine. */
+.theme-v2 .decision-row > td {
+    padding: 0.75rem 1rem 1rem !important;
+    background: var(--surface-low);
+    border-left: 3px solid var(--outline-variant);
+}
+
+.theme-v2 .decision-row.is-approved > td { border-left-color: var(--secondary); }
+
+.theme-v2 .decision-row.is-rejected > td { border-left-color: var(--danger); }
+
+.theme-v2 .decision-grid { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0.75rem 1.5rem; }
+
+.theme-v2 .decision-days { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+
+.theme-v2 .decision-remarks { flex: 1 1 18rem; display: flex; flex-direction: column; gap: 0.375rem; }
+
+.theme-v2 .quick-reasons { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+
+.theme-v2 .choice-reject > input:checked + label { border-color: var(--danger); background: var(--danger); }
+
+.theme-v2 .decision-choice .choice > input:checked + label::before { content: none; }
+
+.theme-v2 .choice-reject > label:hover { border-color: var(--danger); color: var(--danger); }
+
+.theme-v2 .decision-days .choice-other .form-control { width: 5.5rem; }
+
+/* Pharmacy render dialog: medication lines filled by js/pharmacy_review. */
+.theme-v2 .render-list {
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem 0.75rem 2rem;
+    border-radius: 0.625rem;
+    background: var(--surface-low);
+}
+
+.theme-v2 .render-list:empty { display: none; }
+
+/* Validation summary. */
+.theme-v2 .alert-error {
+    margin-bottom: 1rem;
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+    border-left: 4px solid var(--danger);
+    background: var(--danger-container);
+    color: var(--on-danger-container);
+}
+
+.theme-v2 .alert-error ul { margin: 0.375rem 0 0; padding-left: 1.75rem; }
+
+/* Success / error / warning dialogs. */
+.theme-v2 .status-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1.75rem 1.5rem;
+    background: var(--surface);
+    text-align: center;
+}
+
+.theme-v2 .status-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 0.25rem;
+    border-radius: 999px;
+    font-size: 2rem;
+}
+
+.theme-v2 .status-success { background: var(--secondary-container); color: var(--on-secondary-container); box-shadow: 0 0 0 8px rgba(134, 242, 228, 0.3); }
+
+.theme-v2 .status-error { background: var(--danger-container); color: var(--danger); box-shadow: 0 0 0 8px rgba(255, 218, 214, 0.45); }
+
+.theme-v2 .status-warning { background: var(--warning-container); color: var(--on-warning-container); box-shadow: 0 0 0 8px rgba(255, 220, 190, 0.45); }
+
+.theme-v2 .status-title { margin: 0.25rem 0 0; font: 700 1.25rem/1.75rem var(--font-head); }
+
+.theme-v2 .status-message { margin: 0 0 0.75rem; color: var(--on-surface-variant); font-size: 0.9375rem; }
+
+.theme-v2 .status-message:empty { display: none; }
+
+.theme-v2 .agree-box {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.625rem;
+    background: var(--surface-low);
+    text-align: left;
+}
+
+.theme-v2 .agree-box .form-check-input { margin: 0; }
+
+.theme-v2 .agree-box label { font-weight: 600; cursor: pointer; }
+
+/* Loading overlay. */
+.theme-v2 .fullscreen-modal { position: fixed; background: rgba(19, 27, 46, 0.55); backdrop-filter: blur(2px); }
+
+/* ---------- Small screens ---------- */
+@media (max-width: 767px) {
+    .theme-v2 .page-head { align-items: stretch; }
+    .theme-v2 .page-actions { width: 100%; }
+    .theme-v2 .page-actions #btn_add_prescription { flex: 1; }
+    .theme-v2 .toolbar .input-icon,
+    .theme-v2 .toolbar .input-icon:not(.flex-grow-1) { width: 100%; }
+    .theme-v2 .toolbar .btn { width: 100%; }
+    .theme-v2 .modal-footer .btn { min-width: 0; flex: 1; }
+    .theme-v2 .modal-sub { display: none; }
+}

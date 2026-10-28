@@ -1,33 +1,42 @@
-<div class="modal fade" id="settings_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
+{{-- Change password dialog; master.blade.php drives it by id. --}}
+<div class="modal fade" id="settings_modal" tabindex="-1" aria-labelledby="settings_modal_title" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-sm-plus">
         <div class="modal-content">
-            <div class="modal-body">
-                <div class="text-end">
-                    <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close">X</button>
+            <div class="modal-header">
+                <div class="modal-heading">
+                    <span class="modal-icon"><i class="bi bi-key"></i></span>
+                    <h5 class="modal-title" id="settings_modal_title">Change password</h5>
                 </div>
-                <h5 class="card-title">Change password</h5>
-                <div class="text-white bg-danger rounded p-2 error_container d-none">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <div>There are some errors, please correct them below:</div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-error error_container d-none">
+                    <div class="d-flex align-items-center fw-semibold">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>Some details need fixing:</div>
                     </div>
                     <ul class="error_list"></ul>
                 </div>
-                <div class="form-label">
-                    <label>Old password</label>
-                    <input type="password" class="form-control" id="old_password" />
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <label class="form-label" for="old_password">Current password</label>
+                        <input type="password" class="form-control" id="old_password" autocomplete="current-password"/>
+                    </div>
+                    <div>
+                        <label class="form-label" for="new_password">New password</label>
+                        <input type="password" class="form-control" id="new_password" autocomplete="new-password"/>
+                        <div class="form-text">At least 4 characters.</div>
+                    </div>
+                    <div>
+                        <label class="form-label" for="confirm_password">Confirm new password</label>
+                        <input type="password" class="form-control" id="confirm_password" autocomplete="new-password"/>
+                    </div>
                 </div>
-                <div class="form-label">
-                    <label>New password</label>
-                    <input type="password" class="form-control" id="new_password" />
-                </div>
-                <div class="form-label">
-                    <label>Confirm password</label>
-                    <input type="password" class="form-control" id="confirm_password"/>
-                </div>
-
-                <button class="btn btn-primary mt-2 float-end" id="btn_change_password">Proceed</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" id="btn_change_password">Update password</button>
             </div>
         </div>
     </div>

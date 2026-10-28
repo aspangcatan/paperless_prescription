@@ -1,7 +1,8 @@
-<script src="js/moment.min.js"></script>
-<script src="js/xlsx.bundle.js"></script>
-<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
-<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/xlsx.bundle.js') }}"></script>
+<script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
 <script>
@@ -82,16 +83,16 @@
                     const date_approved = (it.date_approved) ? moment(it.date_approved).format("MM/DD/YYYY hh:mm:ss A") : "";
                     const tr = `
                         <tr>
-                           <td>` + it.name + `</td>
-                           <td>` + it.age + `</td>
-                           <td>` + it.sex + `</td>
-                           <td>` + it.station + `</td>
-                           <td>` + it.physician + `</td>
+                           <td>` + escapeCell(it.name) + `</td>
+                           <td>` + escapeCell(it.age) + `</td>
+                           <td>` + escapeCell(it.sex) + `</td>
+                           <td>` + escapeCell(it.station) + `</td>
+                           <td>` + escapeCell(it.physician) + `</td>
                            <td>` + moment(it.created_at).format("MM/DD/YYYY hh:mm:ss A") + `</td>
-                           <td>` + it.attending_physician + `</td>
-                           <td class="fw-bold">` + it.antimicrobial + `</td>
-                           <td>` + approved_by + `</td>
-                           <td>` + it.days_approved + `</td>
+                           <td>` + escapeCell(it.attending_physician) + `</td>
+                           <td class="fw-bold">` + escapeCell(it.antimicrobial) + `</td>
+                           <td>` + escapeCell(approved_by) + `</td>
+                           <td>` + escapeCell(it.days_approved) + `</td>
                            <td>` + date_approved + `</td>
                            <td>` + moment(it.start_date).format("MM/DD/YYYY") + `</td>
                            <td>` + moment(it.stop_date).format("MM/DD/YYYY") + `</td>

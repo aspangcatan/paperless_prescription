@@ -1,6 +1,7 @@
-<script src="js/moment.min.js"></script>
-<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
-<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
 <script>
     const prescription_modal = new bootstrap.Modal(document.getElementById('prescription_modal'));
     const patient_modal = new bootstrap.Modal(document.getElementById('patient_modal'));
@@ -319,8 +320,8 @@
                     tr = "<tr class='pointer'>";
 
                 tr += "<td>" + moment(concurrent_date).format("MM/DD/YYYY") + " </td>";
-                tr += "<td>" + antimicrobial + "</td>";
-                tr += "<td>" + dosing_regimen + "</td>";
+                tr += "<td>" + escapeCell(antimicrobial) + "</td>";
+                tr += "<td>" + escapeCell(dosing_regimen) + "</td>";
                 tr += "<td>" + moment(start_date).format("MM/DD/YYYY") + "</td>";
                 tr += "<td>" + moment(stop_date).format("MM/DD/YYYY") + "</td>";
                 tr += "<td>";
@@ -380,8 +381,8 @@
             if ($(this).val() == "") {
                 let tr = "<tr id='micro_id_" + count + "'>";
                 tr += "<td>" + moment(date).format("MM/DD/YYYY") + " </td>";
-                tr += "<td>" + specimen + "</td>";
-                tr += "<td>" + pathogen + "</td>";
+                tr += "<td>" + escapeCell(specimen) + "</td>";
+                tr += "<td>" + escapeCell(pathogen) + "</td>";
                 tr += "<td>";
                 tr += "<button class='btn btn-sm btn-success' onclick='editMicrobiological(" + count + ")'><i class='bi bi-pencil-fill'></i></button>"
                 tr += "</td>";
@@ -601,54 +602,16 @@
                 }
 
 
-                for (let i = 0; i < $("#medication_list tr").length; i++) {
-                    let medication_flag = true;
-                    const description = $("#medication_list tr:eq(" + i + ")").find("td:eq(0)").text();
-                    const dosage_strength = $("#medication_list tr:eq(" + i + ")").find("td:eq(1) input").val();
-                    const dosage_unit = $("#medication_list tr:eq(" + i + ")").find("td:eq(1) select").val();
-                    const unit = $("#medication_list tr:eq(" + i + ")").find("td:eq(2)").text();
-                    const quantity_ordered = $("#medication_list tr:eq(" + i + ")").find("td:eq(3) input").val();
-                    const frequency = $("#medication_list tr:eq(" + i + ")").find("td:eq(4) select").val();
+                const medicine_rows = readDoctorMedicines();
+                medicine_rows.errors.forEach(error => {
+                    is_valid = false;
+                    $("#prescription_modal .error_list").append($("<li>").text(error));
+                });
+                medicine_rows.medications.forEach(it => medications.push(it));
 
-                    if (dosage_strength == "") {
-                        is_valid = false;
-                        medication_flag = false;
-                        $("#prescription_modal .error_list").append("<li>Dosage strength amount is required</li>");
-                    }
-
-                    if (dosage_unit == "") {
-                        is_valid = false;
-                        medication_flag = false;
-                        $("#prescription_modal .error_list").append("<li>Dosage strength unit is required</li>");
-                    }
-
-
-                    if (frequency == "") {
-                        is_valid = false;
-                        medication_flag = false;
-                        $("#prescription_modal .error_list").append("<li>Frequency is required</li>");
-                    }
-
-                    if (medication_flag) {
-                        medications.push({
-                            description: description,
-                            unit: unit,
-                            dosage_strength: dosage_strength,
-                            dosage_unit: dosage_unit,
-                            quantity_ordered: 0,
-                            frequency: frequency
-                        });
-                    }
-                }
-
-                if (medications.length < 1 && is_valid) {
+                if ($("#medication_list tr.med-editable").length < 1 && is_valid) {
                     is_valid = false;
                     $("#prescription_modal .error_list").append("<li>There must be a medication</li>");
-                }
-
-                if (medications.length > 1 && is_valid && (type != "1" && type != "5")) {
-                    is_valid = false;
-                    $("#prescription_modal .error_list").append("<li>Maximum of 1 medication per prescription</li>");
                 }
 
                 if (remarks == "") {
@@ -1000,13 +963,13 @@
                     if (it.for_switch == prescription_id && ($("#form_prescription_type").val() == "4" || $("#form_prescription_type").val() == "7"))
                         tr = "<tr class='pointer active'>";
                     tr += "<td>" + moment(it.concurrent_date).format("MM/DD/YYYY") + " </td>";
-                    tr += "<td>" + it.antimicrobial + "</td>";
-                    tr += "<td>" + it.dosing_regimen + "</td>";
+                    tr += "<td>" + escapeCell(it.antimicrobial) + "</td>";
+                    tr += "<td>" + escapeCell(it.dosing_regimen) + "</td>";
                     tr += "<td>" + moment(it.start_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td>" + moment(it.stop_date).format("MM/DD/YYYY") + "</td>";
                     tr += "<td></td>";
                     tr += "<td></td>";
-                    tr += "<td class='d-none'>" + it.id + "</td>";
+                    tr += "<td class='d-none'>" + escapeCell(it.id) + "</td>";
                     tr += "</tr>";
 
                     $("#concurrent_list").append(tr);
@@ -1046,8 +1009,8 @@
                             const it = ams.microbiologicals[i];
                             let tr = "<tr id='micro_id_" + i + "'>";
                             tr += "<td>" + moment(it.date).format("MM/DD/YYYY") + " </td>";
-                            tr += "<td>" + it.specimen + "</td>";
-                            tr += "<td>" + it.pathogen + "</td>";
+                            tr += "<td>" + escapeCell(it.specimen) + "</td>";
+                            tr += "<td>" + escapeCell(it.pathogen) + "</td>";
                             tr += "<td>";
                             tr += "<button class='btn btn-sm btn-success' onclick='editMicrobiological(" + i + ")'><i class='bi bi-pencil-fill'></i></button>"
                             tr += "</td>";
@@ -1061,51 +1024,9 @@
 
                     }
 
-                    for (let i = 0; i < data.results.length; i++) {
-                        const it = data.results[i];
-                        let tr = "<tr id='medicine_id_" + i + "'>";
-                        tr += "<td>" + it.description + "</td>";
-                        tr += "<td>";
-                        tr += "<div class='d-flex'>";
-                        tr += "<input class='form-control text-center w-50' type='number' value='" + it.dosage_strength + "'/>"
-                        tr += "<select class='form-control text-center w-50'>";
-                        for (let i = 0; i < STRENGTH_UNIT.length; i++) {
-                            tr += "<option>" + STRENGTH_UNIT[i] + "</option>"
-                        }
-                        tr += "</select>";
-                        tr += "</div>";
-                        tr += "</td>";
-                        tr += "<td>" + it.unit + "</td>";
-                        tr += "<td class='d-none'><input class='form-control text-center' type='number' value='1' min='1'/></td>";
-                        tr += "<td>";
-                        tr += "<select class='form-control text-center'>";
-                        for (let i = 0; i < FREQUENCIES.length; i++) {
-                            tr += "<option>" + FREQUENCIES[i] + "</option>"
-                        }
-                        tr += "</select>";
-                        tr += "</td>";
-                        tr += "<td>";
-                        tr += "<button class='btn btn-sm btn-success' onclick='editMedicine(" + i + ")'><i class='bi bi-pencil-fill'></i></button>"
-                        tr += "</td>";
-                        tr += "<td>";
-                        tr += "<button class='btn btn-sm btn-danger' onclick='deleteMedicine(" + i + ")'><i class='bi bi-trash-fill'></i></button>"
-                        tr += "</td>";
-                        tr += "</tr>";
-                        // const tr = `<tr>
-                        //                     <td>` + it.description + `</td>
-                        //                     <td>` + it.dosage_strength + ' ' + it.dosage_unit + `</td>
-                        //                     <td>` + it.unit + `</td>
-                        //                     <td class="d-none">` + it.quantity_ordered + `</td>
-                        //                     <td>` + it.frequency + `</td>
-                        //                     <td></td>
-                        //                  </tr>`;
-                        //
-
-
-                        $("#medication_list").append(tr);
-                        $("#medicine_id_" + i + " td:eq(1) select").val(it.dosage_unit);
-                        $("#medicine_id_" + i + " td:eq(4) select").val(it.frequency);
-                    }
+                    // A submitted Rx is read-only here: each medicine with its own decision.
+                    $("#rx_review_status").html(reviewStatusPill(data.review_status));
+                    data.results.forEach(it => $("#medication_list").append(infoMedicineRow(it)));
 
                 }
             }).catch(err => {
@@ -1144,10 +1065,10 @@
             return `
                 <tr id="patient_row_local_` + index + `" data-source="local">
                     <td><span class="badge bg-secondary">Local</span></td>
-                    <td>` + it.hospital_id + `</td>
-                    <td>` + name + `</td>
+                    <td>` + escapeCell(it.hospital_id) + `</td>
+                    <td>` + escapeCell(name) + `</td>
                     <td>` + birthdate + `</td>
-                    <td>` + it.sex + `</td>
+                    <td>` + escapeCell(it.sex) + `</td>
                     <td>
                         <button class="btn btn-sm btn-success btn-action" onclick="selectPatientRow('local', ` + index + `)">
                             <i class="bi bi-prescription"></i>
@@ -1161,8 +1082,8 @@
         return `
             <tr id="patient_row_medix_` + index + `" data-source="medix">
                 <td><span class="badge bg-info text-white">Medix</span></td>
-                <td>` + it.hospitalNo + `</td>
-                <td>` + name + `</td>
+                <td>` + escapeCell(it.hospitalNo) + `</td>
+                <td>` + escapeCell(name) + `</td>
                 <td>` + birthdate + `</td>
                 <td>` + (it.gender || "").charAt(0) + `</td>
                 <td>
@@ -1256,8 +1177,8 @@
                 data.results.forEach(it => {
                     const tr = `
                         <tr id='` + it.id + `'>
-                           <td>` + it.description + `</td>
-                           <td>` + it.unit + `</td>
+                           <td>` + escapeCell(it.description) + `</td>
+                           <td>` + escapeCell(it.unit) + `</td>
                            <td>
                                 <button class="btn btn-sm btn-primary" onclick="appendMedicine('` + it.id + `')">
                                     <i class="bi bi-check"></i>
@@ -1285,7 +1206,7 @@
             .then(res => res.json())
             .then(data => {
                 $("#btn_save_patient").prop("disabled", false);
-                $("#btn_save_patient").html("ADD / UPDATE");
+                $("#btn_save_patient").html('<i class="bi bi-check2"></i> Save patient');
 
                 if (data.code == 500) {
                     toastr.success(data.message, "Something went wrong")
@@ -1401,31 +1322,32 @@
                     const it = data.results[i];
                     const bg = (it.urgency == "Urgent") ? "bg-danger" : "bg-success";
                     const tr = ` <tr id='prescription_id_` + it.id + `'>
-                                <td><span class="badge ` + bg + `">` + it.urgency + `</span></td>
-                                <td>` + it.hospital_id + `</td>
-                                <td>` + it.name + `</td>
-                                <td>` + it.station + `</td>
+                                <td><span class="badge ` + bg + `">` + escapeCell(it.urgency) + `</span></td>
+                                <td>` + escapeCell(it.hospital_id) + `</td>
+                                <td>` + escapeCell(it.name) + `</td>
+                                <td>` + escapeCell(it.station) + `</td>
                                 <td>` + moment(it.created_at).format("MM/DD/YYYY hh:mm:ss A") + `</td>
-                                <td class="d-none">` + it.sex + `</td>
-                                <td class="d-none">` + it.birthdate + `</td>
-                                <td class="d-none">` + it.ward + `</td>
-                                <td class="d-none">` + it.bed_no + `</td>
-                                <td class="d-none">` + it.type + `</td>
-                                <td class="d-none">` + it.drug_allergy + `</td>
-                                <td class="d-none">` + it.weight + `</td>
-                                <td class="d-none">` + it.height + `</td>
-                                <td class="d-none">` + it.serum_creatinine + `</td>
-                                <td class="d-none">` + it.creatinine_clearance + `</td>
-                                <td class="d-none">` + it.transaminases + `</td>
-                                <td class="d-none">` + it.sgpt + `</td>
-                                <td class="d-none">` + it.sgot + `</td>
-                                <td class="d-none">` + it.days_requested + `</td>
-                                <td class="d-none">` + it.attending_physician + `</td>
-                                <td class="d-none">` + it.additional_labs + `</td>
-                                <td class="d-none">` + it.outcome + `</td>
-                                <td class="d-none">` + it.diagnosis + `</td>
-                                <td class="d-none">` + it.for_extension + `</td>
+                                <td class="d-none">` + escapeCell(it.sex) + `</td>
+                                <td class="d-none">` + escapeCell(it.birthdate) + `</td>
+                                <td class="d-none">` + escapeCell(it.ward) + `</td>
+                                <td class="d-none">` + escapeCell(it.bed_no) + `</td>
+                                <td class="d-none">` + escapeCell(it.type) + `</td>
+                                <td class="d-none">` + escapeCell(it.drug_allergy) + `</td>
+                                <td class="d-none">` + escapeCell(it.weight) + `</td>
+                                <td class="d-none">` + escapeCell(it.height) + `</td>
+                                <td class="d-none">` + escapeCell(it.serum_creatinine) + `</td>
+                                <td class="d-none">` + escapeCell(it.creatinine_clearance) + `</td>
+                                <td class="d-none">` + escapeCell(it.transaminases) + `</td>
+                                <td class="d-none">` + escapeCell(it.sgpt) + `</td>
+                                <td class="d-none">` + escapeCell(it.sgot) + `</td>
+                                <td class="d-none">` + escapeCell(it.days_requested) + `</td>
+                                <td class="d-none">` + escapeCell(it.attending_physician) + `</td>
+                                <td class="d-none">` + escapeCell(it.additional_labs) + `</td>
+                                <td class="d-none">` + escapeCell(it.outcome) + `</td>
+                                <td class="d-none">` + escapeCell(it.diagnosis) + `</td>
+                                <td class="d-none">` + escapeCell(it.for_extension) + `</td>
                                 <td>
+                                    ` + reviewStatusPill(it.review_status) + `
                                     <button class="btn btn-sm btn-primary" onclick="viewPrescription(` + it.id + `)">
                                         <i class="bi bi-prescription"></i>
                                     </button>
@@ -1444,10 +1366,11 @@
         });
     }
 
-    function editMedicine(id) {
-        prescribed_med_id = id;
+    // Remembers which row the picked medicine replaces (the row element, not its position).
+    function editMedicine(button) {
+        prescribed_med_id = $(button).closest("tr");
         medicine_modal.toggle();
-        $("#search_medicine").val($("#medication_list tr:eq(" + id + ") td:eq(0)").text().trim());
+        $("#search_medicine").val(prescribed_med_id.find(".med-description").text().trim());
         getMedicine($("#search_medicine").val());
     }
 
@@ -1483,8 +1406,8 @@
         $("#btn_save_microbiological").val(id);
     }
 
-    function deleteMedicine(id) {
-        $("#medication_list tr:eq(" + id + ")").remove();
+    function deleteMedicine(button) {
+        $(button).closest("tr").remove();
     }
 
     function deleteConcurrent(id) {
@@ -1504,54 +1427,17 @@
             return;
         }
 
-        const count = $("#medication_list tr").length;
-
+        const row = doctorMedicineRow({description: description, unit: unit});
         if (prescribed_med_id !== "") {
-            $("#medication_list tr:eq(" + prescribed_med_id + ")").remove();
-        } else if (count > 0 && ($("#form_prescription_type").val() !== "1" && $("#form_prescription_type").val() !== "5ork")) {
-            alert("Maximum of 1 medication per prescription only");
-            return;
+            prescribed_med_id.replaceWith(row);
+            prescribed_med_id = "";
+        } else {
+            $("#medication_list").append(row);
         }
-
-        let tr = "<tr>";
-        tr += "<td>" + description + "</td>";
-        tr += "<td>";
-        tr += "<div class='d-flex'>";
-        tr += "<input class='form-control text-center w-50' type='number'/>"
-        tr += "<select class='form-control text-center w-50'>";
-        for (let i = 0; i < STRENGTH_UNIT.length; i++) {
-            tr += "<option>" + STRENGTH_UNIT[i] + "</option>"
-        }
-        tr += "</select>";
-        tr += "</div>";
-        tr += "</td>";
-        tr += "<td>" + unit + "</td>";
-        tr += "<td class='d-none'><input class='form-control text-center' type='number' value='1' min='1'/></td>";
-        tr += "<td>";
-        tr += "<select class='form-control text-center'>";
-        for (let i = 0; i < FREQUENCIES.length; i++) {
-            tr += "<option>" + FREQUENCIES[i] + "</option>"
-        }
-        tr += "</select>";
-        tr += "</td>";
-        tr += "<td>";
-        tr += "<button class='btn btn-sm btn-success' onclick='editMedicine(" + count + ")'><i class='bi bi-pencil-fill'></i></button>"
-        tr += "</td>";
-        tr += "<td>";
-        tr += "<button class='btn btn-sm btn-danger' onclick='deleteMedicine(" + count + ")'><i class='bi bi-trash-fill'></i></button>"
-        tr += "</td>";
-        tr += "</tr>";
-
-        $("#medication_list").append(tr);
     }
 
     function activityLog(it) {
-        return `<tr>
-    <td>` + it.fname + ' ' + it.mname + ' ' + it.lname + ` <span class="badge bg-primary ms-2">` + it.origin + `</span></td>
-    <td>` + it.remarks + `</td>
-    <td><div class="badge bg-success p-1">` + it.released_to + `</div></td>
-    <td>` + moment(it.date_forwarded).format("MM/DD/YYYY hh:mm:ss A") + `</td>
-    </tr>`
+        return activityLogRow(it);
     }
 
     function clearForms() {
@@ -1563,6 +1449,7 @@
         $("#microbiological_result_list").empty();
         $("#concurrent_list").empty();
         $("#medication_list").empty();
+        $("#rx_review_status").empty();
     }
 
     function clearConcurrent() {
@@ -1581,13 +1468,11 @@
 
     function checkIfMedExists(_description) {
         let is_exists = false;
-        for (let i = 0; i < $("#medication_list tr").length; i++) {
-            const description = $("#medication_list tr:eq(" + i + ") td:eq(0)").text().trim();
-            if (_description == description) {
+        $("#medication_list .med-description").each(function () {
+            if ($(this).text().trim() == _description.trim()) {
                 is_exists = true;
-                break;
             }
-        }
+        });
         return is_exists;
     }
 

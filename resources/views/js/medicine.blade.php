@@ -1,6 +1,7 @@
-<script src="js/moment.min.js"></script>
-<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
-<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
 <script>
     const medicine_modal = new bootstrap.Modal(document.getElementById('medicine_modal'));
     const success_modal = new bootstrap.Modal(document.getElementById('success_modal'));
@@ -115,12 +116,12 @@
 
                     const tr = `
                         <tr id="medicine_id_` + it.id + `">
-                           <td>` + it.description + `</td>
-                           <td>` + it.unit + `</td>
+                           <td>` + escapeCell(it.description) + `</td>
+                           <td>` + escapeCell(it.unit) + `</td>
                            <td>` + PRESCRIPTION_TYPES[it.type] + `</td>
                            <td><span class="` + bg + `">` + status + `</span></td>
                            <td></td>
-                           <td class="d-none">` + it.type + `</td>
+                           <td class="d-none">` + escapeCell(it.type) + `</td>
                         </tr>`;
                     $("#medicine_list").append(tr);
                 }

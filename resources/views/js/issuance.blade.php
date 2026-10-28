@@ -1,6 +1,7 @@
-<script src="js/moment.min.js"></script>
-<script src="js/constant.js?v={{ date('ymdhis') }}"></script>
-<script src="js/websocket.js?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
+<script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
 <script>
     $(document).ready(function () {
 
@@ -38,9 +39,9 @@
                     const quantity_returned = (it.quantity_returned) ? it.quantity_returned : 0;
                     const tr = `
                         <tr>
-                           <td>` + it.description + `</td>
-                           <td>` + it.unit + `</td>
-                           <td>` + it.quantity_rendered + `</td>
+                           <td>` + escapeCell(it.description) + `</td>
+                           <td>` + escapeCell(it.unit) + `</td>
+                           <td>` + escapeCell(it.quantity_rendered) + `</td>
                            <td>` + quantity_returned + `</td>
                         </tr>`;
                     $("#medicine_list").append(tr);

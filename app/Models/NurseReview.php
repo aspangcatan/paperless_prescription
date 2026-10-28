@@ -11,4 +11,5 @@ class NurseReview extends Model
 
     protected $connection = 'mysql';
     protected $table = 'nurse_reviews';
+    protected $fillable = ['prescription_id'];
 }

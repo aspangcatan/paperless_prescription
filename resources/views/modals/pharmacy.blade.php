@@ -1,21 +1,24 @@
-<div class="modal fade" id="render_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
+{{-- js/pharmacy_review tells the two actions apart by their trimmed text, so keep "Proceed" and "Return to Doctor" as plain text. --}}
+<div class="modal fade" id="render_modal" tabindex="-1" aria-labelledby="render_modal_title" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-heading">
+                    <span class="modal-icon"><i class="bi bi-capsule"></i></span>
+                    <h5 class="modal-title" id="render_modal_title">Render medications</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
             <div class="modal-body">
-                <div class="text-end">
-                    <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close">X</button>
-                </div>
-                <h5 class="card-title">Medications:</h5>
-                <ul id="rendered_list">
-
-                </ul>
-                <h6 class="card-title">Write some remarks</h6>
-                <textarea class="form-control" style="height: 100px" id="pharmacy_remarks"></textarea>
-                <div class="mt-2 text-end">
-                    <button class="btn btn-danger me-1" id="btn_render_doctor">Return to Doctor</button>
-                    <button class="btn btn-primary ms-1" id="btn_render">Proceed</button>
-                </div>
+                <p class="form-label">Medications</p>
+                <ul class="render-list" id="rendered_list"></ul>
+                <label class="form-label" for="pharmacy_remarks">Remarks</label>
+                <textarea class="form-control" rows="4" id="pharmacy_remarks"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-danger" id="btn_render_doctor">Return to Doctor</button>
+                <button class="btn btn-primary" id="btn_render">Proceed</button>
             </div>
         </div>
     </div>

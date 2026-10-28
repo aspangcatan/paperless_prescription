@@ -1,174 +1,104 @@
-<div class="modal fade" id="success_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
+{{-- Shared status dialogs and the review remarks dialog. Page scripts read reasons and days from the label after each input. --}}
+<div class="modal fade" id="success_modal" tabindex="-1" aria-labelledby="success_modal_title" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-center">
-                <div class="w-100 text-center">
-                    <i class="bi bi-emoji-smile text-white" style="font-size: 80px;"></i>
-                </div>
-            </div>
+    <div class="modal-dialog modal-dialog-centered modal-sm-plus">
+        <div class="modal-content status-modal">
             <div class="modal-body">
-                <div class="text-secondary fw-bold   fs-4 text-center">Success!</div>
-                <div class="mt-2 text-secondary fs-5 text-center" id="success_message"></div>
-                <div class="text-center mt-4">
-                    <button class="btn btn-lg btn-danger" data-bs-dismiss="modal" aria-label="Close">Close</button>
+                <span class="status-icon status-success"><i class="bi bi-check-lg"></i></span>
+                <h5 class="status-title" id="success_modal_title">Done</h5>
+                <p class="status-message" id="success_message"></p>
+                <button class="btn btn-primary w-100" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="error_modal" tabindex="-1" aria-labelledby="error_modal_title" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-sm-plus">
+        <div class="modal-content status-modal">
+            <div class="modal-body">
+                <span class="status-icon status-error"><i class="bi bi-x-lg"></i></span>
+                <h5 class="status-title" id="error_modal_title">Something went wrong</h5>
+                <p class="status-message" id="error_message"></p>
+                <button class="btn btn-light w-100" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="warning_modal" tabindex="-1" aria-labelledby="warning_modal_title" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-sm-plus">
+        <div class="modal-content status-modal">
+            <div class="modal-body">
+                <span class="status-icon status-warning"><i class="bi bi-exclamation-lg"></i></span>
+                <h5 class="status-title" id="warning_modal_title">Cancel pending medications?</h5>
+                <p class="status-message">
+                    Submitting will cancel all pending medications for this patient.
+                </p>
+                <div class="agree-box">
+                    <input type="checkbox" class="form-check-input" id="i_agree">
+                    <label for="i_agree">I understand and agree</label>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-light flex-fill" data-bs-dismiss="modal">Go back</button>
+                    <button class="btn btn-danger flex-fill" id="btn_proceed_cancel" disabled>Submit</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="error_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
+<div class="modal fade" id="remarks_modal" tabindex="-1" aria-labelledby="remarks_message" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-center">
-                <div class="p-3 w-100 text-center">
-                    <i class="bi bi-emoji-frown text-white" style="font-size: 80px;"></i>
+            <div class="modal-header">
+                <div class="modal-heading">
+                    <span class="modal-icon"><i class="bi bi-chat-left-text"></i></span>
+                    <h5 class="modal-title" id="remarks_message"></h5>
                 </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="text-secondary font-weight-bold fs-4 text-center">Ooops!</div>
-                <div class="mt-2 text-secondary fs-5 text-center" id="error_message"></div>
-                <div class="text-center mt-4">
-                    <button class="btn btn-lg btn-danger" data-bs-dismiss="modal" aria-label="Close">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                <label class="form-label" for="common_remarks">Remarks</label>
+                <textarea class="form-control" rows="4" id="common_remarks"></textarea>
 
-<div class="modal fade" id="warning_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
-     data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-center">
-                <div class="p-3 w-100 text-center">
-                    <i class="bi bi-exclamation-triangle-fill text-white" style="font-size: 80px;"></i>
-                </div>
-            </div>
-            <div class="modal-body">
-                <div class="text-secondary font-weight-bold fs-4 text-center">Warning!</div>
-                <div class="mt-2 text-secondary fs-5">
-                    <div>
-                        By clicking submit, You agree to cancel all pending medications particular to this patient.
-                    </div>
-                    <div class="mt-3">
-                        <div class="form-check ps-0">
-                            <input type="checkbox" id="i_agree">
-                            <label class="form-check-label">I agree</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-center mt-4">
-                    <button class="btn btn-lg btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
-                    <button class="btn btn-lg btn-success" id="btn_proceed_cancel" disabled>Submit</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="remarks_modal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true"
-     data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="text-end">
-                    <button type="button" style="background: transparent !important;" class="btn" data-bs-dismiss="modal" aria-label="Close">X</button>
-                </div>
-
-                <h6 class="card-title" id="remarks_message"></h6>
-                <textarea class="form-control" style="height: 100px" id="common_remarks"></textarea>
-
-                <div id="reject_outcome_container">
-                    <h6 class="card-title">Specific reason <small>(optional)</small></h6>
-                    <div class="form-check ps-0">
-                        <input type="checkbox" name="reject_outcome">
-                        <label class="form-check-label">
-                            Wrong indication
-                        </label>
-                    </div>
-                    <div class="form-check ps-0">
-                        <input type="checkbox" name="reject_outcome">
-                        <label class="form-check-label">
-                            Double request
-                        </label>
-                    </div>
-                    <div class="form-check ps-0">
-                        <input type="checkbox" name="reject_outcome">
-                        <label class="form-check-label">
-                            Incomplete data
-                        </label>
-                    </div>
-                    <div class="form-check ps-0">
-                        <input type="checkbox" name="reject_outcome">
-                        <label class="form-check-label">
-                            Discharged
-                        </label>
-                    </div>
-                    <div class="form-check ps-0">
-                        <input type="checkbox" name="reject_outcome">
-                        <label class="form-check-label">
-                            Hama
-                        </label>
-                    </div>
-                    <div class="form-check ps-0">
-                        <input type="checkbox" name="reject_outcome">
-                        <label class="form-check-label">
-                            Transferred
-                        </label>
-                    </div>
-                    <div class="form-check ps-0">
-                        <input type="checkbox" name="reject_outcome">
-                        <label class="form-check-label">
-                            Died
-                        </label>
-                    </div>
-                    <div class="form-check ps-0">
-                        <input type="checkbox" name="reject_outcome">
-                        <label class="form-check-label">
-                            Absconded
-                        </label>
+                <div id="reject_outcome_container" class="mt-3">
+                    <p class="form-label">Specific reason <span class="text-muted fw-normal">(optional)</span></p>
+                    <div class="choice-group">
+                        @foreach(['Wrong indication', 'Double request', 'Incomplete data', 'Discharged', 'Hama', 'Transferred', 'Died', 'Absconded'] as $i => $reason)
+                            <div class="choice">
+                                <input type="checkbox" name="reject_outcome" id="reject_outcome_{{ $i }}">
+                                <label for="reject_outcome_{{ $i }}">{{ $reason }}</label>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
                 @if(session('access_rights') == "ICC")
                     <div id="days_approved_container" class="mt-3">
-                        <h6>No. days approved</h6>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input  type="radio" name="days_approved">
-                                    <label class="form-check-label">1</label>
+                        <p class="form-label">No. of days approved</p>
+                        <div class="choice-group">
+                            @foreach(['1', '3', '7', '14'] as $days)
+                                <div class="choice">
+                                    <input type="radio" name="days_approved" id="days_approved_{{ $days }}">
+                                    <label for="days_approved_{{ $days }}">{{ $days }}</label>
                                 </div>
-                                <div class="form-check">
-                                    <input  type="radio" name="days_approved">
-                                    <label class="form-check-label">3</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input  type="radio" name="days_approved">
-                                    <label class="form-check-label">7</label>
-                                </div>
-                                <div class="form-check">
-                                    <input  type="radio" name="days_approved">
-                                    <label class="form-check-label">14</label>
-                                </div>
-                                <div class="form-check">
-                                    <input  type="radio" name="days_approved">
-                                    <div class="d-flex align-items-center">
-                                        <label class="form-check-label">Others</label>
-                                        <input type="number" class="underline ms-1" id="days_approved"/>
-                                    </div>
-                                </div>
+                            @endforeach
+                            <div class="choice choice-other">
+                                <input type="radio" name="days_approved" id="days_approved_others">
+                                <label for="days_approved_others">Others</label>
+                                <input type="number" class="form-control form-control-sm" id="days_approved" placeholder="Days"/>
                             </div>
                         </div>
                     </div>
                 @endif
-                <hr/>
-                <button class="btn btn-primary mt-2 float-end" id="btn_proceed">Proceed</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" id="btn_proceed">Proceed</button>
             </div>
         </div>
     </div>

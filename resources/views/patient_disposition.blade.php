@@ -1,51 +1,46 @@
 @extends('master')
 @section('content')
     <div class="col-12">
-        <div class="d-flex justify-content-end mb-2">
+        <div class="page-head">
             <div>
-                <input class="form-control" placeholder="Search firstname" id="filter_firstname"/>
-            </div>
-            <div>
-                <input class="form-control" placeholder="Search lastname" id="filter_lastname"/>
-            </div>
-            <div class="ms-1">
-                <button class="btn btn-success" id="btn_search_prescription">
-                    <i class="bi bi-search"></i>
-                </button>
+                <p class="eyebrow">Patients</p>
+                <h1>Patient disposition</h1>
+                <p class="page-sub">Record whether a patient is admitted, discharged, transferred or has died.</p>
             </div>
         </div>
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">Patient List</h5>
+
+        <div class="card list-card">
+            <div class="toolbar">
+                <div class="input-icon flex-grow-1">
+                    <i class="bi bi-person"></i>
+                    <input class="form-control" placeholder="First name" id="filter_firstname"/>
                 </div>
-                <div class="table-responsive">
-                    <table class="table text-center">
-                        <thead>
-                        <tr>
-                            <th>Hospital ID</th>
-                            <th>Patient</th>
-                            <th>Birthdate</th>
-                            <th>Gender</th>
-                            <th>Disposition Status</th>
-                            <th colspan="2" style="width:4%"></th>
-                        </tr>
-                        </thead>
-                        <tbody id="patient_list"></tbody>
-                    </table>
+                <div class="input-icon flex-grow-1">
+                    <i class="bi bi-person"></i>
+                    <input class="form-control" placeholder="Last name" id="filter_lastname"/>
                 </div>
+                <button class="btn btn-primary" id="btn_search_prescription">
+                    <i class="bi bi-funnel"></i> Apply
+                </button>
             </div>
-            <div class="card-footer text-dark" id="pagination_container">
-                <div class="d-flex align-items-center justify-content-center">
-                    <button class="btn btn-sm d-none" style="background: transparent !important;" id="btn_prev">
-                        <i class="bi bi-caret-left"></i>
-                    </button>
-                    <div id="page_items_count"></div>
-                    <button class="btn btn-sm" style="background: transparent !important;" id="btn_next">
-                        <i class="bi bi-caret-right"></i>
-                    </button>
-                </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover m-0 data-table">
+                    <thead>
+                    <tr>
+                        <th>Hospital ID</th>
+                        <th>Patient</th>
+                        <th>Birthdate</th>
+                        <th>Sex</th>
+                        <th>Disposition status</th>
+                        <th colspan="2" style="width: 4%"></th>
+                    </tr>
+                    </thead>
+                    <tbody id="patient_list"></tbody>
+                </table>
             </div>
+
+            @include('layouts.pager')
         </div>
     </div>
     @include('modals/disposition')
