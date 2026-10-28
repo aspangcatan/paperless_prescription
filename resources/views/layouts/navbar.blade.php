@@ -17,7 +17,8 @@
             <li class="nav-item dropdown pe-3">
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
                     <img
-                        src="{{ (Auth::user()->picture) ? url('/avatar/'.Auth::user()->picture) : asset('images/csmc-logo.png') }}?v={{ date('Ymdhis') }}"
+                        src="{{ (Auth::user()->picture) ? 'https://dohcsmc.com/id/storage/crop/'.Auth::user()->picture.'.png' : asset('images/csmc-logo.png') }}"
+                        onerror="this.onerror=null; this.src='{{ asset('images/csmc-logo.png') }}';"
                         alt="Profile" class="rounded-circle">
                     <span
                         class="d-none d-md-block dropdown-toggle ps-2">{{ \Illuminate\Support\Facades\Auth::user()->lname[0].'. '.\Illuminate\Support\Facades\Auth::user()->fname }}</span>
