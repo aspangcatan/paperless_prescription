@@ -3,7 +3,7 @@
 <script src="{{ asset('js/constant.js') }}?v={{ date('ymdhis') }}"></script>
 <script src="{{ asset('js/prescription-ui.js') }}?v={{ date('ymdhis') }}"></script>
 <script src="{{ asset('js/websocket.js') }}?v={{ date('ymdhis') }}"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="{{ asset('js/vendor/daterangepicker.min.js') }}"></script>
 
 <script>
     let filtered_date = "";
