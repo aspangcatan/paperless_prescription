@@ -181,6 +181,69 @@
             color: var(--on-surface-variant);
         }
 
+        .move {
+            padding: 1.125rem;
+            border-radius: 0.875rem;
+            background: var(--primary-fixed);
+            box-shadow: inset 0 0 0 1px rgba(0, 35, 111, 0.15);
+        }
+
+        .move-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font: 700 0.9375rem/1.25rem var(--font-head);
+            color: var(--primary);
+        }
+
+        .links {
+            display: grid;
+            gap: 0.625rem;
+            margin: 0.875rem 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .links li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 0.75rem;
+            border-radius: 0.75rem;
+            background: var(--surface-lowest);
+        }
+
+        .link-icon {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.625rem;
+            color: var(--primary);
+            background: var(--secondary-container);
+        }
+
+        .links div { display: flex; flex-direction: column; min-width: 0; }
+
+        .link-label {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--secondary);
+        }
+
+        .links a {
+            font-weight: 600;
+            color: var(--primary);
+            overflow-wrap: anywhere;
+            text-decoration: none;
+        }
+
+        .links a:hover { text-decoration: underline; }
+
         .facts {
             display: grid;
             gap: 0.75rem;
@@ -264,13 +327,33 @@
         <span class="card-icon" aria-hidden="true"><i class="bi bi-gear"></i></span>
 
         <div>
-            <span class="chip"><span class="dot" aria-hidden="true"></span> Scheduled maintenance</span>
+            <span class="chip"><span class="dot" aria-hidden="true"></span> Scheduled maintenance · Moving</span>
             <h1>We'll be back shortly</h1>
             <p class="lead">
-                E-AMSP is down for a system update. We're applying improvements to keep
-                prescriptions, reviews and dispensing running smoothly.
+                E-AMSP is down while we move it to a new address. Once it's back, please use
+                the links below and update your bookmarks.
             </p>
         </div>
+
+        <section class="move" aria-labelledby="move-title">
+            <p class="move-title" id="move-title"><i class="bi bi-signpost-split"></i> New E-AMSP address</p>
+            <ul class="links">
+                <li>
+                    <span class="link-icon" aria-hidden="true"><i class="bi bi-globe2"></i></span>
+                    <div>
+                        <span class="link-label">Over the internet</span>
+                        <a href="https://ams.dohcsmc.com">https://ams.dohcsmc.com</a>
+                    </div>
+                </li>
+                <li>
+                    <span class="link-icon" aria-hidden="true"><i class="bi bi-hdd-network"></i></span>
+                    <div>
+                        <span class="link-label">Hospital intranet</span>
+                        <a href="http://192.168.4.19:83">http://192.168.4.19:83</a>
+                    </div>
+                </li>
+            </ul>
+        </section>
 
         <ul class="facts">
             <li>
